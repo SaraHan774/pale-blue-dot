@@ -8,6 +8,7 @@ import { useMarkdownShortcuts } from '@/hooks/useMarkdownShortcuts';
 import { useMermaid } from '@/hooks/useMermaid';
 import { FindBar } from '@/components/FindBar';
 import { openExternalUrl } from '@/lib/openExternal';
+import TurndownService from 'turndown';
 import './PageEditor.css';
 
 function insertImageMarkdown(
@@ -48,7 +49,8 @@ interface PageEditorProps {
 
 export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, metaOverrides, editorRef }: PageEditorProps) {
   const navigate = useNavigate();
-  const { updatePageInStore, pages, slashCommands, columnColors } = useStore();
+  const { updatePageInStore, pagesArray, slashCommands, columnColors } = useStore();
+  const pages = pagesArray;
   const [title, setTitle] = useState(page.title);
   const [content, setContent] = useState(page.content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -177,6 +179,91 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
       });
     };
   }, [preview, previewHtml]);
+
+  // Handle copy events in preview mode to preserve markdown formatting
+  useEffect(() => {
+    if (!preview) return;
+    const container = previewRef.current;
+    if (!container) return;
+
+    const handleCopy = (e: ClipboardEvent) => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) return;
+
+      try {
+        // Get the selected HTML
+        const range = selection.getRangeAt(0);
+        const fragment = range.cloneContents();
+        const div = document.createElement('div');
+        div.appendChild(fragment);
+        let html = div.innerHTML;
+
+        // Convert wiki-style links back to markdown format before turndown
+        // <a class="page-link" data-page-ref="Title">Display</a> → [[Title|Display]]
+        // <a class="page-link" data-page-id="id">Display</a> → [[id|Display]]
+        html = html.replace(
+          /<a[^>]*class="[^"]*page-link[^"]*"[^>]*data-page-(?:ref|id)="([^"]+)"[^>]*>([^<]+)<\/a>/g,
+          (_match, ref, display) => {
+            // If display text matches the reference, use short form [[ref]]
+            if (display.trim() === ref.trim()) {
+              return `[[${ref}]]`;
+            }
+            return `[[${ref}|${display}]]`;
+          }
+        );
+
+        // Initialize Turndown with GitHub Flavored Markdown options
+        const turndownService = new TurndownService({
+          headingStyle: 'atx',
+          codeBlockStyle: 'fenced',
+          bulletListMarker: '-',
+          emDelimiter: '*',
+        });
+
+        // Add rule for mermaid code blocks
+        turndownService.addRule('mermaid', {
+          filter: (node) => {
+            return node.nodeName === 'DIV' &&
+                   node.classList.contains('mermaid-block');
+          },
+          replacement: (_content, node) => {
+            const pre = (node as HTMLElement).querySelector('pre.mermaid');
+            if (pre) {
+              return '\n```mermaid\n' + pre.textContent + '\n```\n';
+            }
+            return '';
+          }
+        });
+
+        // Add rule for checkboxes
+        turndownService.addRule('taskList', {
+          filter: (node) => {
+            return node.nodeName === 'INPUT' &&
+                   (node as HTMLInputElement).type === 'checkbox';
+          },
+          replacement: (_content, node) => {
+            const checked = (node as HTMLInputElement).checked;
+            return checked ? '[x]' : '[ ]';
+          }
+        });
+
+        // Convert HTML to markdown
+        const markdown = turndownService.turndown(html);
+
+        // Put markdown in clipboard
+        e.clipboardData?.setData('text/plain', markdown);
+        e.preventDefault();
+      } catch (error) {
+        console.error('Failed to convert copied content to markdown:', error);
+        // Let default copy behavior happen if conversion fails
+      }
+    };
+
+    container.addEventListener('copy', handleCopy);
+    return () => {
+      container.removeEventListener('copy', handleCopy);
+    };
+  }, [preview]);
 
   // Derive existing columns from all pages' kanbanColumn values (case-insensitive dedup)
   const existingColumns = Array.from(

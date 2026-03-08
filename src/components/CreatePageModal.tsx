@@ -12,7 +12,8 @@ interface CreatePageModalProps {
 
 export function CreatePageModal({ onClose, parentId }: CreatePageModalProps) {
   const navigate = useNavigate();
-  const { addPage, pages, config, columnColors } = useStore();
+  const { addPage, pagesArray, config, columnColors } = useStore();
+  const pages = pagesArray;
 
   // Find parent page to show context and inherit column
   const parentPage = parentId ? pages.find(p => p.id === parentId) : null;

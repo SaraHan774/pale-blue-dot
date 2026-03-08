@@ -12,6 +12,11 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "bench": "vitest run src/__tests__/performance --reporter=verbose",
+    "bench:state": "vitest run rootcause1-state.bench --reporter=verbose",
+    "bench:io": "vitest run rootcause2-io.bench --reporter=verbose",
+    "bench:dom": "vitest run rootcause3-dom.bench --reporter=verbose",
+    "bench:baseline": "vitest run src/__tests__/performance --reporter=verbose 2>&1 | tee benchmarks/baseline-$(date +%Y%m%d-%H%M%S).txt",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
@@ -32,6 +37,7 @@
     "@tiptap/react": "^3.20.0",
     "@tiptap/starter-kit": "^3.20.0",
     "@tiptap/suggestion": "^3.20.0",
+    "@types/turndown": "^5.0.6",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
     "date-fns": "^3.3.1",
@@ -50,6 +56,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
     "tiptap-markdown": "^0.9.0",
+    "turndown": "^7.2.2",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
@@ -58,6 +65,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.5.1",
     "@types/js-yaml": "^4.0.9",
+    "@types/jsdom": "^28.0.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^6.21.0",

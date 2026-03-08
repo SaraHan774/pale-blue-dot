@@ -6,6 +6,7 @@
 import { Page, PageFrontmatter, Highlight, FilterCriteria, SortOptions } from '@/types';
 import { fileSystemService } from './fileSystemFactory';
 import { markdownService } from './markdown';
+import { perfMonitor } from '@/lib/performance';
 
 export class PageService {
   /**
@@ -256,29 +257,62 @@ export class PageService {
   }
 
   /**
+   * Update page metadata only (no content change)
+   * Optimized for metadata-only updates (e.g., column change, tags, pinning)
+   * Reads existing content from file instead of using page.content
+   * This avoids write amplification when content hasn't changed
+   *
+   * @param pagePath - Page file path
+   * @param metadata - Partial metadata to update (only changed fields)
+   */
+  async updatePageMetadata(
+    pagePath: string,
+    metadata: Partial<Omit<PageFrontmatter, 'id' | 'createdAt' | 'path' | 'content'>>
+  ): Promise<void> {
+    return perfMonitor.measureAsync('pageService.updateMetadata', 'io', async () => {
+      // Read existing file to get current frontmatter and content
+      const fileContent = await fileSystemService.readFile(pagePath);
+      const { frontmatter: currentFrontmatter, content } = markdownService.parse(fileContent, pagePath);
+
+      // Merge metadata updates into current frontmatter
+      const updatedFrontmatter: PageFrontmatter = {
+        ...(currentFrontmatter as PageFrontmatter),
+        ...metadata,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Serialize and write back with unchanged content
+      const markdown = markdownService.serialize(updatedFrontmatter, content);
+      await fileSystemService.writeFile(pagePath, markdown);
+    }, { fields: Object.keys(metadata).join(',') });
+  }
+
+  /**
    * Update a page
    * NEW: Path is directly to .md file, no /index.md suffix needed
    * @param page - Page to update
    */
   async updatePage(page: Page): Promise<void> {
-    const frontmatter: PageFrontmatter = {
-      id: page.id,
-      title: page.title,
-      tags: page.tags,
-      createdAt: page.createdAt,
-      updatedAt: new Date().toISOString(),
-      viewType: page.viewType,
-      ...(page.parentId && { parentId: page.parentId }),
-      ...(page.dueDate && { dueDate: page.dueDate }),
-      ...(page.kanbanColumn && { kanbanColumn: page.kanbanColumn }),
-      ...(page.googleCalendarEventId && { googleCalendarEventId: page.googleCalendarEventId }),
-      ...(page.pinned !== undefined && { pinned: page.pinned }),
-      ...(page.pinnedAt && { pinnedAt: page.pinnedAt }),
-      memos: page.memos || []
-    };
+    return perfMonitor.measureAsync('pageService.updatePage', 'io', async () => {
+      const frontmatter: PageFrontmatter = {
+        id: page.id,
+        title: page.title,
+        tags: page.tags,
+        createdAt: page.createdAt,
+        updatedAt: new Date().toISOString(),
+        viewType: page.viewType,
+        ...(page.parentId && { parentId: page.parentId }),
+        ...(page.dueDate && { dueDate: page.dueDate }),
+        ...(page.kanbanColumn && { kanbanColumn: page.kanbanColumn }),
+        ...(page.googleCalendarEventId && { googleCalendarEventId: page.googleCalendarEventId }),
+        ...(page.pinned !== undefined && { pinned: page.pinned }),
+        ...(page.pinnedAt && { pinnedAt: page.pinnedAt }),
+        memos: page.memos || []
+      };
 
-    const markdown = markdownService.serialize(frontmatter, page.content);
-    await fileSystemService.writeFile(page.path, markdown);
+      const markdown = markdownService.serialize(frontmatter, page.content);
+      await fileSystemService.writeFile(page.path, markdown);
+    }, { pageId: page.id, contentLength: page.content.length });
   }
 
   /**

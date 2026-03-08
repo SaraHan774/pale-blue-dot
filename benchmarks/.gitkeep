@@ -1,0 +1,17 @@
+# Benchmark Results
+
+This directory stores benchmark results for tracking performance improvements.
+
+## File Naming Convention
+
+```
+baseline-YYYYMMDD-HHMMSS.txt    # Before optimization
+after-YYYYMMDD-HHMMSS.txt       # After optimization
+```
+
+## Example
+
+```
+baseline-20260307-143022.txt
+after-20260310-091534.txt
+```

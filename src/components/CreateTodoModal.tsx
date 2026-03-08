@@ -9,7 +9,8 @@ interface CreateTodoModalProps {
 }
 
 export function CreateTodoModal({ onClose }: CreateTodoModalProps) {
-  const { addPage, pages, config } = useStore();
+  const { addPage, pagesArray, config } = useStore();
+  const pages = pagesArray;
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [checkItems, setCheckItems] = useState<string[]>([]);

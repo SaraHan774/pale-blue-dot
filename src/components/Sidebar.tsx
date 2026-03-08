@@ -14,7 +14,8 @@ const DEFAULT_PALETTE = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444', '#8b5cf6', 
 const PAGE_BATCH_SIZE = 50;
 
 export function Sidebar() {
-  const { pages, setPages, hasFileSystemAccess, setSidebarOpen, activeFilters, setActiveFilters, sortOptions, setSortOptions, loadSettingsFromFile, columnColors, sidebarWidth, setSidebarWidth } = useStore();
+  const { pagesArray, setPages, hasFileSystemAccess, setSidebarOpen, activeFilters, setActiveFilters, sortOptions, setSortOptions, loadSettingsFromFile, columnColors, sidebarWidth, setSidebarWidth } = useStore();
+  const pages = pagesArray;
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createParentId, setCreateParentId] = useState<string | undefined>();

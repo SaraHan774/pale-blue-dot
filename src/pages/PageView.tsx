@@ -19,10 +19,11 @@ export function PageView() {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
   const {
-    pages, removePage, updatePageInStore, columnColors, showToast,
+    pagesArray, removePage, updatePageInStore, columnColors, showToast,
     highlightColors, config, isImmerseMode, setIsImmerseMode,
     pageWidth, setPageWidth, slashCommands,
   } = useStore();
+  const pages = pagesArray;
 
   // ── UI State ──────────────────────────────────────────────────────
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -132,7 +133,7 @@ export function PageView() {
     const updatedPage = { ...page, title: newTitle, updatedAt: new Date().toISOString() };
     setPage(updatedPage);
     updatePageInStore(updatedPage);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to save title:', err); }
+    try { await pageService.updatePageMetadata(page.path, { title: newTitle }); } catch (err) { console.error('Failed to save title:', err); }
   }, [page, editTitle, updatePageInStore, setPage]);
 
   const handleColumnChange = useCallback(async (newColumn: string) => {
@@ -140,7 +141,7 @@ export function PageView() {
     const updatedPage = { ...page, kanbanColumn: newColumn || undefined, updatedAt: new Date().toISOString() };
     setPage(updatedPage);
     updatePageInStore(updatedPage);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to save column:', err); }
+    try { await pageService.updatePageMetadata(page.path, { kanbanColumn: newColumn || undefined }); } catch (err) { console.error('Failed to save column:', err); }
   }, [page, updatePageInStore, setPage]);
 
   const handleAddTag = useCallback(async (tag: string) => {
@@ -151,7 +152,7 @@ export function PageView() {
     updatePageInStore(updatedPage);
     setTagInput('');
     setShowTagSuggestions(false);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to save tag:', err); }
+    try { await pageService.updatePageMetadata(page.path, { tags: newTags }); } catch (err) { console.error('Failed to save tag:', err); }
   }, [page, updatePageInStore, setPage]);
 
   const handleRemoveTag = useCallback(async (tag: string) => {
@@ -160,7 +161,7 @@ export function PageView() {
     const updatedPage = { ...page, tags: newTags, updatedAt: new Date().toISOString() };
     setPage(updatedPage);
     updatePageInStore(updatedPage);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to save tag:', err); }
+    try { await pageService.updatePageMetadata(page.path, { tags: newTags }); } catch (err) { console.error('Failed to save tag:', err); }
   }, [page, updatePageInStore, setPage]);
 
   const handleDueDateChange = useCallback(async (newDate: string) => {
@@ -239,7 +240,7 @@ export function PageView() {
     setPage(updatedPage);
     updatePageInStore(updatedPage);
     setLastCreatedMemoId(newMemo.id);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to create memo:', err); }
+    try { await pageService.updatePageMetadata(page.path, { memos: updatedMemos }); } catch (err) { console.error('Failed to create memo:', err); }
   }, [page, updatePageInStore, setPage]);
 
   const handleUpdateMemo = useCallback(async (memoId: string, note: string) => {
@@ -250,7 +251,7 @@ export function PageView() {
     const updatedPage = { ...page, memos: updatedMemos, updatedAt: new Date().toISOString() };
     setPage(updatedPage);
     updatePageInStore(updatedPage);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to update memo:', err); }
+    try { await pageService.updatePageMetadata(page.path, { memos: updatedMemos }); } catch (err) { console.error('Failed to update memo:', err); }
   }, [page, updatePageInStore, setPage]);
 
   const handleDeleteMemo = useCallback(async (memoId: string) => {
@@ -259,7 +260,7 @@ export function PageView() {
     const updatedPage = { ...page, memos: updatedMemos, updatedAt: new Date().toISOString() };
     setPage(updatedPage);
     updatePageInStore(updatedPage);
-    try { await pageService.updatePage(updatedPage); } catch (err) { console.error('Failed to delete memo:', err); }
+    try { await pageService.updatePageMetadata(page.path, { memos: updatedMemos }); } catch (err) { console.error('Failed to delete memo:', err); }
   }, [page, updatePageInStore, setPage]);
 
   const handleScrollToHighlight = useCallback((highlightId: string) => {
@@ -396,22 +397,38 @@ export function PageView() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showColumnDropdown]);
 
-  // External links → system browser
+  // External links → system browser (scoped to editor container only)
   useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      const link = (e.target as HTMLElement).closest('a[href]') as HTMLAnchorElement | null;
+    const container = editorContainerRef.current;
+    if (!container) return;
+
+    const handleEditorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Early bailout: If target is not a link and doesn't contain a link, skip expensive traversal
+      if (target.tagName !== 'A' && !target.closest('a[href]')) {
+        return;
+      }
+
+      const link = (target.tagName === 'A' ? target : target.closest('a[href]')) as HTMLAnchorElement | null;
       if (!link) return;
+
       const href = link.getAttribute('href');
       if (!href) return;
-      const container = editorContainerRef.current;
-      if (!container || !container.contains(link)) return;
+
+      // Skip internal links (wiki links and page navigation)
       if (link.hasAttribute('data-page-ref') || link.hasAttribute('data-page-id')) return;
       if (href.startsWith('/page/') || href.startsWith('#')) return;
-      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+
+      // External link - open in system browser
+      e.preventDefault();
+      e.stopPropagation();
       openExternalUrl(href).catch(() => {});
     };
-    document.addEventListener('click', handleDocumentClick, true);
-    return () => document.removeEventListener('click', handleDocumentClick, true);
+
+    // Scoped to editor container only - doesn't run on sidebar/modal/header clicks
+    container.addEventListener('click', handleEditorClick, false);
+    return () => container.removeEventListener('click', handleEditorClick, false);
   }, []);
 
   // ── Keyboard shortcuts ────────────────────────────────────────────

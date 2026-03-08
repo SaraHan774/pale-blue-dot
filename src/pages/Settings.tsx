@@ -44,7 +44,7 @@ const DEFAULT_PALETTE = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444', '#8b5cf6', 
 export function Settings() {
   const {
     slashCommands, addSlashCommand, updateSlashCommand, removeSlashCommand, resetSlashCommands,
-    pages, columnColors, setColumnColor, removeColumnColor,
+    pagesArray, columnColors, setColumnColor, removeColumnColor,
     fontSettings, setFontSettings,
     boardDensity, setBoardDensity,
     highlightColors, setHighlightColors,
@@ -52,6 +52,7 @@ export function Settings() {
     git: gitSettings, setGitSettings,
     useWYSIWYG, setUseWYSIWYG,
   } = useStore();
+  const pages = pagesArray;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 

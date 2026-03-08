@@ -6,6 +6,14 @@ import { create } from 'zustand';
 import { Page, AppConfig, DEFAULT_CONFIG, SortOptions } from '@/types';
 import { AppSlashCommand, DEFAULT_SLASH_COMMANDS } from '@/data/defaultSlashCommands';
 import { configService, FontSettings, GitSettings } from '@/services/configService';
+import {
+  buildNormalizedState,
+  addPageToIndexes,
+  removePageFromIndexes,
+  updatePageInIndexes,
+  type PageIndexes,
+} from './normalizedHelpers';
+import { perfMonitor } from '@/lib/performance';
 
 // Load initial settings from localStorage (synchronous, fast first render)
 const initialSettings = configService.loadFromLocalStorage();
@@ -52,8 +60,15 @@ interface AppState {
   currentPage: Page | null;
   setCurrentPage: (page: Page | null) => void;
 
-  // All pages cache
-  pages: Page[];
+  // All pages cache (NORMALIZED)
+  pages: Record<string, Page>;  // Normalized entity map
+  pageIds: string[];  // Array of page IDs
+  indexes: PageIndexes;  // Indexes for fast lookups
+
+  // MIGRATION: Backward compatibility - use this instead of pages during migration
+  pagesArray: Page[];  // Computed on every state change
+  getPagesArray: () => Page[];
+
   setPages: (pages: Page[]) => void;
   addPage: (page: Page) => void;
   updatePageInStore: (page: Page) => void;
@@ -156,20 +171,113 @@ export const useStore = create<AppState>((set, get) => ({
   currentPage: null,
   setCurrentPage: (page) => set({ currentPage: page }),
 
-  // All pages cache
-  pages: [],
-  setPages: (pages) => set({ pages }),
-  addPage: (page) => set((state) => ({ pages: [...state.pages, page] })),
+  // All pages cache (NORMALIZED)
+  pages: {},
+  pageIds: [],
+  indexes: {
+    columnIndex: {},
+    tagIndex: {},
+    parentIndex: {},
+  },
+
+  // Backward compatibility: Convert normalized state to array
+  getPagesArray: () => {
+    const state = get();
+    return state.pageIds.map(id => state.pages[id]).filter(Boolean);
+  },
+
+  pagesArray: [],
+
+  setPages: (inputPages) => {
+    perfMonitor.start('store.setPages');
+    const normalized = buildNormalizedState(inputPages);
+    const pagesArray = normalized.pageIds.map(id => normalized.pages[id]);
+    set({
+      pages: normalized.pages,
+      pageIds: normalized.pageIds,
+      indexes: normalized.indexes,
+      pagesArray,
+    });
+    perfMonitor.end('store.setPages', 'state', { pageCount: inputPages.length });
+  },
+
+  addPage: (page) =>
+    set((state) => {
+      perfMonitor.start('store.addPage');
+      const newPages = { ...state.pages, [page.id]: page };
+      const newPageIds = [...state.pageIds, page.id];
+      const newIndexes = {
+        columnIndex: { ...state.indexes.columnIndex },
+        tagIndex: { ...state.indexes.tagIndex },
+        parentIndex: { ...state.indexes.parentIndex },
+      };
+      addPageToIndexes(newIndexes, page);
+
+      const pagesArray = newPageIds.map(id => newPages[id]);
+
+      perfMonitor.end('store.addPage', 'state', { pageId: page.id });
+      return {
+        pages: newPages,
+        pageIds: newPageIds,
+        indexes: newIndexes,
+        pagesArray,
+      };
+    }),
+
   updatePageInStore: (page) =>
-    set((state) => ({
-      pages: state.pages.map((p) => (p.id === page.id ? page : p)),
-      currentPage: state.currentPage?.id === page.id ? page : state.currentPage
-    })),
+    set((state) => {
+      perfMonitor.start('store.updatePage');
+      const oldPage = state.pages[page.id];
+      const newPages = { ...state.pages, [page.id]: page };
+      const newIndexes = {
+        columnIndex: { ...state.indexes.columnIndex },
+        tagIndex: { ...state.indexes.tagIndex },
+        parentIndex: { ...state.indexes.parentIndex },
+      };
+
+      if (oldPage) {
+        updatePageInIndexes(newIndexes, oldPage, page);
+      } else {
+        addPageToIndexes(newIndexes, page);
+      }
+
+      perfMonitor.end('store.updatePage', 'state', { pageId: page.id });
+
+      const pagesArray = state.pageIds.map(id => newPages[id]);
+
+      return {
+        pages: newPages,
+        indexes: newIndexes,
+        pagesArray,
+        currentPage: state.currentPage?.id === page.id ? page : state.currentPage,
+      };
+    }),
+
   removePage: (pageId) =>
-    set((state) => ({
-      pages: state.pages.filter((p) => p.id !== pageId),
-      currentPage: state.currentPage?.id === pageId ? null : state.currentPage
-    })),
+    set((state) => {
+      const pageToRemove = state.pages[pageId];
+      const { [pageId]: removed, ...remainingPages } = state.pages;
+      const newPageIds = state.pageIds.filter(id => id !== pageId);
+      const newIndexes = {
+        columnIndex: { ...state.indexes.columnIndex },
+        tagIndex: { ...state.indexes.tagIndex },
+        parentIndex: { ...state.indexes.parentIndex },
+      };
+
+      if (pageToRemove) {
+        removePageFromIndexes(newIndexes, pageToRemove);
+      }
+
+      const pagesArray = newPageIds.map(id => remainingPages[id]);
+
+      return {
+        pages: remainingPages,
+        pageIds: newPageIds,
+        indexes: newIndexes,
+        pagesArray,
+        currentPage: state.currentPage?.id === pageId ? null : state.currentPage,
+      };
+    }),
 
   // App configuration
   config: DEFAULT_CONFIG,

@@ -15,11 +15,12 @@ const isTauri = '__TAURI_INTERNALS__' in window;
 export function Home() {
   const {
     hasFileSystemAccess, setHasFileSystemAccess,
-    pages, setPages, updatePageInStore, columnColors,
+    pagesArray, setPages, updatePageInStore, columnColors,
     columnOrder, setColumnOrder,
     boardDensity,
     boardView, setBoardView,
   } = useStore();
+  const pages = pagesArray;
   const [listSortField, setListSortField] = useState<'title' | 'createdAt' | 'dueDate' | 'kanbanColumn'>('title');
   const [listSortDir, setListSortDir] = useState<'asc' | 'desc'>('asc');
   const [draggedCardId, setDraggedCardId] = useState<string | null>(null);
@@ -362,7 +363,8 @@ export function Home() {
     const updatedCard = { ...card, kanbanColumn: columnTag };
 
     try {
-      await pageService.updatePage(updatedCard);
+      // Use metadata-only update for better performance
+      await pageService.updatePageMetadata(card.path, { kanbanColumn: columnTag });
       updatePageInStore(updatedCard);
     } catch (error) {
       console.error('Failed to move card:', error);
@@ -385,7 +387,8 @@ export function Home() {
     const updatedCard = { ...card, kanbanColumn: undefined };
 
     try {
-      await pageService.updatePage(updatedCard);
+      // Use metadata-only update for better performance
+      await pageService.updatePageMetadata(card.path, { kanbanColumn: undefined });
       updatePageInStore(updatedCard);
     } catch (error) {
       console.error('Failed to move card:', error);
@@ -402,14 +405,19 @@ export function Home() {
     const card = pageMap.get(cardId);
     if (!card) return;
 
+    const newPinned = !card.pinned;
     const updatedCard = {
       ...card,
-      pinned: !card.pinned,
-      pinnedAt: !card.pinned ? new Date().toISOString() : undefined,
+      pinned: newPinned,
+      pinnedAt: newPinned ? new Date().toISOString() : undefined,
     };
 
     try {
-      await pageService.updatePage(updatedCard);
+      // Use metadata-only update for better performance
+      await pageService.updatePageMetadata(card.path, {
+        pinned: newPinned,
+        pinnedAt: newPinned ? updatedCard.pinnedAt : undefined,
+      });
       updatePageInStore(updatedCard);
     } catch (error) {
       console.error('Failed to pin/unpin card:', error);
