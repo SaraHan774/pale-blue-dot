@@ -1,28 +1,14 @@
 .recently-edited {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   padding: 0.5rem 1.5rem 0.625rem;
   overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-primary) transparent;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .recently-edited::-webkit-scrollbar {
-  height: 4px;
-}
-
-.recently-edited::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.recently-edited::-webkit-scrollbar-thumb {
-  background: var(--border-primary);
-  border-radius: 2px;
-}
-
-.recently-edited::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary);
+  display: none;
 }
 
 .recently-edited-label {
@@ -37,10 +23,9 @@
 }
 
 .recently-edited-cards {
-  display: flex;
+  display: inline-flex;
   gap: 0.5rem;
-  flex: 1;
-  min-width: 0;
+  min-width: min-content;
 }
 
 .recently-edited-card {
