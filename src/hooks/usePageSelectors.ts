@@ -16,6 +16,7 @@ import {
   selectRootPages,
   selectPageCountByColumn,
   selectPagesBySearch,
+  selectRecentlyEditedPages,
 } from '@/store/selectors';
 
 /**
@@ -184,4 +185,15 @@ export function useSortedColumns(): string[] {
   return useMemo(() => {
     return [...columns].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
   }, [columns]);
+}
+
+/**
+ * Hook to get recently edited pages
+ * Only re-renders when recently edited pages change
+ *
+ * @example
+ * const recentPages = useRecentlyEditedPages(5, currentPageId);
+ */
+export function useRecentlyEditedPages(limit: number, excludeId?: string): Page[] {
+  return useStore(state => selectRecentlyEditedPages(state, limit, excludeId));
 }

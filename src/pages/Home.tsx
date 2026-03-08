@@ -7,6 +7,7 @@ import { CreatePageModal } from '@/components/CreatePageModal';
 import { CreateTodoModal } from '@/components/CreateTodoModal';
 import { ContextMenu } from '@/components/ContextMenu';
 import { TooltipWindow } from '@/components/TooltipWindow';
+import { RecentlyEdited } from '@/components/RecentlyEdited';
 import './Home.css';
 
 const DEFAULT_PALETTE = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
@@ -496,50 +497,53 @@ export function Home() {
   return (
     <div className="home-board">
       <div className="board-header">
-        <div className="board-view-tabs">
-          <button
-            className={`view-tab ${boardView === 'kanban' ? 'active' : ''}`}
-            onClick={() => setBoardView('kanban')}
-          >
-            <span className="material-symbols-outlined">view_kanban</span>
-            Board
-          </button>
-          <button
-            className={`view-tab ${boardView === 'list' ? 'active' : ''}`}
-            onClick={() => setBoardView('list')}
-          >
-            <span className="material-symbols-outlined">list</span>
-            List
-          </button>
-          <button
-            className={`view-tab ${boardView === 'compact' ? 'active' : ''}`}
-            onClick={() => setBoardView('compact')}
-          >
-            <span className="material-symbols-outlined">grid_view</span>
-            Compact
-          </button>
+        <div className="board-header-row">
+          <div className="board-view-tabs">
+            <button
+              className={`view-tab ${boardView === 'kanban' ? 'active' : ''}`}
+              onClick={() => setBoardView('kanban')}
+            >
+              <span className="material-symbols-outlined">view_kanban</span>
+              Board
+            </button>
+            <button
+              className={`view-tab ${boardView === 'list' ? 'active' : ''}`}
+              onClick={() => setBoardView('list')}
+            >
+              <span className="material-symbols-outlined">list</span>
+              List
+            </button>
+            <button
+              className={`view-tab ${boardView === 'compact' ? 'active' : ''}`}
+              onClick={() => setBoardView('compact')}
+            >
+              <span className="material-symbols-outlined">grid_view</span>
+              Compact
+            </button>
+          </div>
+          <div className="board-actions-right">
+            <button
+              className={`board-action-btn ${isRefreshing ? 'refreshing' : ''}`}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              title="Refresh pages from workspace"
+            >
+              <span className="material-symbols-outlined" style={{ animation: isRefreshing ? 'spin 0.5s linear infinite' : 'none' }}>
+                refresh
+              </span>
+              Refresh
+            </button>
+            <button className="board-action-btn" onClick={() => setShowTodoModal(true)}>
+              <span className="material-symbols-outlined">check_box</span>
+              Todo
+            </button>
+            <button className="board-action-btn" onClick={() => setShowCreateModal(true)}>
+              <span className="material-symbols-outlined">note_add</span>
+              New Page
+            </button>
+          </div>
         </div>
-        <div className="board-actions-right">
-          <button
-            className={`board-action-btn ${isRefreshing ? 'refreshing' : ''}`}
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            title="Refresh pages from workspace"
-          >
-            <span className="material-symbols-outlined" style={{ animation: isRefreshing ? 'spin 0.5s linear infinite' : 'none' }}>
-              refresh
-            </span>
-            Refresh
-          </button>
-          <button className="board-action-btn" onClick={() => setShowTodoModal(true)}>
-            <span className="material-symbols-outlined">check_box</span>
-            Todo
-          </button>
-          <button className="board-action-btn" onClick={() => setShowCreateModal(true)}>
-            <span className="material-symbols-outlined">note_add</span>
-            New Page
-          </button>
-        </div>
+        <RecentlyEdited />
       </div>
 
       {boardView === 'compact' ? (

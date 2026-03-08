@@ -219,3 +219,30 @@ export function selectPagesBySearch(
     page.tags.some(tag => tag.toLowerCase().includes(lowerSearch))
   );
 }
+
+/**
+ * Select recently edited pages
+ *
+ * @example
+ * const recent = useStore(state => selectRecentlyEditedPages(state, 5, currentPageId));
+ */
+export function selectRecentlyEditedPages(
+  state: CurrentPageState | NormalizedPageState,
+  limit: number,
+  excludeId?: string
+): Page[] {
+  // Get all pages
+  const allPages = 'pageIds' in state
+    ? state.pageIds.map(id => state.pages[id])
+    : (state.pages as Page[]);
+
+  // Filter out excluded page if provided
+  const filtered = excludeId
+    ? allPages.filter(p => p.id !== excludeId)
+    : allPages;
+
+  // Sort by updatedAt descending and take top N
+  return filtered
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, limit);
+}

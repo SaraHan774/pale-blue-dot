@@ -102,10 +102,16 @@
 
 .board-header {
   display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.board-header-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.375rem 1.5rem;
-  flex-shrink: 0;
 }
 
 /* ── View tabs (Board / List) ── */
