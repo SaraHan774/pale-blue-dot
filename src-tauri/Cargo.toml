@@ -1,6 +1,6 @@
 [package]
 name = "my-kanban"
-version = "0.7.1"
+version = "0.7.2"
 description = "A local file-based Kanban board"
 authors = ["you"]
 edition = "2021"
