@@ -18,6 +18,7 @@ import { WikiLink } from '../lib/tiptap/extensions/WikiLink';
 import { WikiLinkSuggestion } from '../lib/tiptap/extensions/WikiLinkSuggestion';
 import { HighlightMark } from '../lib/tiptap/extensions/HighlightMark';
 import { ResolvableImage } from '../lib/tiptap/extensions/ResolvableImage';
+import { SafeLink } from '../lib/tiptap/extensions/SafeLink';
 import { Page } from '@/types';
 import { linkService, saveImage } from '@/services';
 import { fileSystemService } from '@/services/fileSystemFactory';
@@ -134,6 +135,15 @@ export default function TiptapEditor({
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4, 5, 6] },
         codeBlock: false,
+        // Disable default Link extension (using SafeLink instead for security)
+        link: false,
+      }),
+      // Use SafeLink extension with URL validation (CVE-2025-14284 mitigation)
+      SafeLink.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'tiptap-link',
+        },
       }),
       CodeBlockLowlight.configure({
         lowlight,
