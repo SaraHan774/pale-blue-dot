@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
 import { DEFAULT_FONT_SETTINGS, FontSettings } from '@/services/configService';
 import { AppSlashCommand } from '@/data/defaultSlashCommands';
-import { migrationService, gitService } from '@/services';
-import { GitConfig } from '@/services/gitService';
+import { migrationService } from '@/services';
 import './Settings.css';
 
 const SANS_FONT_OPTIONS = [
@@ -49,7 +48,6 @@ export function Settings() {
     boardDensity, setBoardDensity,
     highlightColors, setHighlightColors,
     pageWidth, setPageWidth,
-    git: gitSettings, setGitSettings,
     useWYSIWYG, setUseWYSIWYG,
   } = useStore();
   const pages = pagesArray;
@@ -69,12 +67,6 @@ export function Settings() {
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationResult, setMigrationResult] = useState<string | null>(null);
 
-  // Git integration state
-  const [isGitRepo, setIsGitRepo] = useState(false);
-  const [isInitializingGit, setIsInitializingGit] = useState(false);
-  const [gitError, setGitError] = useState('');
-  const [isLFSAvailable, setIsLFSAvailable] = useState(false);
-
   // Check if migration is needed on mount
   useEffect(() => {
     const checkMigration = async () => {
@@ -84,31 +76,6 @@ export function Settings() {
     checkMigration();
   }, []);
 
-  // Check if workspace is a Git repository
-  const checkGitRepo = useCallback(async () => {
-    try {
-      const isRepo = await gitService.isRepository();
-      setIsGitRepo(isRepo);
-    } catch {
-      setIsGitRepo(false);
-    }
-  }, []);
-
-  // Check if Git LFS is available
-  const checkLFSAvailable = useCallback(async () => {
-    try {
-      const available = await gitService.isLFSAvailable();
-      setIsLFSAvailable(available);
-    } catch {
-      setIsLFSAvailable(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkGitRepo();
-    checkLFSAvailable();
-  }, [checkGitRepo, checkLFSAvailable]);
-
   // TOC
   const tocItems = [
     { id: 'typography', label: 'Typography' },
@@ -116,19 +83,11 @@ export function Settings() {
     { id: 'highlight-colors', label: 'Highlight Colors' },
     { id: 'column-colors', label: 'Column Colors' },
     ...(needsMigration ? [{ id: 'migration', label: 'Migration' }] : []),
-    { id: 'git-integration', label: 'Git Integration' },
     { id: 'slash-commands', label: 'Slash Commands' },
     { id: 'keyboard-shortcuts', label: 'Keyboard Shortcuts' },
   ];
 
   const [activeSection, setActiveSection] = useState(tocItems[0]?.id ?? '');
-
-  // Re-check Git repo when navigating to Git Integration section
-  useEffect(() => {
-    if (activeSection === 'git-integration') {
-      checkGitRepo();
-    }
-  }, [activeSection, checkGitRepo]);
 
   // Track active section on scroll in the content container
   useEffect(() => {
@@ -192,66 +151,6 @@ export function Settings() {
       setMigrationResult(`❌ Migration failed: ${error}`);
     } finally {
       setIsMigrating(false);
-    }
-  };
-
-  // Git handlers
-  const handleGitSettingsChange = (field: keyof typeof gitSettings, value: any) => {
-    setGitSettings({
-      ...gitSettings,
-      [field]: value,
-    });
-  };
-
-  const handleInitializeGit = async () => {
-    if (!gitSettings.userName || !gitSettings.userEmail) {
-      setGitError('Please provide user name and email before initializing');
-      return;
-    }
-
-    const hasRemote = gitSettings.remoteUrl.trim() !== '';
-    const confirmMessage = hasRemote
-      ? 'This will initialize a Git repository and push to:\n\n' +
-        `${gitSettings.remoteUrl}\n\n` +
-        'Make sure:\n' +
-        '• The remote repository exists on GitHub\n' +
-        '• Your SSH keys are configured\n' +
-        '• You have push access to this repository\n\n' +
-        'Continue?'
-      : 'This will initialize a local Git repository.\n\n' +
-        'You can add a remote URL later to enable sync.\n\n' +
-        'Continue?';
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    setIsInitializingGit(true);
-    setGitError('');
-
-    try {
-      const config: GitConfig = {
-        user_name: gitSettings.userName,
-        user_email: gitSettings.userEmail,
-        remote_url: gitSettings.remoteUrl,
-        remote_name: gitSettings.remoteName || 'origin',
-        branch_name: gitSettings.branchName || 'main',
-      };
-
-      await gitService.initialize(config);
-      setIsGitRepo(true);
-
-      const successMessage = hasRemote
-        ? '✅ Git repository initialized and pushed to remote successfully!\n\nYou can now use the Git button in the top bar to commit and sync changes.'
-        : '✅ Git repository initialized successfully!\n\nAdd a remote URL in settings to enable sync with GitHub.';
-
-      alert(successMessage);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('Git initialization failed:', message);
-      setGitError(message);
-    } finally {
-      setIsInitializingGit(false);
     }
   };
 
@@ -1079,253 +978,6 @@ export function Settings() {
           )}
         </section>
       )}
-
-      <section id="git-integration" className="settings-section">
-        <div className="settings-section-header">
-          <h2>Git Integration</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {isGitRepo && (
-              <div className="settings-git-status-badge">
-                ✓ Repository Initialized
-              </div>
-            )}
-            <button
-              onClick={checkGitRepo}
-              className="btn btn-secondary"
-              style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
-              title="Refresh repository status"
-            >
-              ↻ Refresh
-            </button>
-          </div>
-        </div>
-
-        {typeof window !== 'undefined' && !('__TAURI_INTERNALS__' in window) && (
-          <div className="settings-git-desktop-only-notice">
-            <strong>⚠️ Desktop Only</strong>
-            <p>Git integration is only available in the desktop app. Please use the Tauri desktop version to enable Git sync.</p>
-          </div>
-        )}
-
-        <p className="settings-description">
-          Sync your workspace with Git for version control and collaboration between devices.
-          {!isGitRepo && ' Configure your details below and initialize to get started.'}
-        </p>
-
-        {/* Git LFS Status */}
-        {isLFSAvailable ? (
-          <div className="settings-git-lfs-status" style={{
-            marginTop: '0.5rem',
-            padding: '0.75rem',
-            background: 'var(--bg-secondary)',
-            borderRadius: '6px',
-            fontSize: '0.875rem',
-            color: 'var(--text-secondary)'
-          }}>
-            <span style={{ color: '#10b981', marginRight: '0.5rem' }}>✓</span>
-            <strong>Git LFS available</strong> - Images will be stored efficiently (full quality, small repo size)
-          </div>
-        ) : (
-          <div className="settings-git-lfs-status" style={{
-            marginTop: '0.5rem',
-            padding: '0.75rem',
-            background: 'var(--bg-secondary)',
-            borderRadius: '6px',
-            fontSize: '0.875rem',
-            color: 'var(--text-secondary)'
-          }}>
-            <span style={{ color: '#f59e0b', marginRight: '0.5rem' }}>⚠</span>
-            <strong>Git LFS not installed</strong> - Images will be stored directly in Git (may increase repo size).
-            Install with: <code style={{ padding: '0.125rem 0.25rem', background: 'var(--bg-primary)', borderRadius: '3px' }}>brew install git-lfs</code>
-          </div>
-        )}
-
-        {/* Enable Git */}
-        <div className="settings-density-container">
-          <label className="settings-checkbox-label">
-            <input
-              type="checkbox"
-              checked={gitSettings.enabled}
-              onChange={(e) => handleGitSettingsChange('enabled', e.target.checked)}
-              className="settings-checkbox"
-            />
-            <span>Enable Git features</span>
-          </label>
-          <p className="settings-density-description">
-            Enable auto-commit and other Git automation features (Git button always shows when repository is initialized)
-          </p>
-        </div>
-
-        {/* User Configuration */}
-        <div className="settings-typography-grid" style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ gridColumn: '1 / -1', marginBottom: '0.5rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>
-            👤 User Configuration
-          </h3>
-
-          <div className="settings-typography-row">
-            <div className="settings-typography-field">
-              <label htmlFor="git-user-name">Name</label>
-              <input
-                id="git-user-name"
-                type="text"
-                value={gitSettings.userName}
-                onChange={(e) => handleGitSettingsChange('userName', e.target.value)}
-                placeholder="Your Name"
-                className="settings-input"
-              />
-              <small style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                Used in commit author information
-              </small>
-            </div>
-
-            <div className="settings-typography-field">
-              <label htmlFor="git-user-email">Email</label>
-              <input
-                id="git-user-email"
-                type="email"
-                value={gitSettings.userEmail}
-                onChange={(e) => handleGitSettingsChange('userEmail', e.target.value)}
-                placeholder="your.email@example.com"
-                className="settings-input"
-              />
-              <small style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                Used in commit author information
-              </small>
-            </div>
-          </div>
-        </div>
-
-        {/* Remote Configuration */}
-        <div className="settings-typography-grid" style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ gridColumn: '1 / -1', marginBottom: '0.5rem', fontSize: '1rem', color: 'var(--text-secondary)' }}>
-            🌐 Remote Repository
-          </h3>
-
-          <div className="settings-typography-row">
-            <div className="settings-typography-field" style={{ gridColumn: '1 / -1' }}>
-              <label htmlFor="git-remote-url">Remote URL</label>
-              <input
-                id="git-remote-url"
-                type="text"
-                value={gitSettings.remoteUrl}
-                onChange={(e) => handleGitSettingsChange('remoteUrl', e.target.value)}
-                placeholder="git@github.com:username/repo.git"
-                className="settings-input"
-              />
-              <small style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                SSH URL for your remote Git repository (recommended for authentication)
-              </small>
-            </div>
-          </div>
-
-          <div className="settings-typography-row">
-            <div className="settings-typography-field">
-              <label htmlFor="git-remote-name">Remote Name</label>
-              <input
-                id="git-remote-name"
-                type="text"
-                value={gitSettings.remoteName}
-                onChange={(e) => handleGitSettingsChange('remoteName', e.target.value)}
-                placeholder="origin"
-                className="settings-input"
-              />
-              <small style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                Typically "origin"
-              </small>
-            </div>
-
-            <div className="settings-typography-field">
-              <label htmlFor="git-branch-name">Branch Name</label>
-              <input
-                id="git-branch-name"
-                type="text"
-                value={gitSettings.branchName}
-                onChange={(e) => handleGitSettingsChange('branchName', e.target.value)}
-                placeholder="main"
-                className="settings-input"
-              />
-              <small style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-                Default branch (e.g., "main" or "master")
-              </small>
-            </div>
-          </div>
-        </div>
-
-        {/* Auto-commit */}
-        <div className="settings-density-container" style={{ marginTop: '1.5rem' }}>
-          <label className="settings-checkbox-label">
-            <input
-              type="checkbox"
-              checked={gitSettings.autoCommit}
-              onChange={(e) => handleGitSettingsChange('autoCommit', e.target.checked)}
-              disabled={!gitSettings.enabled}
-              className="settings-checkbox"
-            />
-            <span>Enable auto-commit</span>
-          </label>
-          <p className="settings-density-description">
-            Automatically commit changes at regular intervals (manual push still required)
-          </p>
-
-          {gitSettings.autoCommit && (
-            <div className="settings-typography-field" style={{ marginTop: '0.75rem', maxWidth: '240px' }}>
-              <label htmlFor="git-auto-commit-interval">
-                Interval: {gitSettings.autoCommitInterval} minutes
-              </label>
-              <input
-                id="git-auto-commit-interval"
-                type="range"
-                min="1"
-                max="60"
-                step="1"
-                value={gitSettings.autoCommitInterval}
-                onChange={(e) => handleGitSettingsChange('autoCommitInterval', parseInt(e.target.value, 10))}
-                disabled={!gitSettings.enabled}
-                className="settings-range"
-              />
-              <div className="settings-range-labels">
-                <span>1 min</span>
-                <span>60 min</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Initialize or Status */}
-        {!isGitRepo ? (
-          <div className="settings-git-init-section">
-            <button
-              className="btn btn-primary"
-              onClick={handleInitializeGit}
-              disabled={isInitializingGit || !gitSettings.userName || !gitSettings.userEmail}
-            >
-              {isInitializingGit
-                ? (gitSettings.remoteUrl ? 'Initializing & Pushing...' : 'Initializing Repository...')
-                : 'Initialize Git Repository'}
-            </button>
-            {gitError && (
-              <div className="settings-error" style={{ marginTop: '0.75rem' }}>
-                {gitError}
-              </div>
-            )}
-            {(!gitSettings.userName || !gitSettings.userEmail) && (
-              <small style={{ display: 'block', marginTop: '0.5rem', color: 'var(--text-tertiary)' }}>
-                Please provide your name and email before initializing
-              </small>
-            )}
-          </div>
-        ) : (
-          <div className="settings-git-initialized">
-            <div className="settings-git-success-card">
-              <span className="settings-git-success-icon">✓</span>
-              <div>
-                <strong>Git repository initialized</strong>
-                <p>Use the Git button in the top bar to commit and sync your changes</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
 
       <section id="slash-commands" className="settings-section">
         <div className="settings-section-header">

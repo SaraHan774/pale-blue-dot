@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { Page, AppConfig, DEFAULT_CONFIG, SortOptions } from '@/types';
 import { AppSlashCommand, DEFAULT_SLASH_COMMANDS } from '@/data/defaultSlashCommands';
-import { configService, FontSettings, GitSettings } from '@/services/configService';
+import { configService, FontSettings } from '@/services/configService';
 import {
   buildNormalizedState,
   addPageToIndexes,
@@ -31,7 +31,6 @@ const persistSettings = (state: {
   sidebarWidth: number;
   highlightColors: string[];
   pageWidth: 'narrow' | 'wide';
-  git: GitSettings;
   useWYSIWYG: boolean;
 }) => {
   configService.save({
@@ -46,7 +45,6 @@ const persistSettings = (state: {
     sidebarWidth: state.sidebarWidth,
     highlightColors: state.highlightColors,
     pageWidth: state.pageWidth,
-    git: state.git,
     useWYSIWYG: state.useWYSIWYG,
   });
 };
@@ -140,10 +138,6 @@ interface AppState {
   // Page width (persisted)
   pageWidth: 'narrow' | 'wide';
   setPageWidth: (width: 'narrow' | 'wide') => void;
-
-  // Git settings (persisted)
-  git: GitSettings;
-  setGitSettings: (git: GitSettings) => void;
 
   // WYSIWYG editor (persisted)
   useWYSIWYG: boolean;
@@ -413,14 +407,6 @@ export const useStore = create<AppState>((set, get) => ({
     persistSettings({ ...state, pageWidth: width });
   },
 
-  // Git settings
-  git: initialSettings.git,
-  setGitSettings: (git) => {
-    set({ git });
-    const state = get();
-    persistSettings({ ...state, git });
-  },
-
   // WYSIWYG editor
   useWYSIWYG: initialSettings.useWYSIWYG ?? false,
   setUseWYSIWYG: (useWYSIWYG) => {
@@ -461,7 +447,6 @@ export const useStore = create<AppState>((set, get) => ({
         sidebarWidth: fileSettings.sidebarWidth || 280,
         highlightColors: fileSettings.highlightColors || ['#FFEB3B', '#C5E1A5', '#90CAF9', '#FFCC80', '#F48FB1'],
         pageWidth: fileSettings.pageWidth || 'narrow',
-        git: fileSettings.git,
         useWYSIWYG: fileSettings.useWYSIWYG ?? false,
       });
       // Sync localStorage cache
@@ -481,7 +466,6 @@ export const useStore = create<AppState>((set, get) => ({
         sidebarWidth: state.sidebarWidth,
         highlightColors: state.highlightColors,
         pageWidth: state.pageWidth,
-        git: state.git,
         useWYSIWYG: state.useWYSIWYG,
       });
     }

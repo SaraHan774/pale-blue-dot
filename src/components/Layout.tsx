@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Toast } from './Toast';
-import { GitButton } from './GitButton';
 import { useStore } from '@/store/useStore';
 import { fileSystemService } from '@/services';
 import './Layout.css';
@@ -174,7 +173,6 @@ export function Layout() {
             HOME
           </Link>
           <div className="top-bar-spacer" />
-          <GitButton />
           <Link to="/settings" className="settings-button" title="Settings">
             <span className="material-symbols-outlined">settings</span>
           </Link>
