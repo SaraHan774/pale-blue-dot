@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * MCP Server for My Kanban
+ * MCP Server for Pale Blue Dot
  *
  * Provides tools for Claude to interact with highlights and memos
  * stored in markdown files. Highlights are stored inline as <mark> tags
@@ -41,7 +41,7 @@ interface PageFrontmatter {
 }
 
 // Workspace path - configurable via environment variable
-const WORKSPACE_PATH = process.env.KANBAN_WORKSPACE || path.join(process.cwd(), '../workspace');
+const WORKSPACE_PATH = process.env.PALE_BLUE_DOT_WORKSPACE || path.join(process.cwd(), '../workspace');
 
 // ── Highlight helpers (inline <mark> tags) ─────────────────────────
 
@@ -159,7 +159,7 @@ function normalizeFrontmatter(data: any): PageFrontmatter {
 // MCP Server
 const server = new Server(
   {
-    name: 'my-kanban-mcp',
+    name: 'pale-blue-dot-mcp',
     version: '1.0.0',
   },
   {
@@ -832,7 +832,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('My Kanban MCP Server running on stdio');
+  console.error('Pale Blue Dot MCP Server running on stdio');
 }
 
 main().catch((error) => {

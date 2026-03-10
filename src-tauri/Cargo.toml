@@ -1,7 +1,7 @@
 [package]
-name = "my-kanban"
+name = "pale-blue-dot"
 version = "0.7.2"
-description = "A local file-based Kanban board"
+description = "A contemplative, local file-based knowledge manager inspired by Carl Sagan's Pale Blue Dot"
 authors = ["you"]
 edition = "2021"
 

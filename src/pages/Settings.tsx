@@ -3,6 +3,7 @@ import { useStore } from '@/store/useStore';
 import { DEFAULT_FONT_SETTINGS, FontSettings } from '@/services/configService';
 import { AppSlashCommand } from '@/data/defaultSlashCommands';
 import { migrationService } from '@/services';
+import { fileSystemService } from '@/services/fileSystemFactory';
 import './Settings.css';
 
 const SANS_FONT_OPTIONS = [
@@ -49,6 +50,7 @@ export function Settings() {
     highlightColors, setHighlightColors,
     pageWidth, setPageWidth,
     useWYSIWYG, setUseWYSIWYG,
+    config, setConfig, showToast,
   } = useStore();
   const pages = pagesArray;
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export function Settings() {
 
   // TOC
   const tocItems = [
+    { id: 'workspace', label: 'Workspace' },
     { id: 'typography', label: 'Typography' },
     { id: 'board-appearance', label: 'Board Appearance' },
     { id: 'highlight-colors', label: 'Highlight Colors' },
@@ -113,6 +116,28 @@ export function Settings() {
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needsMigration]);
+
+  const handleChangeWorkspace = async () => {
+    try {
+      const handle = await fileSystemService.requestDirectoryAccess();
+      const newPath = handle.name;
+
+      setConfig({
+        ...config,
+        workspacePath: newPath,
+      });
+
+      showToast(`Workspace changed to: ${newPath}. Please refresh the page.`, 'success');
+
+      // Refresh after a short delay to allow user to see the toast
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to change workspace:', error);
+      showToast('Failed to change workspace. Please try again.', 'error');
+    }
+  };
 
   const handleMigrate = async () => {
     if (!window.confirm(
@@ -374,6 +399,45 @@ export function Settings() {
         </nav>
 
         <div className="settings-content">
+      {/* Workspace Section */}
+      <section id="workspace" className="settings-section">
+        <div className="settings-section-header">
+          <h2>Workspace</h2>
+        </div>
+
+        <div className="settings-group">
+          <label>Current Workspace Directory</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+            <div style={{
+              flex: 1,
+              padding: '0.75rem 1rem',
+              backgroundColor: 'var(--bg-secondary)',
+              borderRadius: '8px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.875rem',
+              color: 'var(--text-secondary)',
+            }}>
+              {config.workspacePath}
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={handleChangeWorkspace}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              Change Workspace
+            </button>
+          </div>
+          <p style={{
+            fontSize: '0.8125rem',
+            color: 'var(--text-secondary)',
+            marginTop: '0.75rem',
+            opacity: 0.8
+          }}>
+            Select a different folder to use as your workspace. The app will reload after changing the workspace.
+          </p>
+        </div>
+      </section>
+
       <section id="typography" className="settings-section">
         <div className="settings-section-header">
           <h2>Typography</h2>

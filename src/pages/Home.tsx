@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { listen } from '@tauri-apps/api/event';
 import { useStore } from '@/store/useStore';
 import { fileSystemService, pageService, markdownService, resolveImagesInHtml } from '@/services';
+import { Button, ButtonGroup } from '@/components/Button';
 import { CreatePageModal } from '@/components/CreatePageModal';
 import { CreateTodoModal } from '@/components/CreateTodoModal';
 import { ContextMenu } from '@/components/ContextMenu';
@@ -261,27 +262,27 @@ export function Home() {
     return (
       <div className="home">
         <div className="welcome-card">
-          <h1>Welcome to My Kanban</h1>
+          <h1>Welcome to Pale Blue Dot 🌍</h1>
           <p className="welcome-text">
-            A local, file-based Kanban board with Notion-like pages.
+            A contemplative, local file-based knowledge manager inspired by Carl Sagan's Pale Blue Dot.
             All your data is stored locally and can be tracked with git.
           </p>
 
           <div className="features">
             <div className="feature">
               <span className="feature-icon">📋</span>
-              <h3>Kanban Board</h3>
+              <h3>Kanban Workflow</h3>
               <p>Organize pages into columns with drag & drop</p>
             </div>
             <div className="feature">
-              <span className="feature-icon">📝</span>
-              <h3>Markdown Notes</h3>
-              <p>Write notes with full markdown syntax support</p>
+              <span className="feature-icon">✍️</span>
+              <h3>Notion-Style Pages</h3>
+              <p>Write with rich markdown and wiki-style links</p>
             </div>
             <div className="feature">
               <span className="feature-icon">🏷️</span>
-              <h3>Tag = Column</h3>
-              <p>Create tags that become kanban columns</p>
+              <h3>Tags & Hierarchy</h3>
+              <p>Organize with tags, nested pages, and filters</p>
             </div>
           </div>
 
@@ -498,63 +499,66 @@ export function Home() {
     <div className="home-board">
       <div className="board-header">
         <div className="board-header-row">
-          <div className="board-view-tabs">
-            <button
-              className={`view-tab ${boardView === 'kanban' ? 'active' : ''}`}
+          <ButtonGroup spacing="compact" className="board-view-tabs">
+            <Button
+              variant={boardView === 'kanban' ? 'secondary' : 'ghost'}
               onClick={() => setBoardView('kanban')}
-            >
-              <span className="material-symbols-outlined">view_kanban</span>
-              Board
-            </button>
-            <button
-              className={`view-tab ${boardView === 'list' ? 'active' : ''}`}
+              icon={<span className="material-symbols-outlined">view_kanban</span>}
+              title="Board View"
+            />
+            <Button
+              variant={boardView === 'list' ? 'secondary' : 'ghost'}
               onClick={() => setBoardView('list')}
-            >
-              <span className="material-symbols-outlined">list</span>
-              List
-            </button>
-            <button
-              className={`view-tab ${boardView === 'compact' ? 'active' : ''}`}
+              icon={<span className="material-symbols-outlined">list</span>}
+              title="List View"
+            />
+            <Button
+              variant={boardView === 'compact' ? 'secondary' : 'ghost'}
               onClick={() => setBoardView('compact')}
-            >
-              <span className="material-symbols-outlined">grid_view</span>
-              Compact
-            </button>
-          </div>
-          <div className="board-actions-right">
-            <button
-              className={`board-action-btn ${isRefreshing ? 'refreshing' : ''}`}
+              icon={<span className="material-symbols-outlined">grid_view</span>}
+              title="Compact View"
+            />
+          </ButtonGroup>
+          <ButtonGroup spacing="compact" className="board-actions-right">
+            <Button
+              variant="icon"
               onClick={handleRefresh}
               disabled={isRefreshing}
               title="Refresh pages from workspace"
-            >
-              <span className="material-symbols-outlined" style={{ animation: isRefreshing ? 'spin 0.5s linear infinite' : 'none' }}>
-                refresh
-              </span>
-              Refresh
-            </button>
-            <button className="board-action-btn" onClick={() => setShowTodoModal(true)}>
-              <span className="material-symbols-outlined">check_box</span>
-              Todo
-            </button>
-            <button className="board-action-btn" onClick={() => setShowCreateModal(true)}>
-              <span className="material-symbols-outlined">note_add</span>
-              New Page
-            </button>
-          </div>
+              icon={
+                <span
+                  className="material-symbols-outlined"
+                  style={{ animation: isRefreshing ? 'spin 0.5s linear infinite' : 'none' }}
+                >
+                  refresh
+                </span>
+              }
+            />
+            <Button
+              variant="icon"
+              onClick={() => setShowTodoModal(true)}
+              icon={<span className="material-symbols-outlined">check_box</span>}
+              title="Create Todo"
+            />
+            <Button
+              variant="icon"
+              onClick={() => setShowCreateModal(true)}
+              icon={<span className="material-symbols-outlined">note_add</span>}
+              title="New Page"
+            />
+          </ButtonGroup>
         </div>
         <RecentlyEdited />
       </div>
 
       {boardView === 'compact' ? (
-        /* ===== COMPACT GRID VIEW ===== */
+        /* ===== COMPACT GRID VIEW - Pale Blue Dot (No rainbow colors!) ===== */
         <div className="compact-grid-view">
           {columns.map((col) => {
             const columnCards = columnCardsMap.get(col.toLowerCase()) || [];
-            const color = getColumnColor(col);
             return (
-              <div key={col} className="compact-column" style={{ '--column-color': color } as React.CSSProperties}>
-                <div className="compact-column-header" style={{ backgroundColor: color }}>
+              <div key={col} className="compact-column">
+                <div className="compact-column-header">
                   <h4>{col}</h4>
                   <span className="compact-card-count">{columnCards.length}</span>
                 </div>
@@ -574,8 +578,8 @@ export function Home() {
             );
           })}
           {hasUncategorized && (
-            <div className="compact-column" style={{ '--column-color': '#6b7280' } as React.CSSProperties}>
-              <div className="compact-column-header" style={{ backgroundColor: '#6b7280' }}>
+            <div className="compact-column">
+              <div className="compact-column-header">
                 <h4>Uncategorized</h4>
                 <span className="compact-card-count">{uncategorizedCards.length}</span>
               </div>

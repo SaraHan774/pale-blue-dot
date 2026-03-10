@@ -1,7 +1,7 @@
-# My Kanban - Claude Reference
+# Pale Blue Dot - Claude Reference
 
 ## Project Overview
-Local, file-based Kanban board with Notion-style pages. Data stored as **single markdown files** (not folders) with YAML frontmatter.
+A contemplative, local file-based knowledge manager inspired by Carl Sagan's Pale Blue Dot. Combines kanban workflow with Notion-style pages. Data stored as **single markdown files** (not folders) with YAML frontmatter.
 
 **Tech Stack:** React 18 + TypeScript + Vite + Tauri v2 + Zustand
 
@@ -111,8 +111,8 @@ graph TD
 - **Single source of truth**: Page data stored in markdown files, cached in Zustand store
 - **Persistent settings**: All user preferences saved to both localStorage (cache) and `.kanban-config.json` (durable)
 - **External links**: Always open in system browser via `openExternalUrl()` utility
-- **Type sharing with MCP server**: `mcp-kanban-server` imports types from `src/types/page.ts`
-  - ⚠️ **IMPORTANT**: When modifying `Highlight` or `Memo` types, rebuild MCP server: `cd mcp-kanban-server && npm run build`
+- **Type sharing with MCP server**: `mcp-pale-blue-dot-server` imports types from `src/types/page.ts`
+  - ⚠️ **IMPORTANT**: When modifying `Highlight` or `Memo` types, rebuild MCP server: `cd mcp-pale-blue-dot-server && npm run build`
   - Single Source of Truth prevents type drift between frontend and MCP tools
   - No manual synchronization needed - TypeScript enforces consistency
 

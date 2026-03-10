@@ -5,6 +5,7 @@ import { listen } from '@tauri-apps/api/event';
 import { useStore } from '@/store/useStore';
 import { pageService, fileSystemService } from '@/services';
 import { CreatePageModal } from './CreatePageModal';
+import { PaleBlueDotLogo } from './PaleBlueDotLogo';
 import './Sidebar.css';
 
 // Tauri detection
@@ -252,41 +253,54 @@ export function Sidebar() {
     return DEFAULT_PALETTE[stableIndex % DEFAULT_PALETTE.length];
   };
 
-  const renderPageTree = (pageId: string, level: number = 0) => {
+  // Render a single page item (ultra-compact design)
+  const renderPageItem = (pageId: string, level: number = 0) => {
     const page = pageMap.get(pageId);
     if (!page) return null;
 
     const children = childrenMap.get(pageId) || [];
+    const hasChildren = children.length > 0;
     const isCollapsed = collapsedPages.has(pageId);
 
     return (
-      <div key={page.id} style={{ marginLeft: `${level * 0.75}rem` }}>
-        <div className="page-item">
-          {children.length > 0 ? (
+      <div key={page.id} className="page-tree-node" data-level={level}>
+        <div className="page-item" style={{ paddingLeft: `${level * 16}px` }}>
+          {/* Collapse toggle */}
+          {hasChildren ? (
             <button
               className="collapse-btn"
               onClick={() => toggleCollapse(page.id)}
-              title={isCollapsed ? 'Expand' : 'Collapse'}
+              aria-label={isCollapsed ? 'Expand' : 'Collapse'}
             >
-              {isCollapsed ? '▸' : '▾'}
+              <span className="collapse-icon">{isCollapsed ? '›' : '⌄'}</span>
             </button>
           ) : (
-            <span className="collapse-btn-placeholder" />
+            <span className="collapse-placeholder" />
           )}
-          <Link to={`/page/${page.id}`} className="sidebar-page-link" replace>
-            <span className="page-title">{page.title}</span>
-          </Link>
-          <button
-            className="btn-icon btn-add-child"
-            onClick={(e) => handleCreateSubPage(page.id, e)}
-            title="Add sub-page"
+
+          {/* Page link */}
+          <Link
+            to={`/page/${page.id}`}
+            className="page-link"
+            replace
           >
-            +
+            {page.title}
+          </Link>
+
+          {/* Add sub-page button */}
+          <button
+            className="add-child-btn"
+            onClick={(e) => handleCreateSubPage(page.id, e)}
+            aria-label="Add sub-page"
+          >
+            <span className="add-icon">+</span>
           </button>
         </div>
-        {!isCollapsed && children.length > 0 && (
+
+        {/* Children */}
+        {hasChildren && !isCollapsed && (
           <div className="page-children">
-            {children.map(child => renderPageTree(child.id, level + 1))}
+            {children.map(child => renderPageItem(child.id, level + 1))}
           </div>
         )}
       </div>
@@ -300,7 +314,7 @@ export function Sidebar() {
     <aside className="sidebar" style={{ width: `${sidebarWidth}px` }}>
       <div className="sidebar-header">
         <Link to="/" className="sidebar-title" replace>
-          <h2>My Kanban</h2>
+          <PaleBlueDotLogo size={28} showText={false} />
         </Link>
         <div className="sidebar-header-actions">
           <button
@@ -424,23 +438,31 @@ export function Sidebar() {
 
       <div className="sidebar-content">
         {loading ? (
-          <div className="loading">Loading pages...</div>
+          <div className="loading">
+            <span className="loading-text">Loading pages...</span>
+          </div>
         ) : visibleRootPages.length > 0 ? (
-          <div className="pages-tree">
-            {visibleRootPages.map(page => renderPageTree(page.id))}
+          <>
+            <div className="pages-list">
+              {visibleRootPages.map(page => renderPageItem(page.id))}
+            </div>
             {remainingCount > 0 && (
               <button
-                className="show-more-btn"
+                className="load-more-btn"
                 onClick={() => setVisibleCount(prev => prev + PAGE_BATCH_SIZE)}
               >
-                Show more ({remainingCount} remaining)
+                <span className="load-more-text">
+                  Show {Math.min(remainingCount, PAGE_BATCH_SIZE)} more
+                </span>
+                <span className="load-more-count">({remainingCount} remaining)</span>
               </button>
             )}
-          </div>
+          </>
         ) : (
           <div className="empty-state">
-            <p>No pages yet</p>
-            <p className="text-secondary">Click + to create your first page</p>
+            <span className="empty-icon">📄</span>
+            <p className="empty-title">No pages yet</p>
+            <p className="empty-subtitle">Click + to create your first page</p>
           </div>
         )}
       </div>

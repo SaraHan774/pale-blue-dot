@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "pale-blue-dot": {
+      "command": "node",
+      "args": [
+        "/Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server/dist/index.js"
+      ],
+      "env": {
+        "PALE_BLUE_DOT_WORKSPACE": "/Users/gahee/pale-blue-dot/workspace"
+      }
+    }
+  }
+}

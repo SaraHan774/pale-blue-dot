@@ -240,7 +240,6 @@
 }
 
 .bubble-color-btn:hover {
-  transform: scale(1.2);
   border-color: var(--text-primary) !important;
   background: inherit !important;
 }

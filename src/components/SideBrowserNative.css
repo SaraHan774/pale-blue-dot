@@ -94,7 +94,6 @@
 
 .btn-primary:hover {
   background: var(--primary-color-hover, #005a9e);
-  transform: translateY(-1px);
 }
 
 .side-browser-error {

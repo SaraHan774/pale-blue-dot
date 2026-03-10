@@ -1,0 +1,304 @@
+/* ═══════════════════════════════════════════════════════════════
+   Pale Blue Dot Button System
+
+   A contemplative button design inspired by Carl Sagan's perspective:
+   - Soft, not aggressive
+   - Cosmic depth through subtle shadows and gradients
+   - Humble and elegant
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Base button reset */
+.pbd-btn {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+
+  /* Typography */
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+
+  /* Visual */
+  border: none;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  user-select: none;
+
+  /* Transitions - smooth like celestial motion */
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  /* Prevent text selection during click */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pbd-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  transform: none !important;
+}
+
+.pbd-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Primary - The Pale Blue Dot itself
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+  color: white;
+  box-shadow:
+    0 1px 3px rgba(123, 165, 209, 0.2),
+    0 4px 12px rgba(123, 165, 209, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pbd-btn-primary:hover:not(:disabled) {
+  box-shadow:
+    0 2px 6px rgba(123, 165, 209, 0.25),
+    0 8px 20px rgba(123, 165, 209, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.pbd-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    0 1px 2px rgba(123, 165, 209, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Secondary - Atmospheric, ghostly
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px var(--border-color);
+}
+
+.pbd-btn-secondary:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px var(--border-color);
+}
+
+.pbd-btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+  background: var(--border-color);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Ghost - Minimal, ethereal
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1px transparent;
+}
+
+.pbd-btn-ghost:hover:not(:disabled) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+.pbd-btn-ghost:active:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Danger - Solar flare, destructive but elegant
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-danger {
+  background: transparent;
+  color: #ef4444;
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3);
+}
+
+.pbd-btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow:
+    0 2px 8px rgba(239, 68, 68, 0.25),
+    0 4px 16px rgba(239, 68, 68, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pbd-btn-danger:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    0 1px 2px rgba(239, 68, 68, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Icon button - Constellation point
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-icon {
+  padding: 0.5rem;
+  min-width: auto;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  background: transparent;
+}
+
+.pbd-btn-icon:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.pbd-btn-icon:active:not(:disabled) {
+  transform: scale(0.98);
+  background: var(--bg-tertiary);
+}
+
+.pbd-btn-icon .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Size variants
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-sm {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  border-radius: 8px;
+}
+
+.pbd-btn-lg {
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  border-radius: 14px;
+}
+
+.pbd-btn-icon.pbd-btn-sm {
+  padding: 0.375rem;
+}
+
+.pbd-btn-icon.pbd-btn-sm .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.pbd-btn-icon.pbd-btn-lg {
+  padding: 0.75rem;
+}
+
+.pbd-btn-icon.pbd-btn-lg .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Full width
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-block {
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Loading state - Orbital spin
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.pbd-btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: pbd-spin 0.8s linear infinite;
+  color: inherit;
+  opacity: 0.6;
+}
+
+.pbd-btn-primary.pbd-btn-loading::after {
+  color: white;
+}
+
+@keyframes pbd-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Button groups - Constellation clusters
+   ═══════════════════════════════════════════════════════════════ */
+.pbd-btn-group {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pbd-btn-group-compact {
+  gap: 0.25rem;
+}
+
+/* Attached buttons (no gap) */
+.pbd-btn-group-attached {
+  gap: 0;
+}
+
+.pbd-btn-group-attached .pbd-btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.pbd-btn-group-attached .pbd-btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Dark theme adjustments
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pbd-btn-primary {
+    box-shadow:
+      0 1px 3px rgba(145, 196, 242, 0.3),
+      0 4px 12px rgba(145, 196, 242, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  :root:not([data-theme="light"]) .pbd-btn-primary:hover:not(:disabled) {
+    box-shadow:
+      0 2px 6px rgba(145, 196, 242, 0.35),
+      0 8px 20px rgba(145, 196, 242, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+:root[data-theme="dark"] .pbd-btn-primary {
+  box-shadow:
+    0 1px 3px rgba(145, 196, 242, 0.3),
+    0 4px 12px rgba(145, 196, 242, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+:root[data-theme="dark"] .pbd-btn-primary:hover:not(:disabled) {
+  box-shadow:
+    0 2px 6px rgba(145, 196, 242, 0.35),
+    0 8px 20px rgba(145, 196, 242, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}

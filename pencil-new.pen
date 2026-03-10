@@ -1,0 +1,1121 @@
+{
+  "version": "2.8",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bi8Au",
+      "x": 0,
+      "y": 0,
+      "name": "Pale Blue Dot Branding",
+      "clip": true,
+      "width": 1440,
+      "height": 2400,
+      "fill": "#0f1419",
+      "layout": "vertical",
+      "gap": 80,
+      "padding": [
+        80,
+        120
+      ],
+      "children": [
+        {
+          "type": "text",
+          "id": "ekx3w",
+          "name": "title",
+          "fill": "#e8f0f8",
+          "content": "Pale Blue Dot",
+          "fontFamily": "Space Grotesk",
+          "fontSize": 72,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "CECk4",
+          "name": "subtitle",
+          "fill": "#8a9ba8",
+          "content": "A minimalist workspace inspired by Carl Sagan's pale blue dot",
+          "fontFamily": "Inter",
+          "fontSize": 24,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "text",
+          "id": "tIcno",
+          "name": "quote",
+          "fill": "#91C4F2",
+          "content": "\"Look again at that dot. That's here. That's home. That's us.\" — Carl Sagan",
+          "fontFamily": "Inter",
+          "fontSize": 18,
+          "fontWeight": "normal",
+          "fontStyle": "italic"
+        },
+        {
+          "type": "frame",
+          "id": "k9sze",
+          "name": "Icon Section",
+          "width": "fill_container",
+          "fill": "#1a2332",
+          "cornerRadius": 16,
+          "gap": 60,
+          "padding": [
+            60,
+            80
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "n9B4F",
+              "name": "Icon Preview",
+              "width": 400,
+              "height": 400,
+              "fill": "#0f1419",
+              "cornerRadius": 20,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "YxH7A",
+                  "name": "stars1",
+                  "fill": "#e8f0f8",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "CFMWM",
+                  "name": "stars2",
+                  "fill": "#B3D9FF",
+                  "width": 3,
+                  "height": 3
+                },
+                {
+                  "type": "ellipse",
+                  "id": "9uNtZ",
+                  "name": "stars3",
+                  "fill": "#91C4F2",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "5fYER",
+                  "name": "stars4",
+                  "fill": "#e8f0f8",
+                  "width": 1,
+                  "height": 1
+                },
+                {
+                  "type": "ellipse",
+                  "id": "zNrHt",
+                  "name": "earth",
+                  "fill": "#7BA5D1",
+                  "width": 120,
+                  "height": 120
+                },
+                {
+                  "type": "ellipse",
+                  "id": "Q74SI",
+                  "name": "glow",
+                  "fill": "#7BA5D133",
+                  "width": 140,
+                  "height": 140
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "RTjW9",
+              "name": "Icon Details",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HEFPF",
+                  "name": "iconTitle",
+                  "fill": "#e8f0f8",
+                  "content": "App Icon Concept",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 32,
+                  "fontWeight": "semibold"
+                },
+                {
+                  "type": "text",
+                  "id": "jqjWO",
+                  "name": "iconDesc",
+                  "fill": "#8a9ba8",
+                  "content": "A minimalist icon featuring a pale blue circle representing Earth from space, set against a deep cosmic background. The icon embodies perspective, humility, and the beauty of our fragile home.",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "1881e",
+          "name": "Color Palette",
+          "width": "fill_container",
+          "fill": "#1a2332",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            60,
+            80
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "x0Pzr",
+              "name": "colorTitle",
+              "fill": "#e8f0f8",
+              "content": "Color Palette",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 32,
+              "fontWeight": "semibold"
+            },
+            {
+              "type": "frame",
+              "id": "Dkxv3",
+              "name": "Color Grid",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ikVIy",
+                  "name": "Light Theme",
+                  "width": "fill_container",
+                  "fill": "#fafbfc",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ze4BA",
+                      "name": "lightLabel",
+                      "fill": "#1a2332",
+                      "content": "Light Theme",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 18,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vAkY5",
+                      "name": "Pale Blue",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#7BA5D1",
+                      "cornerRadius": 8,
+                      "padding": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pLCIg",
+                          "name": "paleBlueLabel",
+                          "fill": "#ffffff",
+                          "content": "Pale Blue #7BA5D1",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YfUxD",
+                      "name": "bg1",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#fafbfc",
+                      "cornerRadius": 8,
+                      "padding": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "zZJtr",
+                          "name": "bg1Label",
+                          "fill": "#1a2332",
+                          "content": "Background #fafbfc",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "5KNEB",
+                      "name": "text1",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#1a2332",
+                      "cornerRadius": 8,
+                      "padding": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "qDNzR",
+                          "name": "text1Label",
+                          "fill": "#fafbfc",
+                          "content": "Text Primary #1a2332",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "tQoU8",
+                  "name": "Dark Theme",
+                  "width": "fill_container",
+                  "fill": "#0f1419",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FKfaR",
+                      "name": "darkLabel",
+                      "fill": "#e8f0f8",
+                      "content": "Dark Theme",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 18,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JN3aa",
+                      "name": "paleBlue2",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#91C4F2",
+                      "cornerRadius": 8,
+                      "padding": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uraOg",
+                          "name": "paleBlue2Label",
+                          "fill": "#0f1419",
+                          "content": "Pale Blue #91C4F2",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "848yW",
+                      "name": "bg2",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#0f1419",
+                      "cornerRadius": 8,
+                      "padding": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "TzuK8",
+                          "name": "bg2Label",
+                          "fill": "#e8f0f8",
+                          "content": "Background #0f1419",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "xzERx",
+                      "name": "text2",
+                      "width": "fill_container",
+                      "height": 60,
+                      "fill": "#e8f0f8",
+                      "cornerRadius": 8,
+                      "padding": 16,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xFqOT",
+                          "name": "text2Label",
+                          "fill": "#0f1419",
+                          "content": "Text Primary #e8f0f8",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "OU8Gc",
+          "name": "UI Preview",
+          "width": "fill_container",
+          "fill": "#fafbfc",
+          "cornerRadius": 16,
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            60,
+            80
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "upZaw",
+              "name": "uiTitle",
+              "fill": "#1a2332",
+              "content": "Interface Preview",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 32,
+              "fontWeight": "semibold"
+            },
+            {
+              "type": "text",
+              "id": "8S7Ep",
+              "name": "uiDesc",
+              "fill": "#5a6c7d",
+              "content": "Minimalist, serene workspace with soft pale blues and generous whitespace. Clean typography and atmospheric depth create a contemplative environment.",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "gGuCg",
+              "name": "mockup",
+              "width": "fill_container",
+              "height": 400,
+              "fill": "#ffffff",
+              "cornerRadius": 12,
+              "gap": 24,
+              "padding": 40,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "CEJv8",
+                  "name": "sidebar",
+                  "width": 240,
+                  "height": "fill_container",
+                  "fill": "#f0f4f8",
+                  "cornerRadius": 8,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": [
+                    24,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nU7hD",
+                      "name": "appName",
+                      "fill": "#1a2332",
+                      "content": "Pale Blue Dot",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "adVys",
+                      "name": "nav1",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#7BA5D1",
+                      "cornerRadius": 6,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "6bl1R",
+                          "name": "nav1Text",
+                          "fill": "#ffffff",
+                          "content": "Home",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iex7l",
+                      "name": "nav2",
+                      "width": "fill_container",
+                      "height": 36,
+                      "fill": "#00000000",
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "WzBa2",
+                          "name": "nav2Text",
+                          "fill": "#5a6c7d",
+                          "content": "Pages",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "L9VID",
+                  "name": "content",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#fafbfc",
+                  "cornerRadius": 8,
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 32,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LAkZa",
+                      "name": "pageTitle",
+                      "fill": "#1a2332",
+                      "content": "Welcome",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 28,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "biVN7",
+                      "name": "pageText",
+                      "fill": "#5a6c7d",
+                      "content": "A calm, minimalist workspace for your thoughts and tasks.",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "7BZec",
+      "x": 1600,
+      "y": 0,
+      "name": "Home - Kanban Board",
+      "width": 1440,
+      "height": 900,
+      "fill": "#fafbfc",
+      "children": [
+        {
+          "type": "frame",
+          "id": "saWC3",
+          "name": "Header",
+          "width": "fill_container",
+          "fill": "#ffffff",
+          "gap": 20,
+          "padding": [
+            24,
+            40
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "KlH08",
+              "name": "logoSection",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "y9cB5",
+                  "name": "logoIcon",
+                  "fill": "#7BA5D1",
+                  "width": 32,
+                  "height": 32
+                },
+                {
+                  "type": "text",
+                  "id": "0SzVV",
+                  "name": "logoText",
+                  "fill": "#1a2332",
+                  "content": "Pale Blue Dot",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 18,
+                  "fontWeight": "semibold"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Q1GEN",
+              "name": "headerRight",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "aDReB",
+                  "name": "searchBtn",
+                  "fill": "#f0f4f8",
+                  "cornerRadius": 8,
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vVUhG",
+                      "name": "searchText",
+                      "fill": "#5a6c7d",
+                      "content": "Search",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "fhP6R",
+          "name": "Kanban Area",
+          "width": "fill_container",
+          "height": "fill_container",
+          "gap": 24,
+          "padding": [
+            32,
+            40
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "XusTr",
+              "name": "To Do",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "2wMxv",
+                  "name": "todoHeader",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    0,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PoSrG",
+                      "name": "todoTitle",
+                      "fill": "#1a2332",
+                      "content": "To Do",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "5Nbzt",
+                      "name": "todoCount",
+                      "fill": "#e1e8ed",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "B2vhv",
+                          "name": "todoCountText",
+                          "fill": "#5a6c7d",
+                          "content": "3",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "D0mJx",
+                  "name": "card1",
+                  "width": "fill_container",
+                  "fill": "#ffffff",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "4oO5s",
+                      "name": "card1Title",
+                      "fill": "#1a2332",
+                      "content": "Design new features",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "medium"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Lt2C5",
+                      "name": "card1Tags",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "b7GoC",
+                          "name": "tag1",
+                          "fill": "#7BA5D120",
+                          "cornerRadius": 6,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "UBtSo",
+                              "name": "tag1Text",
+                              "fill": "#5B8AB8",
+                              "content": "design",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "medium"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qZoNm",
+                  "name": "card2",
+                  "width": "fill_container",
+                  "fill": "#ffffff",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "7PtMS",
+                      "name": "card2Title",
+                      "fill": "#1a2332",
+                      "content": "Review documentation",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "medium"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "d1VxZ",
+              "name": "In Progress",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "5MTl9",
+                  "name": "progressHeader",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    0,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "12Egg",
+                      "name": "progressTitle",
+                      "fill": "#1a2332",
+                      "content": "In Progress",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mqLs1",
+                      "name": "progressCount",
+                      "fill": "#e1e8ed",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Mibza",
+                          "name": "progressCountText",
+                          "fill": "#5a6c7d",
+                          "content": "2",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "F6Pf8",
+                  "name": "card3",
+                  "width": "fill_container",
+                  "fill": "#ffffff",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "G32nV",
+                      "name": "card3Title",
+                      "fill": "#1a2332",
+                      "content": "Implement color system",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "medium"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P7S5a",
+              "name": "Done",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WPROB",
+                  "name": "doneHeader",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    0,
+                    8
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "k98WK",
+                      "name": "doneTitle",
+                      "fill": "#1a2332",
+                      "content": "Done",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "semibold"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L0dgZ",
+                      "name": "doneCount",
+                      "fill": "#e1e8ed",
+                      "cornerRadius": 12,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uKUnj",
+                          "name": "doneCountText",
+                          "fill": "#5a6c7d",
+                          "content": "5",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "medium"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "yhum3",
+                  "name": "card4",
+                  "width": "fill_container",
+                  "fill": "#ffffff",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wPzjk",
+                      "name": "card4Title",
+                      "fill": "#1a2332",
+                      "content": "Create branding concept",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "medium"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Os53P",
+      "x": 3200,
+      "y": 0,
+      "name": "PageView - Editor",
+      "width": 1440,
+      "height": 900,
+      "fill": "#ffffff",
+      "children": [
+        {
+          "type": "frame",
+          "id": "itpoB",
+          "name": "Page Header",
+          "width": "fill_container",
+          "fill": "#fafbfc",
+          "gap": 20,
+          "padding": [
+            24,
+            40
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "5afVg",
+              "name": "backBtn",
+              "fill": "#f0f4f8",
+              "cornerRadius": 8,
+              "padding": [
+                8,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "sfsKv",
+                  "name": "backText",
+                  "fill": "#5a6c7d",
+                  "content": "← Back",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "uQUag",
+              "name": "pageActions",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LpufW",
+                  "name": "saveBtn",
+                  "fill": "#7BA5D1",
+                  "cornerRadius": 8,
+                  "padding": [
+                    10,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "QbYPQ",
+                      "name": "saveBtnText",
+                      "fill": "#ffffff",
+                      "content": "Save",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "medium"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "3UdoC",
+          "name": "Editor Area",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            60,
+            120
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "YxRzY",
+              "name": "pageTitle",
+              "fill": "#1a2332",
+              "content": "Welcome to Pale Blue Dot",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 40,
+              "fontWeight": "semibold"
+            },
+            {
+              "type": "frame",
+              "id": "VLBH0",
+              "name": "pageMeta",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yLwnl",
+                  "name": "metaTag",
+                  "fill": "#7BA5D120",
+                  "cornerRadius": 6,
+                  "padding": [
+                    6,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XQafK",
+                      "name": "metaTagText",
+                      "fill": "#5B8AB8",
+                      "content": "project",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "medium"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "bI391",
+              "name": "contentText",
+              "fill": "#5a6c7d",
+              "content": "A minimalist workspace inspired by Carl Sagan's pale blue dot philosophy. This application helps you organize your thoughts and tasks with serenity and perspective.",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "IN8Yj",
+              "name": "quoteLine",
+              "width": "fill_container",
+              "fill": "#f0f4f8",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                24
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Tl16F",
+                  "name": "quoteText",
+                  "fill": "#1a2332",
+                  "content": "\"Look again at that dot. That's here. That's home. That's us.\"",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "normal",
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "text",
+                  "id": "qTlry",
+                  "name": "quoteAuthor",
+                  "fill": "#7BA5D1",
+                  "content": "— Carl Sagan",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "medium"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

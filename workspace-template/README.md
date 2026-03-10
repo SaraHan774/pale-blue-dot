@@ -1,6 +1,6 @@
 # Workspace Template
 
-This is a sample workspace structure to help you get started with My Kanban.
+This is a sample workspace structure to help you get started with Pale Blue Dot.
 
 ## How to Use
 

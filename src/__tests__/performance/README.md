@@ -1,6 +1,6 @@
 # Performance Benchmark Suite
 
-Comprehensive benchmarks for measuring the performance impact of architectural improvements in My Kanban.
+Comprehensive benchmarks for measuring the performance impact of architectural improvements in Pale Blue Dot.
 
 ## 🎯 Purpose
 

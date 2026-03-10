@@ -23,7 +23,7 @@ This skill handles the complete release process: git checks, build validation, v
 Run these commands in sequence:
 
 ```bash
-cd /Users/gahee/my-kanban && git status
+cd /Users/gahee/pale-blue-dot && git status
 ```
 
 **Check for:**
@@ -32,7 +32,7 @@ cd /Users/gahee/my-kanban && git status
 - ✅ Up to date with origin (no unpushed commits warning is OK)
 
 ```bash
-cd /Users/gahee/my-kanban && git log --oneline -3
+cd /Users/gahee/pale-blue-dot && git log --oneline -3
 ```
 
 Show recent commits for context.
@@ -48,7 +48,7 @@ Show recent commits for context.
 Run the build command:
 
 ```bash
-cd /Users/gahee/my-kanban && npm run build
+cd /Users/gahee/pale-blue-dot && npm run build
 ```
 
 **Wait for completion** and check the exit code.
@@ -76,21 +76,23 @@ Ask the user: "What version number for this release? (e.g., 0.5.3)"
 
 **After user provides version:**
 
-1. Read current package.json:
+1. Read current versions:
 ```bash
-cd /Users/gahee/my-kanban && cat package.json | grep '"version"'
+cd /Users/gahee/pale-blue-dot && cat package.json | grep '"version"' && cat src-tauri/Cargo.toml | grep '^version'
 ```
 
-2. Update package.json with new version:
+2. Update **both** package.json and Cargo.toml with new version:
 - Use Edit tool to replace version in package.json
-- Change `"version": "X.Y.Z"` to `"version": "[USER_PROVIDED_VERSION]"`
+  - Change `"version": "X.Y.Z"` to `"version": "[USER_PROVIDED_VERSION]"`
+- Use Edit tool to replace version in src-tauri/Cargo.toml
+  - Change `version = "X.Y.Z"` to `version = "[USER_PROVIDED_VERSION]"`
 
-3. Confirm the change:
+3. Confirm the changes:
 ```bash
-cd /Users/gahee/my-kanban && git diff package.json
+cd /Users/gahee/pale-blue-dot && git diff package.json src-tauri/Cargo.toml
 ```
 
-Show the diff to user and ask: "Version updated to [VERSION]. Proceed with commit and tag?"
+Show the diff to user and ask: "Version updated to [VERSION] in both package.json and Cargo.toml. Proceed with commit and tag?"
 
 **If user says no:** Stop here and exit
 **If user says yes:** Continue to Step 4
@@ -100,11 +102,11 @@ Show the diff to user and ask: "Version updated to [VERSION]. Proceed with commi
 Run these commands in sequence:
 
 ```bash
-cd /Users/gahee/my-kanban && git add package.json
+cd /Users/gahee/pale-blue-dot && git add package.json src-tauri/Cargo.toml
 ```
 
 ```bash
-cd /Users/gahee/my-kanban && git commit -m "$(cat <<'EOF'
+cd /Users/gahee/pale-blue-dot && git commit -m "$(cat <<'EOF'
 chore: bump version to [VERSION]
 
 Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
@@ -113,11 +115,11 @@ EOF
 ```
 
 ```bash
-cd /Users/gahee/my-kanban && git tag v[VERSION]
+cd /Users/gahee/pale-blue-dot && git tag v[VERSION]
 ```
 
 ```bash
-cd /Users/gahee/my-kanban && git log --oneline -1
+cd /Users/gahee/pale-blue-dot && git log --oneline -1
 ```
 
 Show the commit and confirm tag was created.
@@ -132,7 +134,7 @@ Ask user: "Ready to push and trigger release workflow? This will:
 **If user confirms YES:**
 
 ```bash
-cd /Users/gahee/my-kanban && git push && git push origin v[VERSION]
+cd /Users/gahee/pale-blue-dot && git push && git push origin v[VERSION]
 ```
 
 Show push output and confirm both succeeded.
@@ -152,10 +154,10 @@ After successful push, show this checklist:
 📋 Deployment Checklist:
 
 1. Monitor GitHub Actions:
-   https://github.com/SaraHan774/my-kanban/actions
+   https://github.com/SaraHan774/pale-blue-dot/actions
 
 2. Verify GitHub Secrets are configured (required for Firebase deployment):
-   https://github.com/SaraHan774/my-kanban/settings/secrets/actions
+   https://github.com/SaraHan774/pale-blue-dot/settings/secrets/actions
 
    Required secrets:
    - VITE_FIREBASE_API_KEY
@@ -174,13 +176,13 @@ After successful push, show this checklist:
    ✓ Publish GitHub Release
 
 4. After deployment:
-   - Desktop apps: https://github.com/SaraHan774/my-kanban/releases
+   - Desktop apps: https://github.com/SaraHan774/pale-blue-dot/releases
    - Web app: https://mykanban-5beb2.web.app
 ```
 
 ## Key Rules
 
-- **Always use absolute paths**: `/Users/gahee/my-kanban`
+- **Always use absolute paths**: `/Users/gahee/pale-blue-dot`
 - **Stop on build errors**: Never proceed past failed builds
 - **Ask before destructive operations**: Confirm before pushing
 - **Show full error context**: File paths, line numbers, error messages

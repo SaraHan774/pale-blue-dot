@@ -83,7 +83,8 @@ const DEFAULT_SETTINGS: KanbanSettings = {
   boardDensity: 'normal',
   boardView: 'kanban',
   sidebarWidth: 280,
-  highlightColors: ['#FFEB3B', '#C5E1A5', '#90CAF9', '#FFCC80', '#F48FB1'],
+  // Pale Blue Dot theme highlights - soft, contemplative colors that work in both light and dark modes
+  highlightColors: ['#A8C5E0', '#F5D98B', '#D4C5F0', '#C5DFB4', '#F5BDB5'],
   pageWidth: 'narrow',
   useWYSIWYG: false, // Default to old editor (safe rollout)
 };

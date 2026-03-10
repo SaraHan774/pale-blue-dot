@@ -1,15 +1,15 @@
-# My Kanban MCP 서버 설정 가이드
+# Pale Blue Dot MCP 서버 설정 가이드
 
 ## 🎯 목표
 
-Claude가 My Kanban 앱의 마크다운 파일을 직접 읽고 하이라이트와 메모를 추가/수정/삭제할 수 있게 합니다.
+Claude가 Pale Blue Dot 앱의 마크다운 파일을 직접 읽고 하이라이트와 메모를 추가/수정/삭제할 수 있게 합니다.
 
 ## 📋 설치 단계
 
 ### 1. 의존성 설치 (완료됨 ✅)
 
 ```bash
-cd /Users/gahee/my-kanban/mcp-kanban-server
+cd /Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server
 npm install
 npm run build
 ```
@@ -33,13 +33,13 @@ Claude Desktop 설정 파일 경로:
     "existing-server": {
       ...
     },
-    "my-kanban": {
+    "pale-blue-dot": {
       "command": "node",
       "args": [
-        "/Users/gahee/my-kanban/mcp-kanban-server/dist/index.js"
+        "/Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server/dist/index.js"
       ],
       "env": {
-        "KANBAN_WORKSPACE": "/Users/gahee/my-kanban/workspace"
+        "PALE_BLUE_DOT_WORKSPACE": "/Users/gahee/pale-blue-dot/workspace"
       }
     }
   }
@@ -51,13 +51,13 @@ Claude Desktop 설정 파일 경로:
 ```json
 {
   "mcpServers": {
-    "my-kanban": {
+    "pale-blue-dot": {
       "command": "node",
       "args": [
-        "/Users/gahee/my-kanban/mcp-kanban-server/dist/index.js"
+        "/Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server/dist/index.js"
       ],
       "env": {
-        "KANBAN_WORKSPACE": "/Users/gahee/my-kanban/workspace"
+        "PALE_BLUE_DOT_WORKSPACE": "/Users/gahee/pale-blue-dot/workspace"
       }
     }
   }
@@ -171,10 +171,10 @@ Claude Desktop에서:
 
 ```bash
 # workspace 폴더가 존재하는지 확인
-ls -la /Users/gahee/my-kanban/workspace
+ls -la /Users/gahee/pale-blue-dot/workspace
 
 # 마크다운 파일 확인
-ls /Users/gahee/my-kanban/workspace/*.md
+ls /Users/gahee/pale-blue-dot/workspace/*.md
 ```
 
 ## 📝 테스트 페이지 만들기
@@ -182,7 +182,7 @@ ls /Users/gahee/my-kanban/workspace/*.md
 테스트용 샘플 페이지 생성:
 
 ```bash
-cat > /Users/gahee/my-kanban/workspace/Test.md << 'EOF'
+cat > /Users/gahee/pale-blue-dot/workspace/Test.md << 'EOF'
 ---
 id: test-123
 title: Test Page
@@ -211,14 +211,14 @@ EOF
 
 ## 🎉 완료!
 
-이제 Claude가 My Kanban 앱의 하이라이트와 메모를 직접 관리할 수 있습니다!
+이제 Claude가 Pale Blue Dot 앱의 하이라이트와 메모를 직접 관리할 수 있습니다!
 
 ### 다음 단계:
 
-1. ✅ Chrome에서 My Kanban 앱 열기
+1. ✅ Chrome에서 Pale Blue Dot 앱 열기
 2. ✅ Claude에게 페이지 분석 요청
 3. ✅ Claude가 중요한 부분에 자동으로 하이라이트 추가
 4. ✅ Claude가 하이라이트에 메모 남기기
-5. ✅ My Kanban 앱에서 결과 확인
+5. ✅ Pale Blue Dot 앱에서 결과 확인
 
 즐거운 생산성 향상 되세요! 🚀

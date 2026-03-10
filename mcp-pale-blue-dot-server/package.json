@@ -1,14 +1,14 @@
 {
-  "name": "mcp-kanban-server",
+  "name": "mcp-pale-blue-dot-server",
   "version": "1.0.0",
-  "description": "MCP server for My Kanban highlights and memos",
+  "description": "MCP server for Pale Blue Dot highlights and memos",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "mcp-kanban-server": "./dist/index.js"
+    "mcp-pale-blue-dot-server": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc && cp dist/mcp-kanban-server/src/index.js dist/index.js",
+    "build": "tsc && cp dist/mcp-pale-blue-dot-server/src/index.js dist/index.js",
     "watch": "tsc --watch",
     "dev": "npm run build && node dist/index.js"
   },

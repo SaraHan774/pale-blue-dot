@@ -2154,26 +2154,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "my-kanban"
-version = "0.7.1"
-dependencies = [
- "notify",
- "notify-debouncer-full",
- "portable-pty",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-opener",
- "unicode-normalization",
- "uuid",
- "wait-timeout",
- "which",
-]
-
-[[package]]
 name = "ndk"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2543,6 +2523,26 @@ checksum = "9aa2b01e1d916879f73a53d01d1d6cee68adbb31d6d9177a8cfce093cced1d50"
 dependencies = [
  "futures-core",
  "pin-project-lite",
+]
+
+[[package]]
+name = "pale-blue-dot"
+version = "0.7.2"
+dependencies = [
+ "notify",
+ "notify-debouncer-full",
+ "portable-pty",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-opener",
+ "unicode-normalization",
+ "uuid",
+ "wait-timeout",
+ "which",
 ]
 
 [[package]]

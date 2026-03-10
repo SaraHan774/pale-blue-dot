@@ -1,10 +1,12 @@
-# My Kanban
+# Pale Blue Dot 🌍
 
-로컬 파일 기반 칸반 보드 + 노션 스타일 페이지 에디터.
-모든 데이터는 마크다운 파일로 저장되어 git 추적이 가능하고, 데이터 소유권이 온전히 사용자에게 있습니다.
+A contemplative, local file-based knowledge manager inspired by Carl Sagan's Pale Blue Dot.
+Combines kanban workflow with Notion-style pages — serene, minimal, and fully yours.
 
-A local, file-based Kanban board with Notion-style pages.
-All data is stored as markdown files — git-trackable and fully yours.
+Carl Sagan의 Pale Blue Dot에서 영감을 받은 로컬 파일 기반 지식 관리자.
+칸반 워크플로우 + 노션 스타일 페이지 — 고요하고, 미니멀하며, 온전히 당신의 것입니다.
+
+**PWA (Browser)** | **Desktop (Tauri v2 — macOS, Windows, Linux)**
 
 **PWA (Browser)** | **Desktop (Tauri v2 — macOS, Windows, Linux)**
 
@@ -49,7 +51,7 @@ All data is stored as markdown files — git-trackable and fully yours.
 
 ### MCP Server / MCP 서버
 - **MCP 도구 지원** — AI 에이전트가 페이지 CRUD, 하이라이트, 메모를 직접 조작 가능
-- `mcp-kanban-server/` — 별도 MCP 서버 패키지 포함
+- `mcp-pale-blue-dot-server/` — 별도 MCP 서버 패키지 포함
 
 ---
 
@@ -107,7 +109,7 @@ memos:
 ## Getting Started / 시작하기
 
 ### Download / 다운로드
-[Releases](https://github.com/SaraHan774/my-kanban/releases)에서 플랫폼별 데스크톱 앱 다운로드.
+[Releases](https://github.com/SaraHan774/pale-blue-dot/releases)에서 플랫폼별 데스크톱 앱 다운로드.
 
 ### Web / 웹
 https://mykanban-5beb2.web.app
