@@ -25,7 +25,7 @@ Claude Desktop 설정 파일 경로:
 
 #### 기존 설정이 있는 경우:
 
-기존 `mcpServers` 객체에 `my-kanban` 추가:
+기존 `mcpServers` 객체에 `pbd` 추가:
 
 ```json
 {
@@ -33,7 +33,7 @@ Claude Desktop 설정 파일 경로:
     "existing-server": {
       ...
     },
-    "pale-blue-dot": {
+    "pbd": {
       "command": "node",
       "args": [
         "/Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server/dist/index.js"
@@ -51,7 +51,7 @@ Claude Desktop 설정 파일 경로:
 ```json
 {
   "mcpServers": {
-    "pale-blue-dot": {
+    "pbd": {
       "command": "node",
       "args": [
         "/Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server/dist/index.js"

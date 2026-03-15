@@ -45,7 +45,7 @@ npm run build
 ```json
 {
   "mcpServers": {
-    "pale-blue-dot": {
+    "pbd": {
       "command": "node",
       "args": [
         "/Users/gahee/pale-blue-dot/mcp-pale-blue-dot-server/dist/index.js"
