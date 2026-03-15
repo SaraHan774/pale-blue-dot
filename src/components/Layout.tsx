@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Toast } from './Toast';
+import { PaleBlueDotLogo } from './PaleBlueDotLogo';
 import { useStore } from '@/store/useStore';
 import { fileSystemService } from '@/services';
 import './Layout.css';
@@ -168,9 +169,8 @@ export function Layout() {
               ☰
             </button>
           )}
-          <Link to="/" className="home-button">
-            <span className="material-symbols-outlined">home</span>
-            HOME
+          <Link to="/" className="home-button" title="Home">
+            <PaleBlueDotLogo size={24} />
           </Link>
           <div className="top-bar-spacer" />
           <Link to="/settings" className="settings-button" title="Settings">

@@ -121,15 +121,51 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TAG FILTERS - Compact Pills
+   TAG FILTERS - Collapsible Section
    ═══════════════════════════════════════════════════════════════ */
+
+.sidebar-tag-section {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tag-filter-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: 'Inter', var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.tag-filter-toggle:hover {
+  background-color: color-mix(in srgb, var(--accent-primary) 5%, transparent);
+  color: var(--text-primary);
+}
+
+.tag-filter-toggle .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.tag-filter-toggle .active-count {
+  margin-left: auto;
+  color: var(--accent-primary);
+  font-weight: 600;
+}
 
 .sidebar-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border-color);
+  padding-top: 0;
 }
 
 .filter-tag {

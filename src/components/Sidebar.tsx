@@ -25,6 +25,7 @@ export function Sidebar() {
   const [debouncedSearchText, setDebouncedSearchText] = useState(activeFilters.searchText);
   const [isResizing, setIsResizing] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_BATCH_SIZE);
+  const [showTagFilters, setShowTagFilters] = useState(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -313,9 +314,6 @@ export function Sidebar() {
   return (
     <aside className="sidebar" style={{ width: `${sidebarWidth}px` }}>
       <div className="sidebar-header">
-        <Link to="/" className="sidebar-title" replace>
-          <PaleBlueDotLogo size={28} showText={false} />
-        </Link>
         <div className="sidebar-header-actions">
           <button
             className="btn-icon"
@@ -356,30 +354,46 @@ export function Sidebar() {
       </div>
 
       {allTags.length > 0 && (
-        <div className="sidebar-tags">
-          {allTags.map((tag) => {
-            const isActive = activeFilters.tags.includes(tag);
-            const color = getColColor(tag);
-            return (
-              <button
-                key={tag}
-                className={`filter-tag ${isActive ? 'active' : ''}`}
-                onClick={() => toggleTag(tag)}
-                style={isActive
-                  ? { backgroundColor: color, color: 'white', borderColor: 'transparent' }
-                  : { borderColor: color, color: color }}
-              >
-                {tag}
-              </button>
-            );
-          })}
-          {activeFilters.tags.length > 0 && (
-            <button
-              className="filter-tag clear-tag"
-              onClick={() => setActiveFilters({ ...activeFilters, tags: [] })}
-            >
-              clear
-            </button>
+        <div className="sidebar-tag-section">
+          <button
+            className="tag-filter-toggle"
+            onClick={() => setShowTagFilters(!showTagFilters)}
+          >
+            <span className="material-symbols-outlined">
+              {showTagFilters ? 'expand_less' : 'expand_more'}
+            </span>
+            <span>Tag Filters</span>
+            {activeFilters.tags.length > 0 && (
+              <span className="active-count">({activeFilters.tags.length})</span>
+            )}
+          </button>
+          {showTagFilters && (
+            <div className="sidebar-tags">
+              {allTags.map((tag) => {
+                const isActive = activeFilters.tags.includes(tag);
+                const color = getColColor(tag);
+                return (
+                  <button
+                    key={tag}
+                    className={`filter-tag ${isActive ? 'active' : ''}`}
+                    onClick={() => toggleTag(tag)}
+                    style={isActive
+                      ? { backgroundColor: color, color: 'white', borderColor: 'transparent' }
+                      : { borderColor: color, color: color }}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+              {activeFilters.tags.length > 0 && (
+                <button
+                  className="filter-tag clear-tag"
+                  onClick={() => setActiveFilters({ ...activeFilters, tags: [] })}
+                >
+                  clear
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}

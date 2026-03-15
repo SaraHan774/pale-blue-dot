@@ -123,6 +123,16 @@ export const HighlightMark = Mark.create<HighlightMarkOptions>({
     const style = HTMLAttributes['data-highlight-style'] || 'highlight';
     const color = HTMLAttributes['data-highlight-color'] || '#FFEB3B';
 
+    // Helper function to calculate brightness of a color
+    const getBrightness = (hexColor: string): number => {
+      const hex = hexColor.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      // Calculate perceived brightness (0-255)
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    };
+
     // Apply style based on highlight type
     let bgColor = color;
     let textColor = 'inherit';
@@ -131,6 +141,13 @@ export const HighlightMark = Mark.create<HighlightMarkOptions>({
     if (style === 'underline') {
       bgColor = 'transparent';
       textDecoration = `underline ${color} 2px`;
+    } else {
+      // For highlight style, check if color is bright and adjust text color
+      const brightness = getBrightness(color);
+      // If brightness > 180, use dark text for better contrast
+      if (brightness > 180) {
+        textColor = '#1a1a1a'; // Dark text for bright backgrounds
+      }
     }
 
     return [

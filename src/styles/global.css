@@ -375,6 +375,30 @@ input:focus, textarea:focus {
   outline-offset: 2px;
 }
 
+/* Dark mode highlight adjustments - ensure text is readable on bright backgrounds */
+:root[data-theme="dark"] mark.highlight-mark[data-highlight-style="highlight"] {
+  /* Default: use dark text for all highlight backgrounds in dark mode */
+  /* Most highlight colors are bright, so this provides better contrast */
+  color: #1a1a1a !important;
+}
+
+/* Exceptions: dark highlight colors that need light text in dark mode */
+:root[data-theme="dark"] mark[data-highlight-color="#ef4444"],
+:root[data-theme="dark"] mark[data-highlight-color="#dc2626"],
+:root[data-theme="dark"] mark[data-highlight-color="#991b1b"],
+:root[data-theme="dark"] mark[data-highlight-color="#8b5cf6"],
+:root[data-theme="dark"] mark[data-highlight-color="#7c3aed"],
+:root[data-theme="dark"] mark[data-highlight-color="#6d28d9"],
+:root[data-theme="dark"] mark[data-highlight-color="#3b82f6"],
+:root[data-theme="dark"] mark[data-highlight-color="#2563eb"],
+:root[data-theme="dark"] mark[data-highlight-color="#1d4ed8"],
+:root[data-theme="dark"] mark[data-highlight-color="#ec4899"],
+:root[data-theme="dark"] mark[data-highlight-color="#db2777"],
+:root[data-theme="dark"] mark[data-highlight-color="#be185d"] {
+  /* Use light text for dark highlights */
+  color: #e8f0f8 !important;
+}
+
 /* Utility classes */
 .container {
   max-width: 1200px;
