@@ -13,6 +13,8 @@ import { useHighlightManager } from '@/hooks/useHighlightManager';
 import { openExternalUrl } from '@/lib/openExternal';
 import './PageView.css';
 
+const isTauri = '__TAURI_INTERNALS__' in window;
+
 const DEFAULT_PALETTE = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export function PageView() {
@@ -310,6 +312,260 @@ export function PageView() {
     } catch { showToast('Failed to copy link', 'error'); }
   };
 
+  const handleExportPDF = async () => {
+    console.log('Export PDF clicked, isTauri:', isTauri);
+
+    if (isTauri) {
+      // Desktop app - use html2pdf.js to generate PDF
+      try {
+        showToast('Generating PDF...', 'info');
+
+        const html2pdf = (await import('html2pdf.js')).default;
+
+        // Create a temporary container with all content
+        const printContainer = document.createElement('div');
+        printContainer.style.cssText = `
+          padding: 20px;
+          background-color: #ffffff;
+          font-family: Pretendard, -apple-system, sans-serif;
+          color: #111827;
+          line-height: 1.5;
+          max-width: 800px;
+        `;
+
+        // Add title
+        const titleEl = document.createElement('h1');
+        titleEl.textContent = page?.title || 'Untitled';
+        titleEl.style.cssText = `
+          font-size: 22px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          color: #000000;
+          font-family: 'Space Grotesk', 'Inter', sans-serif;
+          line-height: 1.2;
+        `;
+        printContainer.appendChild(titleEl);
+
+        // Add metadata section
+        const metaEl = document.createElement('div');
+        metaEl.style.cssText = `
+          background-color: #f3f4f6;
+          padding: 10px;
+          border-radius: 6px;
+          margin-bottom: 16px;
+          font-size: 11px;
+          color: #374151;
+          border: 1px solid #d1d5db;
+        `;
+
+        if (page) {
+          const metadata = [];
+          if (page.kanbanColumn) metadata.push(`<div style="margin-bottom: 4px;"><strong style="color: #000000;">Column:</strong> ${page.kanbanColumn}</div>`);
+          if (page.tags.length > 0) metadata.push(`<div style="margin-bottom: 4px;"><strong style="color: #000000;">Tags:</strong> ${page.tags.join(', ')}</div>`);
+          if (page.dueDate) metadata.push(`<div style="margin-bottom: 4px;"><strong style="color: #000000;">Due Date:</strong> ${new Date(page.dueDate).toLocaleDateString()}</div>`);
+          metadata.push(`<div style="margin-bottom: 4px;"><strong style="color: #000000;">Created:</strong> ${new Date(page.createdAt).toLocaleString()}</div>`);
+          metadata.push(`<div><strong style="color: #000000;">Updated:</strong> ${new Date(page.updatedAt).toLocaleString()}</div>`);
+          metaEl.innerHTML = metadata.join('');
+        }
+        printContainer.appendChild(metaEl);
+
+        // Add content
+        const contentEl = editorContainerRef.current?.querySelector('.ProseMirror');
+        if (contentEl) {
+          const contentClone = contentEl.cloneNode(true) as HTMLElement;
+
+          // Force light theme colors for all text elements
+          const allElements = contentClone.querySelectorAll('*');
+          allElements.forEach((el) => {
+            const element = el as HTMLElement;
+            // Reset colors to light theme
+            if (element.style.color && element.style.color.includes('rgb')) {
+              element.style.color = '#111827';
+            }
+            // Fix backgrounds
+            if (element.style.backgroundColor) {
+              const bgColor = element.style.backgroundColor;
+              if (bgColor.includes('var(--') || bgColor === 'transparent') {
+                element.style.backgroundColor = '#ffffff';
+              }
+            }
+          });
+
+          // Style the content container
+          contentClone.style.cssText = `
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #111827;
+            background-color: #ffffff;
+            font-family: Pretendard, -apple-system, sans-serif;
+          `;
+
+          // Style headings - prevent page break right after heading
+          contentClone.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((h) => {
+            (h as HTMLElement).style.color = '#111827';
+            (h as HTMLElement).style.marginTop = '16px';
+            (h as HTMLElement).style.marginBottom = '8px';
+            (h as HTMLElement).style.fontWeight = '700';
+            (h as HTMLElement).style.pageBreakAfter = 'avoid'; // Keep heading with next content
+          });
+
+          // Style paragraphs - allow natural breaking, just avoid orphans/widows
+          contentClone.querySelectorAll('p').forEach((p) => {
+            (p as HTMLElement).style.color = '#374151';
+            (p as HTMLElement).style.marginBottom = '8px';
+            (p as HTMLElement).style.orphans = '2';
+            (p as HTMLElement).style.widows = '2';
+          });
+
+          // Style lists - allow natural breaking
+          contentClone.querySelectorAll('li').forEach((li) => {
+            (li as HTMLElement).style.color = '#374151';
+            (li as HTMLElement).style.marginBottom = '3px';
+          });
+
+          // Style code blocks - avoid breaking only for short code
+          contentClone.querySelectorAll('pre').forEach((pre) => {
+            const preEl = pre as HTMLElement;
+            const lineCount = (preEl.textContent?.split('\n').length || 0);
+            const avoidBreak = lineCount <= 15; // Only avoid breaking for short code (15 lines or less)
+
+            preEl.style.cssText = `
+              background-color: #f3f4f6;
+              border: 1px solid #e5e7eb;
+              padding: 8px;
+              border-radius: 3px;
+              overflow-x: auto;
+              margin: 10px 0;
+              font-size: 9pt;
+              font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
+              ${avoidBreak ? 'page-break-inside: avoid; break-inside: avoid;' : ''}
+            `;
+          });
+
+          contentClone.querySelectorAll('code').forEach((code) => {
+            const codeEl = code as HTMLElement;
+            if (!codeEl.parentElement?.matches('pre')) {
+              codeEl.style.cssText = `
+                background-color: #f3f4f6;
+                padding: 1px 4px;
+                border-radius: 2px;
+                font-size: 9pt;
+                color: #111827;
+                font-family: 'Fira Code', 'Monaco', 'Courier New', monospace;
+              `;
+            } else {
+              codeEl.style.color = '#111827';
+              codeEl.style.fontFamily = "'Fira Code', 'Monaco', 'Courier New', monospace";
+            }
+          });
+
+          // Style blockquotes - allow natural breaking
+          contentClone.querySelectorAll('blockquote').forEach((bq) => {
+            (bq as HTMLElement).style.cssText = `
+              border-left: 2px solid #d1d5db;
+              padding-left: 12px;
+              margin-left: 0;
+              color: #6b7280;
+              font-style: italic;
+              margin: 10px 0;
+            `;
+          });
+
+          // Style links
+          contentClone.querySelectorAll('a').forEach((a) => {
+            (a as HTMLElement).style.color = '#2563eb';
+            (a as HTMLElement).style.textDecoration = 'underline';
+          });
+
+          // Preserve highlight marks but ensure text is readable
+          contentClone.querySelectorAll('mark').forEach((mark) => {
+            const markEl = mark as HTMLElement;
+            const bgColor = markEl.style.backgroundColor;
+            // Ensure text is dark on light highlights
+            markEl.style.color = '#111827';
+            // If no background color set, use default yellow
+            if (!bgColor || bgColor === 'transparent') {
+              markEl.style.backgroundColor = '#fef3c7';
+            }
+          });
+
+          // Style tables - avoid breaking only for small tables
+          contentClone.querySelectorAll('table').forEach((table) => {
+            const rowCount = table.querySelectorAll('tr').length;
+            if (rowCount <= 10) {
+              (table as HTMLElement).style.pageBreakInside = 'avoid';
+              (table as HTMLElement).style.breakInside = 'avoid';
+            }
+          });
+
+          // Style images - keep with following content
+          contentClone.querySelectorAll('img').forEach((img) => {
+            (img as HTMLElement).style.pageBreakInside = 'avoid';
+            (img as HTMLElement).style.breakInside = 'avoid';
+          });
+
+          printContainer.appendChild(contentClone);
+        }
+
+        // Generate PDF - Medium quality, compact layout
+        const opt = {
+          margin: 10,
+          filename: `${page?.title || 'document'}.pdf`,
+          image: { type: 'jpeg', quality: 0.85 },
+          html2canvas: {
+            scale: 1.5,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        };
+
+        // Generate PDF as blob
+        const pdfBlob = await html2pdf().set(opt).from(printContainer).output('blob');
+
+        // Use Tauri dialog to select save location
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        const filePath = await save({
+          defaultPath: `${page?.title || 'document'}.pdf`,
+          filters: [{
+            name: 'PDF',
+            extensions: ['pdf']
+          }]
+        });
+
+        if (!filePath) {
+          showToast('PDF export cancelled', 'info');
+          return;
+        }
+
+        // Convert blob to Uint8Array
+        const arrayBuffer = await pdfBlob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        // Write to file using Tauri FS
+        const { writeFile } = await import('@tauri-apps/plugin-fs');
+        await writeFile(filePath, uint8Array);
+
+        showToast(`PDF saved to ${filePath.split('/').pop()}`, 'success');
+      } catch (error) {
+        console.error('PDF generation failed:', error);
+        showToast('Failed to generate PDF', 'error');
+      }
+    } else {
+      // Browser - use window.print()
+      try {
+        window.print();
+        setTimeout(() => {
+          showToast('Select "Save as PDF" in the print dialog', 'info');
+        }, 100);
+      } catch (error) {
+        console.error('Print failed:', error);
+        showToast('Failed to open print dialog', 'error');
+      }
+    }
+  };
+
   // ── ToC click ─────────────────────────────────────────────────────
   const handleTocClick = useCallback((headingId: string) => {
     const element = document.getElementById(headingId);
@@ -530,6 +786,10 @@ export function PageView() {
                         <button className="page-menu-item" onClick={() => { setShowTerminal(!showTerminal); setShowPageMenu(false); }}>
                           <span className="material-symbols-outlined">terminal</span>
                           {showTerminal ? 'Hide Terminal' : 'Show Terminal'}
+                        </button>
+                        <button className="page-menu-item" onClick={() => { handleExportPDF(); setShowPageMenu(false); }}>
+                          <span className="material-symbols-outlined">picture_as_pdf</span>
+                          Export PDF
                         </button>
                         <div className="page-menu-divider"></div>
                         <button className="page-menu-item page-menu-item-danger" onClick={() => { setShowPageMenu(false); handleDelete(); }}>

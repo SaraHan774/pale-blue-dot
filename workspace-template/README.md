@@ -1,5 +1,7 @@
 # Workspace Template
 
+⚠️ **OUTDATED**: This template uses the old folder-based structure (`folder/index.md`). The current app uses single-file structure (`Page.md`). This template is kept for reference and will be updated in a future release. Use the app's built-in "Create Page" feature to create pages in the new format.
+
 This is a sample workspace structure to help you get started with Pale Blue Dot.
 
 ## How to Use

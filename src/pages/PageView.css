@@ -1180,3 +1180,346 @@ mark.highlight.highlight-flash {
     transform: translateX(0);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLES - Clean Document Output
+   ═══════════════════════════════════════════════════════════════ */
+
+@media print {
+  /* Hide all UI elements */
+  .page-header,
+  .page-actions-bar,
+  .page-actions,
+  .page-menu-container,
+  .page-menu-dropdown,
+  .scroll-to-top,
+  .memo-panel-wrapper,
+  .memo-resize-handle,
+  .terminal-container,
+  .toc-panel,
+  button,
+  .btn,
+  .btn-icon {
+    display: none !important;
+  }
+
+  /* Reset page layout for print */
+  .page-view-container,
+  .page-view {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+
+  .page-content-layout {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .document-view {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Print header with metadata */
+  .page-header-content {
+    display: block !important;
+    padding: 2rem 0 1.5rem 0 !important;
+    border-bottom: 2px solid #e5e7eb !important;
+    margin-bottom: 2rem !important;
+    page-break-after: avoid !important;
+  }
+
+  .editor-meta {
+    display: block !important;
+  }
+
+  /* Title */
+  .editor-title-input {
+    display: block !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    padding: 0 !important;
+    margin-bottom: 1rem !important;
+    resize: none !important;
+    font-family: 'Space Grotesk', -apple-system, sans-serif !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Metadata properties */
+  .editor-props {
+    display: block !important;
+    background: #f9fafb !important;
+    padding: 1rem !important;
+    border-radius: 8px !important;
+    margin-top: 1rem !important;
+  }
+
+  .editor-prop-row {
+    display: flex !important;
+    align-items: center !important;
+    padding: 0.5rem 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    font-size: 0.875rem !important;
+  }
+
+  .editor-prop-row:last-child {
+    border-bottom: none !important;
+  }
+
+  .editor-prop-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    min-width: 120px !important;
+  }
+
+  .editor-prop-label .material-symbols-outlined {
+    font-size: 1rem !important;
+  }
+
+  .editor-prop-value {
+    flex: 1 !important;
+    color: #111827 !important;
+  }
+
+  .editor-prop-static {
+    color: #111827 !important;
+  }
+
+  /* Column chip */
+  .selected-column-chip {
+    display: inline-block !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+  }
+
+  .chip-remove {
+    display: none !important;
+  }
+
+  /* Tags */
+  .page-tags-section {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .page-tag {
+    display: inline-block !important;
+    background: #e5e7eb !important;
+    color: #374151 !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 4px !important;
+    font-size: 0.875rem !important;
+  }
+
+  .tag-remove-btn {
+    display: none !important;
+  }
+
+  .tag-input-wrapper {
+    display: none !important;
+  }
+
+  /* Column selector */
+  .column-selector {
+    display: inline-block !important;
+  }
+
+  .column-selector-display {
+    pointer-events: none !important;
+  }
+
+  .column-dropdown,
+  .column-placeholder {
+    display: none !important;
+  }
+
+  /* Date input - show value only */
+  input[type="date"] {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    font-size: inherit !important;
+    color: #111827 !important;
+  }
+
+  /* Content */
+  .ProseMirror {
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+    color: #111827 !important;
+  }
+
+  /* Typography for print */
+  .ProseMirror h1 {
+    font-size: 1.75rem !important;
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+    page-break-after: avoid !important;
+  }
+
+  .ProseMirror h2 {
+    font-size: 1.5rem !important;
+    margin-top: 1.75rem !important;
+    margin-bottom: 0.875rem !important;
+    page-break-after: avoid !important;
+  }
+
+  .ProseMirror h3 {
+    font-size: 1.25rem !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+    page-break-after: avoid !important;
+  }
+
+  .ProseMirror h4 {
+    font-size: 1.125rem !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0.625rem !important;
+    page-break-after: avoid !important;
+  }
+
+  .ProseMirror p {
+    margin-bottom: 0.75rem !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+
+  .ProseMirror ul,
+  .ProseMirror ol {
+    margin-bottom: 1rem !important;
+    padding-left: 2rem !important;
+  }
+
+  .ProseMirror li {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .ProseMirror pre {
+    background: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 1rem !important;
+    border-radius: 4px !important;
+    font-size: 10pt !important;
+    overflow-x: auto !important;
+    page-break-inside: avoid !important;
+  }
+
+  .ProseMirror code {
+    background: #f3f4f6 !important;
+    padding: 0.125rem 0.375rem !important;
+    border-radius: 3px !important;
+    font-size: 10pt !important;
+  }
+
+  .ProseMirror pre code {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .ProseMirror blockquote {
+    border-left: 3px solid #d1d5db !important;
+    padding-left: 1rem !important;
+    margin-left: 0 !important;
+    color: #6b7280 !important;
+  }
+
+  .ProseMirror table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 1rem 0 !important;
+    page-break-inside: avoid !important;
+  }
+
+  .ProseMirror th,
+  .ProseMirror td {
+    border: 1px solid #d1d5db !important;
+    padding: 0.5rem !important;
+    text-align: left !important;
+  }
+
+  .ProseMirror th {
+    background: #f9fafb !important;
+    font-weight: 600 !important;
+  }
+
+  /* Images */
+  .ProseMirror img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Highlights - preserve colors */
+  mark.highlight-mark {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Links - show URL */
+  .ProseMirror a[href]:after {
+    content: " (" attr(href) ")" !important;
+    font-size: 0.875em !important;
+    color: #6b7280 !important;
+  }
+
+  /* Internal links - don't show href */
+  .ProseMirror a[data-page-ref]:after,
+  .ProseMirror a[data-page-id]:after {
+    content: "" !important;
+  }
+
+  /* Sub-pages section */
+  .sub-pages {
+    margin-top: 2rem !important;
+    page-break-before: avoid !important;
+  }
+
+  .sub-pages h2 {
+    font-size: 1.25rem !important;
+    margin-bottom: 1rem !important;
+    color: #111827 !important;
+  }
+
+  .sub-page-card {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    page-break-inside: avoid !important;
+  }
+
+  .sub-page-card h3 {
+    color: #111827 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-after: always !important;
+  }
+
+  /* Avoid breaking inside these elements */
+  .editor-meta,
+  .editor-props,
+  .sub-page-card,
+  pre,
+  table {
+    page-break-inside: avoid !important;
+  }
+}
