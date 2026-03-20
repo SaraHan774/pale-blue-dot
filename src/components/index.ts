@@ -7,7 +7,7 @@ export { Sidebar } from './Sidebar';
 
 // Editor Components
 export { PageEditor } from './PageEditor';
-export { TiptapEditor } from './TiptapEditor';
+export { default as TiptapEditor } from './TiptapEditor';
 
 // Header Components
 export { PageHeader } from './PageHeader';

@@ -222,11 +222,11 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
 
         // Add rule for mermaid code blocks
         turndownService.addRule('mermaid', {
-          filter: (node) => {
+          filter: (node: Node) => {
             return node.nodeName === 'DIV' &&
-                   node.classList.contains('mermaid-block');
+                   (node as HTMLElement).classList.contains('mermaid-block');
           },
-          replacement: (_content, node) => {
+          replacement: (_content: string, node: Node) => {
             const pre = (node as HTMLElement).querySelector('pre.mermaid');
             if (pre) {
               return '\n```mermaid\n' + pre.textContent + '\n```\n';
@@ -237,11 +237,11 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
 
         // Add rule for checkboxes
         turndownService.addRule('taskList', {
-          filter: (node) => {
+          filter: (node: Node) => {
             return node.nodeName === 'INPUT' &&
                    (node as HTMLInputElement).type === 'checkbox';
           },
-          replacement: (_content, node) => {
+          replacement: (_content: string, node: Node) => {
             const checked = (node as HTMLInputElement).checked;
             return checked ? '[x]' : '[ ]';
           }

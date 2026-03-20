@@ -5,7 +5,6 @@ import { listen } from '@tauri-apps/api/event';
 import { useStore } from '@/store/useStore';
 import { pageService, fileSystemService } from '@/services';
 import { CreatePageModal } from './CreatePageModal';
-import { PaleBlueDotLogo } from './PaleBlueDotLogo';
 import './Sidebar.css';
 
 // Tauri detection

@@ -271,10 +271,10 @@ export function PageView() {
 
     // Find the highlight mark in the document
     let targetPos: number | null = null;
-    editor.state.doc.descendants((node, pos) => {
+    editor.state.doc.descendants((node: any, pos: number) => {
       if (targetPos !== null) return false;
       if (!node.isText || node.marks.length === 0) return;
-      const mark = node.marks.find(m => m.type.name === 'highlight' && m.attrs.id === highlightId);
+      const mark = node.marks.find((m: any) => m.type.name === 'highlight' && m.attrs.id === highlightId);
       if (mark) targetPos = pos;
     });
 
@@ -320,7 +320,7 @@ export function PageView() {
       try {
         showToast('Generating PDF...', 'info');
 
-        const html2pdf = (await import('html2pdf.js')).default;
+        const html2pdf = (await import('html2pdf.js')).default as any;
 
         // Create a temporary container with all content
         const printContainer = document.createElement('div');

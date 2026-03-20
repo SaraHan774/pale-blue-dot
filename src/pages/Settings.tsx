@@ -119,7 +119,7 @@ export function Settings() {
 
   const handleChangeWorkspace = async () => {
     try {
-      const handle = await fileSystemService.requestDirectoryAccess();
+      const handle = await fileSystemService.requestDirectoryAccess() as FileSystemDirectoryHandle;
       const newPath = handle.name;
 
       setConfig({

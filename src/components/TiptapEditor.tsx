@@ -58,9 +58,9 @@ function findHighlightRange(doc: ProseMirrorNode, highlightId: string) {
   let maxPos = -Infinity;
   let style = 'highlight';
 
-  doc.descendants((node, pos) => {
+  doc.descendants((node: ProseMirrorNode, pos: number) => {
     if (!node.isText || node.marks.length === 0) return;
-    const mark = node.marks.find((m) => m.type.name === 'highlight' && m.attrs.id === highlightId);
+    const mark = node.marks.find((m: any) => m.type.name === 'highlight' && m.attrs.id === highlightId);
     if (mark) {
       minPos = Math.min(minPos, pos);
       maxPos = Math.max(maxPos, pos + node.nodeSize);
@@ -184,7 +184,7 @@ export default function TiptapEditor({
       }),
       WikiLinkSuggestion.configure({
         suggestion: {
-          items: ({ query }) =>
+          items: ({ query }: { query: string }) =>
             pages
               .filter((p) => p.title.toLowerCase().includes(query.toLowerCase()))
               .slice(0, 10)
@@ -193,7 +193,7 @@ export default function TiptapEditor({
             let container: HTMLDivElement;
 
             return {
-              onStart(props) {
+              onStart(props: any) {
                 container = document.createElement('div');
                 container.className = 'wiki-link-suggestions';
                 renderSuggestionItems(container, props.items, (item) =>
@@ -201,12 +201,12 @@ export default function TiptapEditor({
                 );
                 document.body.appendChild(container);
               },
-              onUpdate(props) {
+              onUpdate(props: any) {
                 renderSuggestionItems(container, props.items, (item) =>
                   props.command({ id: item.id, label: item.label }),
                 );
               },
-              onKeyDown(props) {
+              onKeyDown(props: any) {
                 if (props.event.key === 'Escape') return true;
                 return false;
               },
@@ -220,7 +220,7 @@ export default function TiptapEditor({
     ],
     content,
     editable: !readOnly,
-    onUpdate: ({ editor: e }) => {
+    onUpdate: ({ editor: e }: { editor: Editor }) => {
       // @ts-ignore - tiptap-markdown adds getMarkdown to storage
       const markdown = e.storage.markdown.getMarkdown() as string;
       internalUpdateRef.current = true;
@@ -229,7 +229,7 @@ export default function TiptapEditor({
     },
     editorProps: {
       attributes: { class: 'tiptap-editor' },
-      handleKeyDown: (view, event) => slashKeyDownRef.current(view, event),
+      handleKeyDown: (view: any, event: KeyboardEvent) => slashKeyDownRef.current(view, event),
     },
   });
 
