@@ -5,9 +5,11 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { loadPages, getImagePath } from '@/services/cacheService';
 import { replaceImagePaths } from '@/services/parserService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -15,6 +17,7 @@ import type { Page } from '@/types';
 
 export default function PageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,6 +97,14 @@ export default function PageScreen() {
         paddingRight: insets.right,
       }]}
     >
+      {/* Back Button */}
+      <View style={[styles.backBar, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Page Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{page.title}</Text>
@@ -163,6 +174,20 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: '#666',
+    fontSize: 16,
+  },
+  backBar: {
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  backText: {
+    color: '#fff',
     fontSize: 16,
   },
   header: {
