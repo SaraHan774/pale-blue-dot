@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Pale Blue Dot Reader",
+    "slug": "pale-blue-dot-reader",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a1a1a"
+      },
+      "package": "com.palebluedot.reader",
+      "permissions": [
+        "android.permission.INTERNET"
+      ],
+      "statusBarTranslucent": false
+    },
+    "scheme": "palebluedot",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "newArchEnabled": false
+          }
+        }
+      ]
+    ]
+  }
+}

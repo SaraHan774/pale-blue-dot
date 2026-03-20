@@ -1,0 +1,42 @@
+{
+  "name": "pale-blue-dot-reader",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^7.1.33",
+    "buffer": "^6.0.3",
+    "expo": "~55.0.0",
+    "expo-asset": "~55.0.10",
+    "expo-build-properties": "^55.0.10",
+    "expo-constants": "~55.0.9",
+    "expo-file-system": "~55.0.11",
+    "expo-font": "~55.0.4",
+    "expo-linking": "~55.0.8",
+    "expo-router": "~55.0.7",
+    "expo-secure-store": "~55.0.9",
+    "expo-status-bar": "~55.0.4",
+    "gray-matter": "^4.0.3",
+    "marked": "^4.3.0",
+    "react": "19.2.0",
+    "react-dom": "^19.2.4",
+    "react-native": "0.83.2",
+    "react-native-render-html": "^6.3.4",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-svg": "15.15.3",
+    "react-native-webview": "13.16.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@types/react": "^19.0.0",
+    "babel-preset-expo": "^55.0.12",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}
