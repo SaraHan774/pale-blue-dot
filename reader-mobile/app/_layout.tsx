@@ -38,7 +38,6 @@ export default function RootLayout() {
           },
           animation: 'slide_from_right',
           headerTransparent: false,
-          headerStatusBarHeight: 0,
         }}
       >
         <Stack.Screen
@@ -56,7 +55,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="page/[id]"
           options={{
-            title: 'Page',
+            headerShown: false,
           }}
         />
       </Stack>

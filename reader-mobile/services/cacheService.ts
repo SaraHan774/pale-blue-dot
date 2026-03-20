@@ -155,9 +155,10 @@ export async function saveImage(
     const valid = await isValidImageFile(localPath);
     if (!valid) {
       const verifyInfo = await FileSystem.getInfoAsync(localPath);
-      console.warn(`Downloaded file appears invalid (size: ${verifyInfo.size || 0} bytes):`, localPath);
+      const fileSize = verifyInfo.exists && 'size' in verifyInfo ? verifyInfo.size : 0;
+      console.warn(`Downloaded file appears invalid (size: ${fileSize || 0} bytes):`, localPath);
       // Don't delete - caller may want to retry with different URL
-      throw new Error(`Downloaded file is not a valid image (size: ${verifyInfo.size || 0} bytes)`);
+      throw new Error(`Downloaded file is not a valid image (size: ${fileSize || 0} bytes)`);
     }
 
     console.log('Image downloaded successfully:', localPath);
