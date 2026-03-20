@@ -49,7 +49,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="column/[name]"
           options={{
-            title: 'Pages',
+            headerShown: false,
           }}
         />
         <Stack.Screen

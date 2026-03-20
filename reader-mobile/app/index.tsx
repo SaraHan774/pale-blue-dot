@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#e0e0e0',
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 14,
   },
   inputSection: {
     padding: 16,
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: '#e0e0e0',
-    fontSize: 14,
+    fontSize: 13,
     marginBottom: 8,
     fontWeight: '500',
   },
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   },
   syncButtonText: {
     color: '#000',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   progressText: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: '#e0e0e0',
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     padding: 16,
     paddingBottom: 8,
@@ -430,21 +430,21 @@ const styles = StyleSheet.create({
   },
   columnCard: {
     backgroundColor: '#1a1a1a',
-    padding: 16,
+    padding: 14,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   columnName: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '500',
   },
   columnArrow: {
     color: '#4fc3f7',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   emptyState: {
@@ -455,9 +455,9 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: '#666',
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 20,
   },
   headerRow: {
     flexDirection: 'row',
@@ -497,14 +497,14 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
   },
   modalDescription: {
     color: '#999',
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
     marginBottom: 20,
   },
   modalInput: {
@@ -537,17 +537,17 @@ const styles = StyleSheet.create({
   },
   modalButtonTextPrimary: {
     color: '#000',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   modalButtonTextSecondary: {
     color: '#e0e0e0',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   modalButtonTextDanger: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });

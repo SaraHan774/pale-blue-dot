@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { loadPages } from '@/services/cacheService';
 import { groupPagesByColumn } from '@/services/parserService';
 import type { Page } from '@/types';
@@ -74,6 +75,14 @@ export default function ColumnScreen() {
       paddingLeft: insets.left,
       paddingRight: insets.right,
     }]}>
+      {/* Back Button */}
+      <View style={[styles.backBar, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.header}>
         <Text style={styles.columnTitle}>{columnName}</Text>
         <Text style={styles.pageCount}>{pages.length} pages</Text>
@@ -141,6 +150,20 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
   },
+  backBar: {
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  backText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   header: {
     padding: 16,
     backgroundColor: '#1a1a1a',
@@ -149,22 +172,22 @@ const styles = StyleSheet.create({
   },
   columnTitle: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   pageCount: {
     color: '#999',
-    fontSize: 14,
+    fontSize: 12,
   },
   listContent: {
     padding: 16,
   },
   pageCard: {
     backgroundColor: '#1a1a1a',
-    padding: 16,
+    padding: 14,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   pageHeader: {
     flexDirection: 'row',
@@ -174,7 +197,7 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '600',
     flex: 1,
   },
@@ -199,7 +222,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     color: '#4fc3f7',
-    fontSize: 12,
+    fontSize: 11,
   },
   pageFooter: {
     flexDirection: 'row',
@@ -208,11 +231,11 @@ const styles = StyleSheet.create({
   },
   dateText: {
     color: '#999',
-    fontSize: 12,
+    fontSize: 11,
   },
   dueDateText: {
     color: '#ffb74d',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
   },
 });

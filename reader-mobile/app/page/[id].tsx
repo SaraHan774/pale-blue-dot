@@ -198,9 +198,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#fff',
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   metadata: {
     gap: 8,
@@ -211,16 +211,16 @@ const styles = StyleSheet.create({
   },
   metadataLabel: {
     color: '#999',
-    fontSize: 14,
+    fontSize: 12,
     marginRight: 8,
   },
   metadataValue: {
     color: '#e0e0e0',
-    fontSize: 14,
+    fontSize: 12,
   },
   dueDateValue: {
     color: '#ffb74d',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
   },
   tagsContainer: {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   tagText: {
     color: '#4fc3f7',
-    fontSize: 12,
+    fontSize: 11,
   },
   contentSection: {
     padding: 16,
