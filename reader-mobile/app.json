@@ -36,6 +36,13 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fbdc82b7-3ee2-4172-8b45-8fbbffda0b1f"
+      }
+    },
+    "owner": "vertias-lux-mea"
   }
 }
