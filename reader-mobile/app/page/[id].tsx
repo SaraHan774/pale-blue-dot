@@ -14,6 +14,16 @@ import { loadPages, getImagePath } from '@/services/cacheService';
 import { replaceImagePaths } from '@/services/parserService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import type { Page } from '@/types';
+import {
+  bgPrimary,
+  bgSecondary,
+  bgTertiary,
+  textPrimary,
+  textSecondary,
+  border,
+  accentPrimary,
+  warning,
+} from '@/constants/colors';
 
 export default function PageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -75,7 +85,7 @@ export default function PageScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4fc3f7" />
+        <ActivityIndicator size="large" color={accentPrimary} />
       </View>
     );
   }
@@ -161,7 +171,7 @@ export default function PageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: bgPrimary,
   },
   content: {
     paddingBottom: 32,
@@ -170,14 +180,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212',
+    backgroundColor: bgPrimary,
   },
   emptyText: {
-    color: '#666',
+    color: textSecondary,
     fontSize: 16,
   },
   backBar: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     paddingHorizontal: 8,
     paddingBottom: 8,
   },
@@ -192,9 +202,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: border,
   },
   title: {
     color: '#fff',
@@ -210,16 +220,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   metadataLabel: {
-    color: '#999',
+    color: textSecondary,
     fontSize: 12,
     marginRight: 8,
   },
   metadataValue: {
-    color: '#e0e0e0',
+    color: textPrimary,
     fontSize: 12,
   },
   dueDateValue: {
-    color: '#ffb74d',
+    color: warning,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -229,20 +239,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   tag: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
   },
   tagText: {
-    color: '#4fc3f7',
+    color: accentPrimary,
     fontSize: 11,
   },
   contentSection: {
     padding: 16,
   },
   emptyContent: {
-    color: '#666',
+    color: textSecondary,
     fontSize: 14,
     fontStyle: 'italic',
   },

@@ -18,6 +18,15 @@ import { syncRepository, validateRepoUrl } from '@/services/githubService';
 import { extractColumns } from '@/services/parserService';
 import { loadToken, saveToken, deleteToken, hasToken } from '@/services/tokenService';
 import type { Page } from '@/types';
+import {
+  bgPrimary,
+  bgSecondary,
+  bgTertiary,
+  textPrimary,
+  textSecondary,
+  border,
+  accentPrimary,
+} from '@/constants/colors';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -185,7 +194,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4fc3f7" />
+        <ActivityIndicator size="large" color={accentPrimary} />
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
@@ -360,33 +369,33 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: bgPrimary,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212',
+    backgroundColor: bgPrimary,
   },
   loadingText: {
-    color: '#e0e0e0',
+    color: textPrimary,
     marginTop: 12,
     fontSize: 14,
   },
   inputSection: {
     padding: 16,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: border,
   },
   label: {
-    color: '#e0e0e0',
+    color: textPrimary,
     fontSize: 13,
     marginBottom: 8,
     fontWeight: '500',
   },
   input: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     color: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -395,7 +404,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   syncButton: {
-    backgroundColor: '#4fc3f7',
+    backgroundColor: accentPrimary,
     paddingVertical: 12,
     borderRadius: 6,
     alignItems: 'center',
@@ -409,7 +418,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   progressText: {
-    color: '#4fc3f7',
+    color: accentPrimary,
     fontSize: 12,
     marginTop: 8,
     textAlign: 'center',
@@ -418,7 +427,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    color: '#e0e0e0',
+    color: textPrimary,
     fontSize: 16,
     fontWeight: 'bold',
     padding: 16,
@@ -429,7 +438,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   columnCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     padding: 14,
     borderRadius: 8,
     marginBottom: 10,
@@ -443,7 +452,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   columnArrow: {
-    color: '#4fc3f7',
+    color: accentPrimary,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -454,7 +463,7 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   emptyText: {
-    color: '#666',
+    color: textSecondary,
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -472,13 +481,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tokenButton: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
   },
   tokenButtonText: {
-    color: '#4fc3f7',
+    color: accentPrimary,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -489,7 +498,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     borderRadius: 12,
     padding: 24,
     width: '90%',
@@ -502,13 +511,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   modalDescription: {
-    color: '#999',
+    color: textSecondary,
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 20,
   },
   modalInput: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     color: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -527,10 +536,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalButtonPrimary: {
-    backgroundColor: '#4fc3f7',
+    backgroundColor: accentPrimary,
   },
   modalButtonSecondary: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
   },
   modalButtonDanger: {
     backgroundColor: '#f44336',
@@ -541,7 +550,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modalButtonTextSecondary: {
-    color: '#e0e0e0',
+    color: textPrimary,
     fontSize: 14,
     fontWeight: '600',
   },

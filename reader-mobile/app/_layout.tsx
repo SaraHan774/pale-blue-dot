@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { initializeCache } from '@/services/cacheService';
 import { Buffer } from 'buffer';
 import Logo from '@/components/Logo';
+import { bgPrimary, bgSecondary } from '@/constants/colors';
 
 // Polyfill Buffer for React Native
 global.Buffer = Buffer;
@@ -23,18 +24,18 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" translucent={false} backgroundColor="#1a1a1a" />
+      <StatusBar style="light" translucent={false} backgroundColor={bgSecondary} />
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#1a1a1a',
+            backgroundColor: bgSecondary,
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
           contentStyle: {
-            backgroundColor: '#121212',
+            backgroundColor: bgPrimary,
           },
           animation: 'slide_from_right',
           headerTransparent: false,

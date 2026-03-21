@@ -3,6 +3,14 @@ import { useWindowDimensions, Linking, Alert, ScrollView, StyleSheet, Image, Vie
 import ImageView from 'react-native-image-viewing';
 import RenderHTML, { CustomBlockRenderer, defaultHTMLElementModels, HTMLContentModel } from 'react-native-render-html';
 import { marked } from 'marked';
+import {
+  bgSecondary,
+  bgTertiary,
+  textPrimary,
+  textSecondary,
+  border,
+  accentPrimary,
+} from '@/constants/colors';
 
 interface MarkdownRendererProps {
   content: string;
@@ -364,14 +372,14 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
 // ─── Styles ──────────────────────────────────────────────────────────
 
 const baseStyle = {
-  color: '#e0e0e0',
+  color: textPrimary,
   fontSize: 14,
   lineHeight: 22,
 };
 
 const tagsStyles = {
   body: {
-    color: '#e0e0e0',
+    color: textPrimary,
     fontSize: 14,
   },
   h1: {
@@ -426,11 +434,11 @@ const tagsStyles = {
     fontSize: 14,
     lineHeight: 22,
     marginBottom: 10,
-    color: '#e0e0e0',
+    color: textPrimary,
   },
   code: {
-    backgroundColor: '#2a2a2a',
-    color: '#4fc3f7',
+    backgroundColor: bgTertiary,
+    color: accentPrimary,
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 3,
@@ -438,7 +446,7 @@ const tagsStyles = {
     whiteSpace: 'pre' as const,
   },
   pre: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     borderRadius: 6,
     marginVertical: 8,
     padding: 0,
@@ -446,9 +454,9 @@ const tagsStyles = {
     whiteSpace: 'pre' as const,
   },
   blockquote: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     borderLeftWidth: 4,
-    borderLeftColor: '#4fc3f7',
+    borderLeftColor: accentPrimary,
     paddingLeft: 12,
     paddingVertical: 8,
     marginVertical: 8,
@@ -463,7 +471,7 @@ const tagsStyles = {
     marginBottom: 4,
   },
   a: {
-    color: '#4fc3f7',
+    color: accentPrimary,
     textDecorationLine: 'underline' as const,
   },
   img: {
@@ -471,7 +479,7 @@ const tagsStyles = {
     borderRadius: 6,
   },
   hr: {
-    backgroundColor: '#444',
+    backgroundColor: border,
     height: 1,
     marginVertical: 16,
   },
@@ -497,9 +505,9 @@ const tableStyles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     borderBottomWidth: 2,
-    borderBottomColor: '#555',
+    borderBottomColor: border,
   },
   headerCell: {
     paddingHorizontal: 12,
@@ -513,12 +521,12 @@ const tableStyles = StyleSheet.create({
   },
   bodyRow: {
     flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: border,
   },
   bodyRowAlt: {
-    backgroundColor: '#1f1f1f',
+    backgroundColor: bgTertiary,
   },
   bodyCell: {
     paddingHorizontal: 12,
@@ -526,19 +534,19 @@ const tableStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   bodyText: {
-    color: '#e0e0e0',
+    color: textPrimary,
     fontSize: 13,
     lineHeight: 18,
   },
   cellBorderRight: {
     borderRightWidth: 1,
-    borderRightColor: '#444',
+    borderRightColor: border,
   },
 });
 
 const codeBlockStyles = StyleSheet.create({
   scrollContainer: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     borderRadius: 6,
     marginVertical: 8,
   },
@@ -557,7 +565,7 @@ const imageStyles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   errorContainer: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     borderRadius: 6,
     padding: 24,
     marginVertical: 12,
@@ -565,11 +573,11 @@ const imageStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   errorText: {
-    color: '#999',
+    color: textSecondary,
     fontSize: 14,
   },
   errorSubtext: {
-    color: '#666',
+    color: textSecondary,
     fontSize: 12,
     marginTop: 4,
   },

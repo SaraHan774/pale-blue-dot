@@ -13,6 +13,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { loadPages } from '@/services/cacheService';
 import { groupPagesByColumn } from '@/services/parserService';
 import type { Page } from '@/types';
+import {
+  bgPrimary,
+  bgSecondary,
+  bgTertiary,
+  textPrimary,
+  textSecondary,
+  border,
+  accentPrimary,
+  warning,
+} from '@/constants/colors';
 
 export default function ColumnScreen() {
   const router = useRouter();
@@ -56,7 +66,7 @@ export default function ColumnScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4fc3f7" />
+        <ActivityIndicator size="large" color={accentPrimary} />
       </View>
     );
   }
@@ -138,20 +148,20 @@ export default function ColumnScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: bgPrimary,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212',
+    backgroundColor: bgPrimary,
   },
   emptyText: {
-    color: '#666',
+    color: textSecondary,
     fontSize: 16,
   },
   backBar: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     paddingHorizontal: 8,
     paddingBottom: 8,
   },
@@ -166,9 +176,9 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: border,
   },
   columnTitle: {
     color: '#fff',
@@ -177,14 +187,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   pageCount: {
-    color: '#999',
+    color: textSecondary,
     fontSize: 12,
   },
   listContent: {
     padding: 16,
   },
   pageCard: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: bgSecondary,
     padding: 14,
     borderRadius: 8,
     marginBottom: 10,
@@ -213,7 +223,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tag: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: bgTertiary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
@@ -221,7 +231,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   tagText: {
-    color: '#4fc3f7',
+    color: accentPrimary,
     fontSize: 11,
   },
   pageFooter: {
@@ -230,11 +240,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateText: {
-    color: '#999',
+    color: textSecondary,
     fontSize: 11,
   },
   dueDateText: {
-    color: '#ffb74d',
+    color: warning,
     fontSize: 11,
     fontWeight: '500',
   },
