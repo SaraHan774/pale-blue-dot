@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
-import { useWindowDimensions, Linking, Alert, ScrollView, StyleSheet, Image, View, Text } from 'react-native';
+import React, { useMemo, useState, useCallback } from 'react';
+import { useWindowDimensions, Linking, Alert, ScrollView, StyleSheet, Image, View, Text, TouchableOpacity } from 'react-native';
+import ImageView from 'react-native-image-viewing';
 import RenderHTML, { CustomBlockRenderer, defaultHTMLElementModels, HTMLContentModel } from 'react-native-render-html';
 import { marked } from 'marked';
 
@@ -206,12 +207,20 @@ const PreRenderer: CustomBlockRenderer = ({ TDefaultRenderer, ...props }) => {
   );
 };
 
+// ─── Image Viewer (with pinch-to-zoom) ──────────────────────────────
+// Note: This uses react-native-image-viewing which provides:
+// - Pinch to zoom
+// - Double tap to zoom
+// - Swipe to dismiss
+// - Smooth animations
+
 // ─── Image Renderer ──────────────────────────────────────────────────
 
 const ImageRenderer = (props: any) => {
   const { tnode } = props;
   const { src, alt } = tnode.attributes;
   const [hasError, setHasError] = React.useState(false);
+  const [viewerVisible, setViewerVisible] = React.useState(false);
 
   if (!src) {
     return <Text style={{ color: '#666', fontStyle: 'italic' }}>No image source</Text>;
@@ -228,15 +237,26 @@ const ImageRenderer = (props: any) => {
 
   return (
     <View style={{ marginVertical: 12 }}>
-      <Image
-        source={{ uri: src }}
-        style={imageStyles.image}
-        resizeMode="contain"
-        onLoad={() => console.log('✅ Image loaded:', src)}
-        onError={(error) => {
-          console.error('❌ Image failed:', src, JSON.stringify(error.nativeEvent));
-          setHasError(true);
-        }}
+      <TouchableOpacity activeOpacity={0.8} onPress={() => setViewerVisible(true)}>
+        <Image
+          source={{ uri: src }}
+          style={imageStyles.image}
+          resizeMode="contain"
+          onLoad={() => console.log('✅ Image loaded:', src)}
+          onError={(error) => {
+            console.error('❌ Image failed:', src, JSON.stringify(error.nativeEvent));
+            setHasError(true);
+          }}
+        />
+      </TouchableOpacity>
+      <ImageView
+        images={[{ uri: src }]}
+        imageIndex={0}
+        visible={viewerVisible}
+        onRequestClose={() => setViewerVisible(false)}
+        presentationStyle="overFullScreen"
+        swipeToCloseEnabled={true}
+        doubleTapToZoomEnabled={true}
       />
     </View>
   );
@@ -534,7 +554,7 @@ const imageStyles = StyleSheet.create({
     aspectRatio: 16 / 9,
     marginVertical: 12,
     borderRadius: 6,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: '#ffffff',
   },
   errorContainer: {
     backgroundColor: '#2a2a2a',
@@ -554,3 +574,5 @@ const imageStyles = StyleSheet.create({
     marginTop: 4,
   },
 });
+
+// Zoom styles removed - handled by react-native-image-viewing library
