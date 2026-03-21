@@ -81,6 +81,13 @@ export function Home() {
     };
   }, [hasFileSystemAccess, loadPages]);
 
+  // Load pages when file system access is granted
+  useEffect(() => {
+    if (hasFileSystemAccess) {
+      loadPages();
+    }
+  }, [hasFileSystemAccess, loadPages]);
+
   // Check if a previously saved handle can be reconnected
   useEffect(() => {
     if (hasFileSystemAccess) return;
