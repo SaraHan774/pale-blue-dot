@@ -29,9 +29,9 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'My Kanban Board',
-        short_name: 'Kanban',
-        description: 'Local file-based Kanban board with Notion-like pages and markdown support',
+        name: 'PaleBlueDot',
+        short_name: 'PBD',
+        description: 'This is our home.',
         theme_color: '#6366f1',
         background_color: '#ffffff',
         display: 'standalone',

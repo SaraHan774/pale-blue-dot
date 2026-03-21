@@ -28,28 +28,19 @@ export function Sidebar() {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    console.log('[Sidebar] hasFileSystemAccess changed:', hasFileSystemAccess);
     if (hasFileSystemAccess) {
-      console.log('[Sidebar] Loading settings and pages...');
       loadSettingsFromFile();
       loadPages();
     }
   }, [hasFileSystemAccess]);
 
   const loadPages = async () => {
-    console.log('[Sidebar] Starting to load pages...');
     setLoading(true);
     try {
-      const rootHandle = fileSystemService.getRootHandle();
-      console.log('[Sidebar] Root handle:', rootHandle);
-
       const allPages = await pageService.getAllPages();
-      console.log('[Sidebar] Loaded pages:', allPages.length);
-      console.log('[Sidebar] First 3 pages:', allPages.slice(0, 3).map(p => p.title));
-
       setPages(allPages);
     } catch (error) {
-      console.error('[Sidebar] Failed to load pages:', error);
+      console.error('Failed to load pages:', error);
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,6 @@
 import { Extension } from '@tiptap/core';
 
 /**
- * Custom keyboard shortcuts for My Kanban
  * Matches the existing PageEditor shortcuts:
  * - Cmd+B: Bold
  * - Cmd+I: Italic
