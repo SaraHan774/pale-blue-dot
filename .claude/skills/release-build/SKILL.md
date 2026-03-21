@@ -78,21 +78,23 @@ Ask the user: "What version number for this release? (e.g., 0.5.3)"
 
 1. Read current versions:
 ```bash
-cd /Users/gahee/pale-blue-dot && cat package.json | grep '"version"' && cat src-tauri/Cargo.toml | grep '^version'
+cd /Users/gahee/pale-blue-dot && cat package.json | grep '"version"' && cat src-tauri/Cargo.toml | grep '^version' && cat src-tauri/tauri.conf.json | grep '"version"'
 ```
 
-2. Update **both** package.json and Cargo.toml with new version:
+2. Update **all three** version files with new version:
 - Use Edit tool to replace version in package.json
   - Change `"version": "X.Y.Z"` to `"version": "[USER_PROVIDED_VERSION]"`
 - Use Edit tool to replace version in src-tauri/Cargo.toml
   - Change `version = "X.Y.Z"` to `version = "[USER_PROVIDED_VERSION]"`
+- Use Edit tool to replace version in src-tauri/tauri.conf.json
+  - Change `"version": "X.Y.Z"` to `"version": "[USER_PROVIDED_VERSION]"`
 
 3. Confirm the changes:
 ```bash
-cd /Users/gahee/pale-blue-dot && git diff package.json src-tauri/Cargo.toml
+cd /Users/gahee/pale-blue-dot && git diff package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
 ```
 
-Show the diff to user and ask: "Version updated to [VERSION] in both package.json and Cargo.toml. Proceed with commit and tag?"
+Show the diff to user and ask: "Version updated to [VERSION] in package.json, Cargo.toml, and tauri.conf.json. Proceed with commit and tag?"
 
 **If user says no:** Stop here and exit
 **If user says yes:** Continue to Step 4
@@ -102,7 +104,7 @@ Show the diff to user and ask: "Version updated to [VERSION] in both package.jso
 Run these commands in sequence:
 
 ```bash
-cd /Users/gahee/pale-blue-dot && git add package.json src-tauri/Cargo.toml
+cd /Users/gahee/pale-blue-dot && git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
 ```
 
 ```bash
@@ -220,7 +222,7 @@ git push
 - ✅ `npm run build` exits with code 0
 - ✅ No TypeScript compilation errors
 - ✅ Vite build completes successfully
-- ✅ package.json version updated
+- ✅ package.json, Cargo.toml, and tauri.conf.json versions updated
 - ✅ Changes committed with proper message
 - ✅ Tag created: v[VERSION]
 - ✅ Pushed to remote
