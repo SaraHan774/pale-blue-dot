@@ -415,6 +415,7 @@ const tagsStyles = {
     paddingVertical: 2,
     borderRadius: 3,
     fontFamily: 'monospace',
+    whiteSpace: 'pre' as const,
   },
   pre: {
     backgroundColor: '#2a2a2a',
@@ -422,6 +423,7 @@ const tagsStyles = {
     marginVertical: 8,
     padding: 0,
     overflow: 'hidden' as const,
+    whiteSpace: 'pre' as const,
   },
   blockquote: {
     backgroundColor: '#2a2a2a',
