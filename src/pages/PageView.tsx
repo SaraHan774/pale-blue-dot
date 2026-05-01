@@ -11,6 +11,7 @@ import { Terminal } from '@/components/Terminal';
 import { usePageSync } from '@/hooks/usePageSync';
 import { useHighlightManager } from '@/hooks/useHighlightManager';
 import { openExternalUrl } from '@/lib/openExternal';
+import { clearResolvedImageCache } from '@/lib/tiptap/extensions/ResolvableImage';
 import './PageView.css';
 
 const isTauri = '__TAURI_INTERNALS__' in window;
@@ -127,6 +128,13 @@ export function PageView() {
   useEffect(() => {
     if (page) setEditTitle(page.title);
   }, [page?.id]);
+
+  // Clear resolved image cache on page navigation so stale blob URLs don't linger
+  useEffect(() => {
+    return () => {
+      clearResolvedImageCache();
+    };
+  }, [pageId]);
 
   // ── Metadata handlers (immediate save for meta fields) ────────────
   const handleTitleSave = useCallback(async () => {

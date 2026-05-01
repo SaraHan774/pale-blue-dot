@@ -20,10 +20,9 @@ export interface ResolvableImageOptions {
   saveImage?: (file: File) => Promise<string>;
 }
 
-/**
- * In-flight resolution tracker so we don't resolve the same src twice
- * concurrently.
- */
+// Module-level singletons — safe for single-editor-at-a-time usage.
+// If a future split-view feature mounts two editors simultaneously, key
+// these maps by pagePath to avoid cross-editor cache invalidation.
 const resolving = new Map<string, Promise<string>>();
 const resolved = new Map<string, string>();
 
@@ -53,41 +52,64 @@ export const ResolvableImage = Image.extend<ResolvableImageOptions>({
           view() {
             return {
               update(view) {
-                // Find all <img> elements whose src starts with `.images/`
-                const imgs = view.dom.querySelectorAll<HTMLImageElement>(
-                  'img[src^=".images/"]',
-                );
+                // Query all img elements and filter by getAttribute('src') —
+                // CSS attribute selector img[src^=".images/"] does NOT work
+                // because browsers normalize relative paths to absolute URLs
+                // before attribute comparison.
+                const allImgs = view.dom.querySelectorAll<HTMLImageElement>('img');
 
-                imgs.forEach((img) => {
-                  const originalSrc = img.getAttribute('src')!;
+                allImgs.forEach((img) => {
+                  // Use getAttribute to get the raw (non-normalized) value
+                  const attrSrc = img.getAttribute('src') ?? '';
+                  const dataOriginal = img.getAttribute('data-original-src') ?? '';
 
-                  // Already resolved
+                  // Determine which key to look up: prefer data-original-src if set
+                  const originalSrc = dataOriginal || (attrSrc.startsWith('.images/') ? attrSrc : '');
+                  if (!originalSrc) return;
+
+                  // Already resolved — ensure the blob URL is applied
                   if (resolved.has(originalSrc)) {
                     const blobUrl = resolved.get(originalSrc)!;
-                    if (img.src !== blobUrl) img.src = blobUrl;
+                    if (img.src !== blobUrl) {
+                      img.src = blobUrl;
+                      img.setAttribute('data-original-src', originalSrc);
+                      img.style.opacity = '1';
+                    }
                     return;
                   }
 
                   // In-flight
                   if (resolving.has(originalSrc)) return;
 
-                  // Hide image while resolving to avoid broken icon flash
+                  // Hide image while resolving to avoid broken icon flash.
+                  // Set data-original-src synchronously so that if ProseMirror
+                  // replaces the DOM node mid-flight the new node will still
+                  // carry the key on the next update tick.
                   img.style.opacity = '0';
                   img.style.transition = 'opacity 0.2s';
+                  img.setAttribute('data-original-src', originalSrc);
 
                   const promise = resolveImageSrc(originalSrc);
 
                   promise
                     .then((blobUrl) => {
                       resolved.set(originalSrc, blobUrl);
+                      // Patch the captured img reference first (O(1)), then
+                      // sweep the DOM for any other elements sharing the same
+                      // src (e.g. duplicated images in the document).
+                      img.src = blobUrl;
+                      img.style.opacity = '1';
                       view.dom
-                        .querySelectorAll<HTMLImageElement>(
-                          `img[src="${originalSrc}"], img[data-resolved-src="${originalSrc}"]`,
-                        )
+                        .querySelectorAll<HTMLImageElement>('img')
                         .forEach((el) => {
-                          el.src = blobUrl;
-                          el.setAttribute('data-resolved-src', originalSrc);
-                          el.style.opacity = '1';
+                          if (el === img) return;
+                          const elAttr = el.getAttribute('src') ?? '';
+                          const elOriginal = el.getAttribute('data-original-src') ?? '';
+                          if (elOriginal === originalSrc || elAttr === originalSrc) {
+                            el.src = blobUrl;
+                            el.setAttribute('data-original-src', originalSrc);
+                            el.style.opacity = '1';
+                          }
                         });
                     })
                     .catch(() => {
