@@ -390,3 +390,46 @@ graph TD
 - Mobile app support
 - Real-time collaboration
 - Plugin system
+
+## Agentic Workflow (harness pattern)
+
+이 저장소는 [Chachamaru127/claude-code-harness](https://github.com/Chachamaru127/claude-code-harness) 의 Plan→Work→Review 사이클을 1인 프로젝트에 맞게 축소·한국어화 한 구조를 갖는다.
+
+### 작업 사이클
+
+1. **Plan**: `/pbd-plan add "T<n>: 요약 (DoD: 기준)"` — [Plans.md](Plans.md) 에 task 등록 (`pm:요청` 마커)
+2. **Work**: `/pbd-work T<n>` — worker agent 가 git worktree 격리에서 구현·검증·worker-report.v1 작성 (`cc:진행` → `cc:완료`)
+3. **Review**: `/pbd-review code` — reviewer agent (context fork 격리) 가 DoD/회귀/안티패턴 검증 후 verdict 반환
+4. **Confirm**: 사용자가 `/pbd-plan update T<n> --status pm:확인`
+5. **Release**: `/release-build` — 기존 release skill
+
+### SSoT (Single Source of Truth)
+
+**모든 자동화 대상 작업은 [Plans.md](Plans.md) 에 등록**. 등록되지 않은 작업은 worker / reviewer 디스패치 거부. 상태 마커는 `pm:요청` → `cc:진행` → `cc:완료` → `pm:확인` 4개만 사용 (단방향 전이).
+
+### 역할 분리
+
+| 역할 | 위치 | 권한 | 호출 |
+|------|------|------|------|
+| advisor | [.claude/agents/advisor.md](.claude/agents/advisor.md) | read-only (Read/Grep/Glob) | worker 가 막힐 때 자동 |
+| reviewer | [.claude/agents/reviewer.md](.claude/agents/reviewer.md) | read-only + Bash (테스트 재실행만) | `/pbd-review` |
+| worker | [.claude/agents/worker.md](.claude/agents/worker.md) | worktree 격리, Edit/Write/Bash | `/pbd-work` |
+
+### 정책 (rules/)
+
+코드 변경에 적용되는 정책은 [.claude/rules/](.claude/rules/) 에 분리:
+
+- [plans-management](.claude/rules/plans-management.md) — Plans.md 마커 / 전이 규칙
+- [service-layer](.claude/rules/service-layer.md) — fileSystem/page/imageService 패턴, `updatePageMetadata` vs `updatePage`
+- [mcp-type-sync](.claude/rules/mcp-type-sync.md) — `src/types/page.ts` 변경 시 MCP 서버 rebuild 의무
+- [normalized-state](.claude/rules/normalized-state.md) — selector / hook 사용 의무, 직접 find/filter 금지
+- [test-quality](.claude/rules/test-quality.md) — 통합 테스트 우선
+- [commit-safety](.claude/rules/commit-safety.md) — `--no-verify`/force push 금지
+
+### 운영 임계치
+
+[.pbd-harness.yaml](.pbd-harness.yaml) 의 `monitor.plans_drift` (WIP 3 / stale 24h), `advisor.max_consults_per_task` (3), `worker.validation_commands` 참조.
+
+### 출력 포맷
+
+[.claude/output-styles/pbd-ops.md](.claude/output-styles/pbd-ops.md) 가 활성화되면 Work phase 응답은 항상 Done/Current/Next 3-section, Review phase 는 Verdict/Findings/Next action 형식.

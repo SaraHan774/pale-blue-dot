@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/monitors.json",
+  "version": 1,
+  "monitors": [
+    {
+      "name": "pbd-plans-drift",
+      "description": "Plans.md 의 WIP 누적 / 정체된 task 감지",
+      "when": "always",
+      "checks": [
+        {
+          "type": "wip_count",
+          "marker": "cc:진행",
+          "max": 3,
+          "message": "Plans.md 의 WIP(cc:진행) 가 {count} 개 (max {max}). 새 task 시작 전 정리 필요."
+        },
+        {
+          "type": "stale_hours",
+          "marker": "cc:진행",
+          "max": 24,
+          "message": "Plans.md 의 cc:진행 task 가 {hours}h 정체. /pbd-work 재개 또는 status 변경 필요."
+        },
+        {
+          "type": "missing_dod",
+          "scope": "active_phase",
+          "message": "Active Phase 의 일부 task 에 DoD 가 비어 있음. /pbd-plan update 로 보완 필요."
+        }
+      ],
+      "output_format": "⚠️ {category}: {detail}"
+    },
+    {
+      "name": "pbd-mcp-type-drift",
+      "description": "src/types/page.ts 가 변경됐는데 MCP 서버 빌드가 오래된 경우 감지",
+      "when": "session_start",
+      "checks": [
+        {
+          "type": "file_mtime_diff",
+          "newer": "src/types/page.ts",
+          "older": "mcp-pale-blue-dot-server/dist/index.js",
+          "message": "src/types/page.ts 가 MCP 빌드보다 새로움. cd mcp-pale-blue-dot-server && npm run build 필요."
+        }
+      ],
+      "output_format": "⚠️ {category}: {detail}"
+    }
+  ]
+}

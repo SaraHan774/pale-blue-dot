@@ -1,0 +1,36 @@
+# Pale Blue Dot Harness 운영 임계치
+# 이 파일은 .claude/skills/pbd-* 와 .claude/monitors/monitors.json 이 참조한다.
+# 변경 후 별도 reload 불필요 — 다음 skill 호출 시 반영.
+
+version: 1
+
+# 리뷰어 동작
+review:
+  effort: high           # Opus 4.7 의 xhigh 미사용 (안정 우선)
+  fork_context: true     # reviewer 는 항상 fork 격리
+
+# 자문관 동작
+advisor:
+  enabled: true
+  max_consults_per_task: 3   # 하나의 task 안에서 advisor 호출 상한
+  retry_threshold: 2          # worker 가 자체 검증 N회 실패 시 자동 advisor 호출
+
+# Plans.md drift 임계치
+monitor:
+  plans_drift:
+    wip_threshold: 3          # 1인 프로젝트라 보수적
+    stale_hours: 24
+
+# 워커 동작
+worker:
+  isolation: worktree         # 항상 git worktree 격리
+  self_review_items: 5        # worker-report.v1 의 self_review 필수 항목 수
+  validation_commands:        # worker 자체 검증에서 반드시 통과해야 하는 명령
+    - "npm run lint"
+    - "npm run build"
+    - "npm test"
+
+# 정리 임계치 (Plans.md 가 너무 길어질 때 자동 archive 제안)
+cleanup:
+  plans:
+    archive_after_phases: 5   # 보관 영역으로 옮기는 기준
