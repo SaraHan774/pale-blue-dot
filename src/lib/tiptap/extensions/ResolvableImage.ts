@@ -20,10 +20,9 @@ export interface ResolvableImageOptions {
   saveImage?: (file: File) => Promise<string>;
 }
 
-/**
- * In-flight resolution tracker so we don't resolve the same src twice
- * concurrently.
- */
+// Module-level singletons — safe for single-editor-at-a-time usage.
+// If a future split-view feature mounts two editors simultaneously, key
+// these maps by pagePath to avoid cross-editor cache invalidation.
 const resolving = new Map<string, Promise<string>>();
 const resolved = new Map<string, string>();
 
@@ -82,19 +81,28 @@ export const ResolvableImage = Image.extend<ResolvableImageOptions>({
                   // In-flight
                   if (resolving.has(originalSrc)) return;
 
-                  // Hide image while resolving to avoid broken icon flash
+                  // Hide image while resolving to avoid broken icon flash.
+                  // Set data-original-src synchronously so that if ProseMirror
+                  // replaces the DOM node mid-flight the new node will still
+                  // carry the key on the next update tick.
                   img.style.opacity = '0';
                   img.style.transition = 'opacity 0.2s';
+                  img.setAttribute('data-original-src', originalSrc);
 
                   const promise = resolveImageSrc(originalSrc);
 
                   promise
                     .then((blobUrl) => {
                       resolved.set(originalSrc, blobUrl);
-                      // Re-query by data-original-src or matching getAttribute src
+                      // Patch the captured img reference first (O(1)), then
+                      // sweep the DOM for any other elements sharing the same
+                      // src (e.g. duplicated images in the document).
+                      img.src = blobUrl;
+                      img.style.opacity = '1';
                       view.dom
                         .querySelectorAll<HTMLImageElement>('img')
                         .forEach((el) => {
+                          if (el === img) return;
                           const elAttr = el.getAttribute('src') ?? '';
                           const elOriginal = el.getAttribute('data-original-src') ?? '';
                           if (elOriginal === originalSrc || elAttr === originalSrc) {
