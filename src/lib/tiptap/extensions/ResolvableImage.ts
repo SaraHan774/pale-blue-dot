@@ -53,18 +53,29 @@ export const ResolvableImage = Image.extend<ResolvableImageOptions>({
           view() {
             return {
               update(view) {
-                // Find all <img> elements whose src starts with `.images/`
-                const imgs = view.dom.querySelectorAll<HTMLImageElement>(
-                  'img[src^=".images/"]',
-                );
+                // Query all img elements and filter by getAttribute('src') —
+                // CSS attribute selector img[src^=".images/"] does NOT work
+                // because browsers normalize relative paths to absolute URLs
+                // before attribute comparison.
+                const allImgs = view.dom.querySelectorAll<HTMLImageElement>('img');
 
-                imgs.forEach((img) => {
-                  const originalSrc = img.getAttribute('src')!;
+                allImgs.forEach((img) => {
+                  // Use getAttribute to get the raw (non-normalized) value
+                  const attrSrc = img.getAttribute('src') ?? '';
+                  const dataOriginal = img.getAttribute('data-original-src') ?? '';
 
-                  // Already resolved
+                  // Determine which key to look up: prefer data-original-src if set
+                  const originalSrc = dataOriginal || (attrSrc.startsWith('.images/') ? attrSrc : '');
+                  if (!originalSrc) return;
+
+                  // Already resolved — ensure the blob URL is applied
                   if (resolved.has(originalSrc)) {
                     const blobUrl = resolved.get(originalSrc)!;
-                    if (img.src !== blobUrl) img.src = blobUrl;
+                    if (img.src !== blobUrl) {
+                      img.src = blobUrl;
+                      img.setAttribute('data-original-src', originalSrc);
+                      img.style.opacity = '1';
+                    }
                     return;
                   }
 
@@ -80,14 +91,17 @@ export const ResolvableImage = Image.extend<ResolvableImageOptions>({
                   promise
                     .then((blobUrl) => {
                       resolved.set(originalSrc, blobUrl);
+                      // Re-query by data-original-src or matching getAttribute src
                       view.dom
-                        .querySelectorAll<HTMLImageElement>(
-                          `img[src="${originalSrc}"], img[data-resolved-src="${originalSrc}"]`,
-                        )
+                        .querySelectorAll<HTMLImageElement>('img')
                         .forEach((el) => {
-                          el.src = blobUrl;
-                          el.setAttribute('data-resolved-src', originalSrc);
-                          el.style.opacity = '1';
+                          const elAttr = el.getAttribute('src') ?? '';
+                          const elOriginal = el.getAttribute('data-original-src') ?? '';
+                          if (elOriginal === originalSrc || elAttr === originalSrc) {
+                            el.src = blobUrl;
+                            el.setAttribute('data-original-src', originalSrc);
+                            el.style.opacity = '1';
+                          }
                         });
                     })
                     .catch(() => {
