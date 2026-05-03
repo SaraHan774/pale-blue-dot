@@ -22,11 +22,12 @@ export function PageView() {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
   const {
-    pagesArray, removePage, updatePageInStore, columnColors, showToast,
+    pages: pagesMap, pagesArray, pageIds, removePage, updatePageInStore, columnColors, showToast,
     highlightColors, config, isImmerseMode, setIsImmerseMode,
     pageWidth, setPageWidth, slashCommands,
   } = useStore();
   const pages = pagesArray;
+  const pagesCount = pageIds.length;
 
   // ── UI State ──────────────────────────────────────────────────────
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -82,7 +83,9 @@ export function PageView() {
   const {
     page, loading, content, setContent, saveNow, markDirty, setPage, tocHeadings,
   } = usePageSync({
-    pageId, pages,
+    pageId,
+    pages: pagesMap,
+    pagesCount,
     onUpdate: updatePageInStore,
     onToast: showToast,
     getEditorState,

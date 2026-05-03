@@ -10,15 +10,17 @@ const AUTOSAVE_DELAY = 1500;
 
 interface UsePageSyncOptions {
   pageId: string | undefined;
-  pages: Page[];
+  pages: Record<string, Page>;
   onUpdate: (page: Page) => void;
   onToast: (message: string, type: 'success' | 'error' | 'info') => void;
   /** Pull fresh content from the editor at save time.
    *  MUST return cached state even if the editor is destroyed. */
   getEditorState?: () => { content: string } | null;
+  /** Number of pages — used to trigger retry effect without iterating the map. */
+  pagesCount?: number;
 }
 
-export function usePageSync({ pageId, pages, onUpdate, onToast, getEditorState }: UsePageSyncOptions) {
+export function usePageSync({ pageId, pages, onUpdate, onToast, getEditorState, pagesCount }: UsePageSyncOptions) {
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState('');
@@ -26,7 +28,7 @@ export function usePageSync({ pageId, pages, onUpdate, onToast, getEditorState }
 
   // ── Refs: keep latest values accessible without recreating callbacks ──
   const pageRef = useRef<Page | null>(null);
-  const pagesRef = useRef(pages);
+  const pagesRef = useRef<Record<string, Page>>(pages);
   const dirtyRef = useRef(false);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSaveTimeRef = useRef(0);
@@ -140,7 +142,7 @@ export function usePageSync({ pageId, pages, onUpdate, onToast, getEditorState }
   // ── Load page (stable — uses refs for pages) ──────────────────────
   const loadPage = useCallback(async (id: string) => {
     const currentPages = pagesRef.current;
-    const foundPage = currentPages.find(p => p.id === id);
+    const foundPage = currentPages[id];  // O(1) map access
     if (!foundPage) return;
 
     try {
@@ -190,11 +192,13 @@ export function usePageSync({ pageId, pages, onUpdate, onToast, getEditorState }
   }, [pageId, loadPage]);
 
   // Retry when pages become available (only if page hasn't loaded yet)
+  // Use pagesCount (derived from pageIds.length in store) to avoid iterating the map.
+  const resolvedPagesCount = pagesCount ?? Object.keys(pages).length;
   useEffect(() => {
-    if (pageId && !page && !loading && pages.length > 0) {
+    if (pageId && !page && !loading && resolvedPagesCount > 0) {
       loadPage(pageId);
     }
-  }, [pages.length, pageId, page, loading, loadPage]);
+  }, [resolvedPagesCount, pageId, page, loading, loadPage]);
 
   // ── Flush on unmount (component removed from DOM) ──────────────────
   useEffect(() => {
