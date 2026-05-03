@@ -25,15 +25,27 @@
 
 ## Active Phase
 
-### Phase 2: 버그 수정
+### Phase 3: MCP 서버 리팩토링
 
-**시작**: 2026-05-01
+**시작**: 2026-05-03
 **DoD**: 이 phase 의 모든 task 가 `pm:확인`.
 
 | Task | 내용 | DoD | Depends | Status | Owner |
 |------|------|-----|---------|--------|-------|
-| T1 | 이미지 엑박 수정 — 페이지 뷰에서 `.images/` 참조 이미지가 정상 렌더링됨 | 워크스페이스 이미지 엑박 없이 표시, `npm run build` 통과 | - | pm:확인 | self |
-| T2 | compact view 소형 창 column 레이아웃 수정 — 창이 작아질 때 column 이 늘어나 하나만 보이는 현상 제거 | 창 축소 시 column 이 최소 가로 너비를 유지한 채 staggered grid 유지, 초과분은 가로 스크롤로 처리, `npm run build` 통과 | - | pm:확인 | self |
+| T1 | MCP 서버 `index.ts` 모듈 분리 — 841줄 단일 파일을 기능별 모듈로 분리 (highlight helpers, page helpers, tool handlers, utils) | 각 MCP tool 이 리팩토링 전후 동일하게 동작, `cd mcp-pale-blue-dot-server && npm run build` 통과 | - | pm:요청 | self |
+
+---
+
+## 보관 (Archived Phases)
+
+### Phase 2: 버그 수정 (archived 2026-05-03)
+
+**시작**: 2026-05-01 / **종료**: 2026-05-03
+
+| Task | 내용 | 최종 Status |
+|------|------|------------|
+| T1 | 이미지 엑박 수정 | pm:확인 |
+| T2 | compact view 소형 창 column 레이아웃 수정 | pm:확인 |
 
 ---
 
