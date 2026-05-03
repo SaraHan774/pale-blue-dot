@@ -25,7 +25,13 @@
 
 ## Active Phase
 
-(없음 — 다음 작업은 `/pbd-plan create` 또는 `/pbd-plan add` 로 등록)
+### Phase 4: 파일 편집기 성능 향상을 위한 리팩토링 작업
+
+**시작**: 2026-05-03
+
+| Task | 내용 | DoD | Status |
+|------|------|-----|--------|
+| T1 | 파일 편집기의 성능 bottle neck 분석 및 해결 계획 수립 | (1) PageView/editor 관련 컴포넌트에서 주요 re-render 병목 3개 이상 식별 (2) 원인·영향 범위·해결 방향을 `docs/editor-perf-analysis.md`에 작성 (3) `npm run build` 통과 | pm:요청 |
 
 ---
 
