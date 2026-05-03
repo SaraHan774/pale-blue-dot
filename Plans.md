@@ -25,18 +25,21 @@
 
 ## Active Phase
 
-### Phase 3: MCP 서버 리팩토링
-
-**시작**: 2026-05-03
-**DoD**: 이 phase 의 모든 task 가 `pm:확인`.
-
-| Task | 내용 | DoD | Depends | Status | Owner |
-|------|------|-----|---------|--------|-------|
-| T1 | MCP 서버 `index.ts` 모듈 분리 — 841줄 단일 파일을 기능별 모듈로 분리 (highlight helpers, page helpers, tool handlers, utils) | 각 MCP tool 이 리팩토링 전후 동일하게 동작, `cd mcp-pale-blue-dot-server && npm run build` 통과 | - | pm:확인 | self |
+(없음 — 다음 작업은 `/pbd-plan create` 또는 `/pbd-plan add` 로 등록)
 
 ---
 
 ## 보관 (Archived Phases)
+
+### Phase 3: MCP 서버 리팩토링 (archived 2026-05-03)
+
+**시작**: 2026-05-03 / **종료**: 2026-05-03
+
+| Task | 내용 | 최종 Status |
+|------|------|------------|
+| T1 | MCP 서버 index.ts 모듈 분리 (841줄 → 9개 모듈) | pm:확인 |
+
+---
 
 ### Phase 2: 버그 수정 (archived 2026-05-03)
 
