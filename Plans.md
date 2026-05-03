@@ -33,7 +33,7 @@
 | Task | 내용 | DoD | Depends | Status | Owner |
 |------|------|-----|---------|--------|-------|
 | T1 | 이미지 엑박 수정 — 페이지 뷰에서 `.images/` 참조 이미지가 정상 렌더링됨 | 워크스페이스 이미지 엑박 없이 표시, `npm run build` 통과 | - | pm:확인 | self |
-| T2 | compact view 소형 창 column 레이아웃 수정 — 창이 작아질 때 column 이 늘어나 하나만 보이는 현상 제거 | 창 축소 시 column 이 최소 가로 너비를 유지한 채 staggered grid 유지, 초과분은 가로 스크롤로 처리, `npm run build` 통과 | - | pm:요청 | self |
+| T2 | compact view 소형 창 column 레이아웃 수정 — 창이 작아질 때 column 이 늘어나 하나만 보이는 현상 제거 | 창 축소 시 column 이 최소 가로 너비를 유지한 채 staggered grid 유지, 초과분은 가로 스크롤로 처리, `npm run build` 통과 | - | pm:확인 | self |
 
 ---
 
