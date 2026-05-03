@@ -41,7 +41,10 @@ export function PageView() {
   const existingColumns = useColumnList();
   const allTags = useTagList();
 
-  // pagesArray: needed only for usePageSync (finds page by id for initial load)
+  // Normalized pages map for usePageSync (O(1) id lookup)
+  const pagesMap = useStore(s => s.pages);
+  const pagesCount = useStore(s => s.pageIds.length);
+  // pagesArray: kept for useMemo derived data below (T3 will subsume when merged)
   const pages = useStore(s => s.pagesArray);
 
   // ── UI State ──────────────────────────────────────────────────────
@@ -98,7 +101,9 @@ export function PageView() {
   const {
     page, loading, content, setContent, saveNow, markDirty, setPage, tocHeadings,
   } = usePageSync({
-    pageId, pages,
+    pageId,
+    pages: pagesMap,
+    pagesCount,
     onUpdate: updatePageInStore,
     onToast: showToast,
     getEditorState,
