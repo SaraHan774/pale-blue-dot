@@ -370,21 +370,9 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
     fileInputRef.current?.click();
   }, []);
 
-  // Expose methods to parent via editorRef
-  useEffect(() => {
-    if (editorRef) {
-      editorRef.current = {
-        save: () => handleSave(),
-        togglePreview: () => handlePreview(),
-        openImagePicker,
-        preview,
-        saving,
-      };
-    }
-    return () => {
-      if (editorRef) editorRef.current = null;
-    };
-  });
+  // Stable refs for handleSave and handlePreview to avoid re-registering effects on every render
+  const handleSaveRef = useRef<() => void | Promise<void>>(() => {});
+  const handlePreviewRef = useRef<() => void | Promise<void>>(() => {});
 
   const handlePreview = useCallback(async () => {
     if (!preview) {
@@ -398,6 +386,25 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
     }
     setPreview(!preview);
   }, [preview, content, page.path, pages]);
+
+  // Keep refs in sync with latest function references
+  useEffect(() => { handlePreviewRef.current = handlePreview; }, [handlePreview]);
+
+  // Expose methods to parent via editorRef
+  useEffect(() => {
+    if (editorRef) {
+      editorRef.current = {
+        save: () => handleSaveRef.current(),
+        togglePreview: () => handlePreviewRef.current(),
+        openImagePicker,
+        preview,
+        saving,
+      };
+    }
+    return () => {
+      if (editorRef) editorRef.current = null;
+    };
+  }, [preview, saving, openImagePicker, editorRef]);
 
   // Clean up blob URLs on unmount — only when used standalone (not embedded in PageView)
   useEffect(() => {
@@ -606,11 +613,12 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
   };
 
   // Keyboard shortcut: Ctrl+S to save, Cmd+F for find
+  // Uses handleSaveRef to avoid re-registering the listener on every state change
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        handleSave();
+        handleSaveRef.current();
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
         e.preventDefault();
@@ -619,7 +627,7 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [title, content, tags, dueDate, selectedColumn]);
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -656,6 +664,11 @@ export function PageEditor({ page, onSave, onCancel, hideMeta, hideToolbar, meta
       setSaving(false);
     }
   };
+
+  // Keep handleSaveRef in sync with the latest handleSave closure
+  // Must be placed after handleSave definition since it references it
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { handleSaveRef.current = handleSave; });
 
   return (
     <>

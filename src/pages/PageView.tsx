@@ -12,6 +12,7 @@ import { usePageSync } from '@/hooks/usePageSync';
 import { useHighlightManager } from '@/hooks/useHighlightManager';
 import { openExternalUrl } from '@/lib/openExternal';
 import { clearResolvedImageCache } from '@/lib/tiptap/extensions/ResolvableImage';
+import { useColumnList, useTagList } from '@/hooks/usePageSelectors';
 import './PageView.css';
 
 const isTauri = '__TAURI_INTERNALS__' in window;
@@ -21,12 +22,30 @@ const DEFAULT_PALETTE = ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444', '#8b5cf6', 
 export function PageView() {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
-  const {
-    pagesArray, removePage, updatePageInStore, columnColors, showToast,
-    highlightColors, config, isImmerseMode, setIsImmerseMode,
-    pageWidth, setPageWidth, slashCommands,
-  } = useStore();
-  const pages = pagesArray;
+  // Field-level selectors — each subscription triggers re-render only for that field
+  const columnColors = useStore(s => s.columnColors);
+  const highlightColors = useStore(s => s.highlightColors);
+  const config = useStore(s => s.config);
+  const isImmerseMode = useStore(s => s.isImmerseMode);
+  const setIsImmerseMode = useStore(s => s.setIsImmerseMode);
+  const pageWidth = useStore(s => s.pageWidth);
+  const setPageWidth = useStore(s => s.setPageWidth);
+  const slashCommands = useStore(s => s.slashCommands);
+
+  // Action functions are stable references in Zustand — subscribe individually
+  const removePage = useStore(s => s.removePage);
+  const updatePageInStore = useStore(s => s.updatePageInStore);
+  const showToast = useStore(s => s.showToast);
+
+  // Selector-based derived data (O(1) via indexes)
+  const existingColumns = useColumnList();
+  const allTags = useTagList();
+
+  // Normalized pages map for usePageSync (O(1) id lookup)
+  const pagesMap = useStore(s => s.pages);
+  const pagesCount = useStore(s => s.pageIds.length);
+  // pagesArray: kept for useMemo derived data below (T3 will subsume when merged)
+  const pages = useStore(s => s.pagesArray);
 
   // ── UI State ──────────────────────────────────────────────────────
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -82,17 +101,16 @@ export function PageView() {
   const {
     page, loading, content, setContent, saveNow, markDirty, setPage, tocHeadings,
   } = usePageSync({
-    pageId, pages,
+    pageId,
+    pages: pagesMap,
+    pagesCount,
     onUpdate: updatePageInStore,
     onToast: showToast,
     getEditorState,
   });
 
   // ── Derived data ──────────────────────────────────────────────────
-  const existingColumns = useMemo(
-    () => Array.from(new Set(pages.map(p => p.kanbanColumn).filter(Boolean) as string[])),
-    [pages]
-  );
+  // existingColumns and allTags come from useColumnList() / useTagList() above
   const sortedColumnNames = useMemo(
     () => [...existingColumns].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())),
     [existingColumns]
@@ -104,7 +122,6 @@ export function PageView() {
     return DEFAULT_PALETTE[stableIndex % DEFAULT_PALETTE.length];
   }, [columnColors, sortedColumnNames]);
 
-  const allTags = useMemo(() => Array.from(new Set(pages.flatMap(p => p.tags))), [pages]);
   const filteredSuggestions = useMemo(
     () => allTags.filter(
       tag => page ? !page.tags.includes(tag) && tag.toLowerCase().includes(tagInput.toLowerCase()) : false

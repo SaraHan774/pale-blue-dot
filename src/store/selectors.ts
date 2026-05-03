@@ -96,8 +96,12 @@ export function selectAllColumns(
   state: CurrentPageState | NormalizedPageState
 ): string[] {
   // Handle normalized state with index
+  // NOTE: columnIndex keys are lowercased, so we must collect original-case values from pages
   if ('pageIds' in state) {
-    return Object.keys(state.indexes.columnIndex);
+    const cols = state.pageIds
+      .map(id => state.pages[id]?.kanbanColumn)
+      .filter((c): c is string => Boolean(c));
+    return Array.from(new Set(cols));
   }
 
   // Handle current flat array state
@@ -118,7 +122,9 @@ export function selectAllTags(
 ): string[] {
   // Handle normalized state with index
   if ('pageIds' in state) {
-    return Object.keys(state.indexes.tagIndex);
+    // Collect original-case tags from page data (tagIndex keys are lowercased)
+    const tags = state.pageIds.flatMap(id => state.pages[id]?.tags ?? []);
+    return Array.from(new Set(tags));
   }
 
   // Handle current flat array state
