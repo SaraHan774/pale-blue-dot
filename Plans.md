@@ -32,7 +32,7 @@
 
 | Task | 내용 | DoD | Depends | Status | Owner |
 |------|------|-----|---------|--------|-------|
-| T1 | MCP 서버 `index.ts` 모듈 분리 — 841줄 단일 파일을 기능별 모듈로 분리 (highlight helpers, page helpers, tool handlers, utils) | 각 MCP tool 이 리팩토링 전후 동일하게 동작, `cd mcp-pale-blue-dot-server && npm run build` 통과 | - | pm:요청 | self |
+| T1 | MCP 서버 `index.ts` 모듈 분리 — 841줄 단일 파일을 기능별 모듈로 분리 (highlight helpers, page helpers, tool handlers, utils) | 각 MCP tool 이 리팩토링 전후 동일하게 동작, `cd mcp-pale-blue-dot-server && npm run build` 통과 | - | cc:완료 | self |
 
 ---
 
