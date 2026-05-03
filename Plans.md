@@ -34,7 +34,7 @@
 | T1 | 파일 편집기의 성능 bottle neck 분석 및 해결 계획 수립 | (1) PageView/editor 관련 컴포넌트에서 주요 re-render 병목 3개 이상 식별 (2) 원인·영향 범위·해결 방향을 `docs/editor-perf-analysis.md`에 작성 (3) `npm run build` 통과 | pm:확인 |
 | T2 | PageView Zustand 구독 세밀화 | `useStore()` 전체 구독을 field-level selector로 분리, `pagesArray` 사용처를 `selectAllColumns`/`selectAllTags` selector로 교체, `npm run build && npm test` 통과 | pm:확인 |
 | T3 | usePageSync 인터페이스 개선 — pages 맵 기반 전환 | `usePageSync`가 `pages: Page[]` 대신 normalized pages map을 사용, `loadPage` 내부 `find`를 O(1) 맵 접근으로 교체, `npm run build && npm test` 통과 | pm:확인 |
-| T4 | PageEditor keyboard shortcut & editorRef effect 최적화 | keyboard shortcut `useEffect` 의존성 배열을 `[]`로 축소(ref 패턴), editorRef `useEffect` dependency array 추가, `npm run build && npm test` 통과 | cc:완료 |
+| T4 | PageEditor keyboard shortcut & editorRef effect 최적화 | keyboard shortcut `useEffect` 의존성 배열을 `[]`로 축소(ref 패턴), editorRef `useEffect` dependency array 추가, `npm run build && npm test` 통과 | pm:확인 |
 | T5 | useHighlightHoverTooltip 이벤트 위임으로 교체 | MutationObserver 콜백에서 이벤트 핸들러 일괄 재등록 제거 → 컨테이너 이벤트 위임으로 대체, 하이라이트 20개 이상 페이지에서 타이핑 lag 없음 확인, `npm run build && npm test` 통과 | pm:요청 |
 
 ---
