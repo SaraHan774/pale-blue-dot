@@ -31,7 +31,7 @@
 
 | Task | 내용 | DoD | Status |
 |------|------|-----|--------|
-| T1 | 파일 편집기의 성능 bottle neck 분석 및 해결 계획 수립 | (1) PageView/editor 관련 컴포넌트에서 주요 re-render 병목 3개 이상 식별 (2) 원인·영향 범위·해결 방향을 `docs/editor-perf-analysis.md`에 작성 (3) `npm run build` 통과 | pm:요청 |
+| T1 | 파일 편집기의 성능 bottle neck 분석 및 해결 계획 수립 | (1) PageView/editor 관련 컴포넌트에서 주요 re-render 병목 3개 이상 식별 (2) 원인·영향 범위·해결 방향을 `docs/editor-perf-analysis.md`에 작성 (3) `npm run build` 통과 | cc:진행 |
 
 ---
 
