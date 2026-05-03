@@ -4,6 +4,8 @@
  */
 
 import { useMemo } from 'react';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
 import { useStore } from '@/store/useStore';
 import { Page } from '@/types';
 import {
@@ -60,7 +62,7 @@ export function usePagesByTag(tag: string): Page[] {
  * const columns = useColumnList();
  */
 export function useColumnList(): string[] {
-  return useStore(selectAllColumns);
+  return useStoreWithEqualityFn(useStore, s => selectAllColumns(s), shallow);
 }
 
 /**
@@ -71,7 +73,7 @@ export function useColumnList(): string[] {
  * const tags = useTagList();
  */
 export function useTagList(): string[] {
-  return useStore(selectAllTags);
+  return useStoreWithEqualityFn(useStore, s => selectAllTags(s), shallow);
 }
 
 /**
