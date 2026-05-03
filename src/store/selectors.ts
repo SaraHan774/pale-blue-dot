@@ -118,7 +118,9 @@ export function selectAllTags(
 ): string[] {
   // Handle normalized state with index
   if ('pageIds' in state) {
-    return Object.keys(state.indexes.tagIndex);
+    // Collect original-case tags from page data (tagIndex keys are lowercased)
+    const tags = state.pageIds.flatMap(id => state.pages[id]?.tags ?? []);
+    return Array.from(new Set(tags));
   }
 
   // Handle current flat array state
