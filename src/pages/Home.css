@@ -593,15 +593,30 @@
    "Looking at all your notes from a distance, like Earth from space"
    ═══════════════════════════════════════════════════════════════ */
 
-.compact-grid-view {
-  margin: 2rem 2.5rem;
-  padding-bottom: 2rem;
-  column-count: auto;
-  column-width: 300px;
-  column-gap: 1.5rem;
-  overflow-y: auto;
+/* Wrapper enables horizontal scroll when compact columns overflow */
+.compact-grid-scroll-wrapper {
   flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
   align-self: stretch;
+}
+
+.compact-grid-view {
+  --compact-col-min-width: 260px;
+  --compact-col-gap: 1.5rem;
+
+  display: grid;
+  /* Each column keeps a minimum width; the grid never shrinks tracks below that */
+  grid-template-columns: repeat(auto-fill, minmax(var(--compact-col-min-width), 320px));
+  gap: var(--compact-col-gap);
+  /* Force the container to be at least wide enough for its content
+     so the scroll-wrapper can activate horizontal scroll instead of
+     squeezing columns to 1 */
+  min-width: max-content;
+  align-items: start;
+  align-content: start;
+  padding: 2rem 2.5rem;
+  padding-bottom: 2rem;
 }
 
 /* Column - Minimal, Serene Container */
@@ -613,9 +628,6 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 1px 2px rgba(123, 165, 209, 0.04);
-  break-inside: avoid;
-  page-break-inside: avoid;
-  margin-bottom: 1.5rem;
 }
 
 /* Header - Unified Pale Blue (NO rainbow colors!) */
@@ -752,43 +764,25 @@
   opacity: 0.5;
 }
 
-/* Responsive Breakpoints */
+/* Responsive Breakpoints
+   The scroll-wrapper handles horizontal overflow at narrow widths,
+   so we only adjust padding/gap — we never force column-count: 1. */
 @media (max-width: 1400px) {
   .compact-grid-view {
-    column-width: 280px;
-    column-gap: 1.25rem;
+    --compact-col-gap: 1.25rem;
   }
 }
 
 @media (max-width: 1200px) {
   .compact-grid-view {
-    column-width: 260px;
-    column-gap: 1rem;
-    margin: 1.75rem 2rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .compact-grid-view {
-    column-count: 1;
-    column-gap: 1.25rem;
-    margin: 1.5rem 1.5rem;
-  }
-
-  .compact-column {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    --compact-col-gap: 1rem;
+    padding: 1.75rem 2rem;
   }
 }
 
 @media (max-width: 768px) {
   .compact-grid-view {
-    margin: 1.25rem 1rem;
-  }
-
-  .compact-column {
-    margin-bottom: 1rem;
+    padding: 1.25rem 1rem;
   }
 
   .compact-column-header {

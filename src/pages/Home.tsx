@@ -560,6 +560,7 @@ export function Home() {
 
       {boardView === 'compact' ? (
         /* ===== COMPACT GRID VIEW - Pale Blue Dot (No rainbow colors!) ===== */
+        <div className="compact-grid-scroll-wrapper">
         <div className="compact-grid-view">
           {columns.map((col) => {
             const columnCards = columnCardsMap.get(col.toLowerCase()) || [];
@@ -604,6 +605,7 @@ export function Home() {
               </div>
             </div>
           )}
+        </div>
         </div>
       ) : boardView === 'kanban' ? (
         <div className="kanban-board">
