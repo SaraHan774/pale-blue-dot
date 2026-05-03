@@ -22,72 +22,53 @@ export function useHighlightHoverTooltip({
   const isMouseOverTooltipRef = useRef(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Attach mouseenter/mouseleave handlers to highlight mark elements
+  // Use event delegation: single mouseover/mouseout on container instead of
+  // per-mark mouseenter/mouseleave that required full detach→re-attach on every DOM mutation.
   useEffect(() => {
     const container = containerRef.current;
     if (!container || !editor || readOnly) return;
 
-    let marks: NodeListOf<HTMLElement> | null = null;
-    let handlers: Array<{ enter: () => void; leave: () => void }> = [];
+    const handleMouseOver = (e: MouseEvent) => {
+      const mark = (e.target as Element).closest('mark.highlight-mark[data-highlight-id]');
+      if (!mark) return;
 
-    const attachHandlers = () => {
-      marks = container.querySelectorAll<HTMLElement>('mark.highlight-mark[data-highlight-id]');
-      handlers = [];
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
 
-      marks.forEach((mark) => {
-        const handleMouseEnter = () => {
-          if (closeTimeoutRef.current) {
-            clearTimeout(closeTimeoutRef.current);
-            closeTimeoutRef.current = null;
-          }
-          const highlightId = mark.getAttribute('data-highlight-id');
-          const color = mark.getAttribute('data-highlight-color') || mark.style.backgroundColor || '';
-          if (!highlightId) return;
-          const rect = mark.getBoundingClientRect();
-          setHoveredHighlight({ id: highlightId, color, rect });
-        };
+      const highlightId = mark.getAttribute('data-highlight-id');
+      const color =
+        mark.getAttribute('data-highlight-color') ||
+        (mark as HTMLElement).style.backgroundColor ||
+        '';
+      if (!highlightId) return;
 
-        const handleMouseLeave = () => {
-          closeTimeoutRef.current = setTimeout(() => {
-            if (!isMouseOverTooltipRef.current) {
-              setHoveredHighlight(null);
-            }
-          }, 150);
-        };
-
-        mark.addEventListener('mouseenter', handleMouseEnter);
-        mark.addEventListener('mouseleave', handleMouseLeave);
-        handlers.push({ enter: handleMouseEnter, leave: handleMouseLeave });
-      });
+      const rect = mark.getBoundingClientRect();
+      setHoveredHighlight({ id: highlightId, color, rect });
     };
 
-    attachHandlers();
+    const handleMouseOut = (e: MouseEvent) => {
+      const mark = (e.target as Element).closest('mark.highlight-mark[data-highlight-id]');
+      if (!mark) return;
 
-    // Re-attach when DOM content changes
-    const observer = new MutationObserver(() => {
-      if (marks && handlers.length > 0) {
-        marks.forEach((mark, i) => {
-          if (handlers[i]) {
-            mark.removeEventListener('mouseenter', handlers[i].enter);
-            mark.removeEventListener('mouseleave', handlers[i].leave);
-          }
-        });
-      }
-      attachHandlers();
-    });
+      // Check that we are actually leaving the mark, not moving into a child element
+      const relatedTarget = e.relatedTarget as Element | null;
+      if (relatedTarget && mark.contains(relatedTarget)) return;
 
-    observer.observe(container, { childList: true, subtree: true });
+      closeTimeoutRef.current = setTimeout(() => {
+        if (!isMouseOverTooltipRef.current) {
+          setHoveredHighlight(null);
+        }
+      }, 150);
+    };
+
+    container.addEventListener('mouseover', handleMouseOver);
+    container.addEventListener('mouseout', handleMouseOut);
 
     return () => {
-      observer.disconnect();
-      if (marks && handlers.length > 0) {
-        marks.forEach((mark, i) => {
-          if (handlers[i]) {
-            mark.removeEventListener('mouseenter', handlers[i].enter);
-            mark.removeEventListener('mouseleave', handlers[i].leave);
-          }
-        });
-      }
+      container.removeEventListener('mouseover', handleMouseOver);
+      container.removeEventListener('mouseout', handleMouseOut);
       if (closeTimeoutRef.current) {
         clearTimeout(closeTimeoutRef.current);
       }
