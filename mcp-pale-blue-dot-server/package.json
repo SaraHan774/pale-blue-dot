@@ -8,7 +8,7 @@
     "mcp-pale-blue-dot-server": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc && cp dist/mcp-pale-blue-dot-server/src/index.js dist/index.js",
+    "build": "tsc && cp -R dist/mcp-pale-blue-dot-server/src/. dist/ && rm -rf dist/mcp-pale-blue-dot-server dist/src",
     "watch": "tsc --watch",
     "dev": "npm run build && node dist/index.js"
   },
