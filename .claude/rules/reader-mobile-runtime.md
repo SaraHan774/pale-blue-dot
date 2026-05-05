@@ -270,6 +270,229 @@ function handleLoadEnd() {
 
 ---
 
+## 9. 터치 타깃 — 최소 44pt 보장
+
+**규칙**: 아이콘 버튼처럼 시각적 크기가 작은 요소는 `hitSlop` 으로 터치 영역을 확장한다.
+44×44pt 미만이면 오터치·미스터치가 잦아진다 (Apple HIG / Material 기준 동일).
+
+```tsx
+// ❌ [major] 아이콘만 있는 버튼에 hitSlop 없음
+<TouchableOpacity onPress={handleSync}>
+  <Ionicons name="refresh-outline" size={22} />
+</TouchableOpacity>
+
+// ✅ hitSlop 으로 44pt 확보
+<TouchableOpacity
+  onPress={handleSync}
+  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+  accessibilityLabel="동기화"
+>
+  <Ionicons name="refresh-outline" size={22} />
+</TouchableOpacity>
+```
+
+**체크포인트:**
+- [ ] 아이콘 전용 버튼(`size` ≤ 24)에 `hitSlop` 이 있는가
+- [ ] `hitSlop` 값이 `(44 - iconSize) / 2` 이상인가
+
+---
+
+## 10. 접근성 — 아이콘 버튼 레이블
+
+**규칙**: 텍스트 없이 아이콘만 있는 버튼은 스크린 리더가 내용을 알 수 없다.
+`accessibilityLabel` 을 반드시 붙인다.
+
+```tsx
+// ❌ [major] 아이콘만, 레이블 없음
+<TouchableOpacity onPress={() => router.push('/config')}>
+  <Ionicons name="settings-outline" size={22} />
+</TouchableOpacity>
+
+// ✅ 레이블 + role 명시
+<TouchableOpacity
+  onPress={() => router.push('/config')}
+  accessibilityLabel="설정"
+  accessibilityRole="button"
+>
+  <Ionicons name="settings-outline" size={22} />
+</TouchableOpacity>
+```
+
+`accessibilityHint` 는 동작 결과가 레이블만으로 불분명할 때 추가한다 (예: "설정 화면으로 이동").
+
+**체크포인트:**
+- [ ] 텍스트 없는 터치 요소에 `accessibilityLabel` 이 있는가
+- [ ] 목록 아이템 등 역할이 명확한 경우 `accessibilityRole` 이 있는가
+
+---
+
+## 11. 키보드 처리 — KeyboardAvoidingView + 외부 탭 해제
+
+**규칙**: 텍스트 입력이 있는 화면은 키보드가 올라왔을 때 입력 필드가 가려지지 않도록
+`KeyboardAvoidingView` 로 감싼다. iOS 와 Android 의 동작 방식이 다르다.
+
+```tsx
+// ✅ 플랫폼별 behavior 분기
+<KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+>
+  <ScrollView keyboardShouldPersistTaps="handled">
+    {/* 입력 필드 */}
+  </ScrollView>
+</KeyboardAvoidingView>
+```
+
+- `behavior="padding"` (iOS): 키보드만큼 하단에 패딩 추가
+- `behavior={undefined}` (Android): 시스템이 자동 처리 (`android:windowSoftInputMode`)
+- `keyboardShouldPersistTaps="handled"` : ScrollView 내 버튼 탭 시 키보드 유지
+
+```tsx
+// ✅ 입력 완료 후 다음 필드로 포커스 이동 (returnKeyType)
+<TextInput
+  returnKeyType="next"
+  onSubmitEditing={() => tokenInputRef.current?.focus()}
+/>
+<TextInput
+  ref={tokenInputRef}
+  returnKeyType="done"
+  onSubmitEditing={Keyboard.dismiss}
+/>
+```
+
+**체크포인트:**
+- [ ] 입력 필드가 있는 화면에 `KeyboardAvoidingView` 가 있는가
+- [ ] iOS/Android `behavior` 가 플랫폼별로 분기되는가
+- [ ] `returnKeyType` 이 흐름에 맞게 설정되어 있는가 (`next` → `done`)
+
+---
+
+## 12. Safe Area — 하드코딩 padding 금지
+
+**규칙**: 노치·Dynamic Island·홈 인디케이터 영역은 기기마다 크기가 다르다.
+`useSafeAreaInsets()` 를 사용하고 상수값으로 패딩을 하드코딩하지 않는다.
+
+```tsx
+// ❌ [major] 하드코딩 패딩 — 다른 기기에서 노치에 가림
+<View style={{ paddingTop: 44, paddingBottom: 34 }}>
+
+// ✅ 런타임 insets 사용
+const insets = useSafeAreaInsets();
+<View style={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom }}>
+```
+
+`SafeAreaProvider` 가 앱 루트(`_layout.tsx`)에 한 번만 설정되어 있으면 하위 화면은
+`useSafeAreaInsets()` 만 사용한다.
+
+**체크포인트:**
+- [ ] 상단/하단 패딩에 상수 `44` / `34` / `20` 이 하드코딩되어 있지 않은가
+- [ ] `useSafeAreaInsets()` 로 `insets.top` / `insets.bottom` 을 반영하는가
+
+---
+
+## 13. 리스트 — FlatList keyExtractor + 가상화
+
+**규칙**: `FlatList` 의 `keyExtractor` 는 안정적인 ID 를 반환해야 한다.
+배열 index 를 key 로 쓰면 항목 추가/삭제 시 불필요한 리렌더 또는 UI 깜빡임이 생긴다.
+
+```tsx
+// ❌ [major] index 를 key 로 사용
+<FlatList
+  keyExtractor={(_, index) => String(index)}
+  ...
+/>
+
+// ✅ 고유 ID 사용
+<FlatList
+  keyExtractor={(item) => item.id}
+  ...
+/>
+```
+
+항목이 100개 이상이 될 수 있는 리스트는 `FlatList` / `FlashList` 를 사용한다.
+`ScrollView` 안에 `map()` 으로 렌더하면 전체 항목을 한 번에 마운트한다.
+
+```tsx
+// ❌ [minor] 긴 리스트를 ScrollView + map 으로 렌더
+<ScrollView>
+  {columns.map(col => <ColumnCard key={col} />)} // 100개 이상이면 성능 문제
+</ScrollView>
+
+// ✅ FlatList 로 가상화
+<FlatList
+  data={columns}
+  keyExtractor={(item) => item}
+  renderItem={({ item }) => <ColumnCard name={item} />}
+/>
+```
+
+**체크포인트:**
+- [ ] `keyExtractor` 가 배열 index 가 아닌 고유 값을 반환하는가
+- [ ] 동적으로 길어질 수 있는 리스트에 `FlatList` 를 사용하는가
+
+---
+
+## 14. Animated — useNativeDriver 필수
+
+**규칙**: `Animated.timing` / `Animated.spring` 은 `useNativeDriver: true` 를 설정해야
+JS 스레드를 차단하지 않는다. `transform` / `opacity` 프로퍼티는 네이티브 드라이버를 지원한다.
+
+```tsx
+// ❌ [major] useNativeDriver 누락 또는 false
+Animated.timing(opacity, {
+  toValue: 1,
+  duration: 200,
+}).start();
+
+// ✅ 네이티브 드라이버 활성화
+Animated.timing(opacity, {
+  toValue: 1,
+  duration: 200,
+  useNativeDriver: true, // opacity, transform 에서 필수
+}).start();
+```
+
+`useNativeDriver: true` 를 쓸 수 없는 경우 (예: `height`, `width`, `backgroundColor` 애니메이션):
+- `LayoutAnimation` 으로 대체하거나
+- `useNativeDriver: false` 를 명시적으로 적고 `[nit]` 수준 주석으로 이유를 남긴다.
+
+**체크포인트:**
+- [ ] `Animated.timing` / `Animated.spring` 에 `useNativeDriver` 가 명시되어 있는가
+- [ ] `opacity` / `transform` 애니메이션에서 `useNativeDriver: true` 인가
+
+---
+
+## 15. Alert 중복 방지
+
+**규칙**: `Alert.alert` 는 OS 레벨 모달이라 스택이 쌓이면 사용자가 닫을 수 없는
+상태가 된다. 비동기 연쇄 호출이나 재진입에서 이중 Alert 이 발생하지 않도록 한다.
+
+```tsx
+// ❌ [major] 동기화 실패 + 뒤로가기 Alert 이 겹칠 수 있음
+async function startSync() {
+  try { ... }
+  catch { Alert.alert('오류', ...); }      // ← 첫 번째 Alert
+  finally { setSyncing(false); }
+}
+
+// 동시에 사용자가 Back 버튼 → 두 번째 Alert 발생
+
+// ✅ isMountedRef + syncing 상태로 이중 발화 차단
+catch (error) {
+  if (!isMountedRef.current) return;       // 이미 나간 경우 skip
+  Alert.alert('오류', error.message);
+}
+```
+
+`syncing` 상태가 `true` 일 때는 Back 버튼이 별도 Alert 을 표시하므로,
+catch 블록의 Alert 이 동시에 발생하는 경로를 코드 리뷰 시 명시적으로 확인한다.
+
+**체크포인트:**
+- [ ] catch 블록 Alert 과 Back 버튼 Alert 이 동시에 발화하는 경로가 있는가
+- [ ] 네트워크 재시도 로직이 있다면 이전 Alert 이 닫힌 후에만 재시도하는가
+
+---
+
 ## 감지 명령 모음
 
 ```bash
@@ -277,19 +500,37 @@ function handleLoadEnd() {
 grep -n "await fetch(" reader-mobile/services/githubService.ts
 
 # 2. await 뒤 가드 없는 setState (isMountedRef 누락 가능성)
-grep -n "setSyncing\|setColumns\|setLoading\|Alert\.alert" reader-mobile/app/ -r | \
+grep -rn "setSyncing\|setColumns\|setLoading\|Alert\.alert" reader-mobile/app/ | \
   grep -v "isMountedRef"
 
 # 3. 저장 전 hasExistingToken 상태 갱신
 grep -A3 "setHasExistingToken(true)" reader-mobile/app/config.tsx
 
 # 4. validateRepoUrl 반환값 boolean 처리
-grep -n "validateRepoUrl" reader-mobile/ -r | grep "=== true\|=== false\|if (await"
+grep -rn "validateRepoUrl" reader-mobile/ | grep "=== true\|=== false\|if (await"
 
 # 5. SecureStore 키 불일치
 grep -n "GITHUB_TOKEN_KEY\|github_access_token\|pbd_github_token" \
   reader-mobile/services/secureConfigService.ts \
   reader-mobile/services/tokenService.ts
+
+# 6. 터치 타깃 hitSlop 누락
+grep -rn "Ionicons\|Feather\|MaterialIcons" reader-mobile/app/ | \
+  grep -v "hitSlop"
+
+# 7. 아이콘 버튼 accessibilityLabel 누락
+grep -rn "TouchableOpacity" reader-mobile/app/ | \
+  grep -v "accessibilityLabel\|Text>"
+
+# 8. Animated useNativeDriver 누락
+grep -rn "Animated\.timing\|Animated\.spring" reader-mobile/ | \
+  grep -v "useNativeDriver"
+
+# 9. FlatList keyExtractor index 사용
+grep -rn "keyExtractor" reader-mobile/ | grep "index"
+
+# 10. Safe Area 하드코딩 패딩
+grep -rn "paddingTop: [0-9]\{2\}\|paddingBottom: [0-9]\{2\}" reader-mobile/app/
 ```
 
 ---
@@ -299,6 +540,6 @@ grep -n "GITHUB_TOKEN_KEY\|github_access_token\|pbd_github_token" \
 | 레이블 | 조건 |
 |--------|------|
 | `[critical]` | 직접 `fetch()` 사용, isMountedRef 없이 async setState, SecureStore 키 불일치 |
-| `[major]` | `useEffect` 단독으로 포커스 복귀 데이터 로드, 로딩/에러/빈 상태 중 하나 누락, 동기화 중 뒤로가기 무방비 |
-| `[minor]` | 스크롤 복원 누락, syncProgress 미표시, 에러 메시지 비구체적 |
-| `[nit]` | 한국어 메시지 어색함, 아이콘 크기/색상 불일치 |
+| `[major]` | `useEffect` 단독 포커스 복귀 로드, 로딩/에러/빈 상태 누락, 동기화 중 뒤로가기 무방비, 아이콘 버튼 `accessibilityLabel` 누락, `hitSlop` 없는 소형 버튼, `useNativeDriver` 누락, Safe Area 하드코딩, Alert 중복 발화 경로 |
+| `[minor]` | 스크롤 복원 누락, syncProgress 미표시, 에러 메시지 비구체적, FlatList index key, ScrollView + map 긴 리스트 |
+| `[nit]` | 한국어 메시지 어색함, `accessibilityHint` 미추가, `returnKeyType` 최적화 |
