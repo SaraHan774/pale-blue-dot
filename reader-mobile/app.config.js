@@ -36,7 +36,6 @@ module.exports = {
       package: androidPackage,
       versionCode: 1,
       permissions: ['android.permission.INTERNET'],
-      statusBarTranslucent: false,
     },
     scheme: 'palebluedot',
     plugins: [
