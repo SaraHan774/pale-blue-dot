@@ -18,7 +18,8 @@ const PARALLEL_DOWNLOAD_BATCH_SIZE = 10; // Download 10 files concurrently
  */
 async function getHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
-    'Accept': 'application/vnd.github.v3+json',
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
   };
 
   const token = await loadToken();
