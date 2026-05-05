@@ -7,14 +7,20 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  Animated,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import WebView from 'react-native-webview';
-import { loadPages, getImagePath, updatePageContent } from '@/services/cacheService';
+import { loadPages, getImagePath, updatePageContent, saveMemo, deleteMemo } from '@/services/cacheService';
 import { replaceImagePaths } from '@/services/parserService';
-import type { Page } from '@/types';
+import type { Page, Memo } from '@/types';
 import {
   bgPrimary,
   bgSecondary,
@@ -89,6 +95,12 @@ export function insertHighlight(
 function generateId(): string {
   return 'hl-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now().toString(36);
 }
+
+function generateMemoId(): string {
+  return 'memo-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now().toString(36);
+}
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 // ─── Build the HTML document injected into WebView ──────────────────
 
@@ -195,6 +207,14 @@ export default function PageScreen() {
   const [tappedHighlightText, setTappedHighlightText] = useState<string>('');
   const [showHighlightEdit, setShowHighlightEdit] = useState(false);
 
+  // Memo bottom sheet state
+  const [showMemoSheet, setShowMemoSheet] = useState(false);
+  const [memoSheetHighlightId, setMemoSheetHighlightId] = useState<string>('');
+  const [memoSheetHighlightText, setMemoSheetHighlightText] = useState<string>('');
+  const [newMemoText, setNewMemoText] = useState<string>('');
+  const [memoSaving, setMemoSaving] = useState(false);
+  const memoSlideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
   useEffect(() => {
     loadPage();
   }, [id]);
@@ -291,6 +311,83 @@ export default function PageScreen() {
       await updatePageContent(page.id, updatedContent);
     } catch (error) {
       console.error('Failed to save highlight:', error);
+    }
+  }
+
+  // ── Memo bottom sheet helpers ──────────────────────────────────────
+
+  function openMemoSheet(highlightId: string, highlightText: string) {
+    setMemoSheetHighlightId(highlightId);
+    setMemoSheetHighlightText(highlightText);
+    setNewMemoText('');
+    setShowMemoSheet(true);
+    Animated.spring(memoSlideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 11,
+    }).start();
+  }
+
+  function closeMemoSheet() {
+    Animated.timing(memoSlideAnim, {
+      toValue: SCREEN_HEIGHT,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowMemoSheet(false);
+      setMemoSheetHighlightId('');
+      setMemoSheetHighlightText('');
+      setNewMemoText('');
+    });
+  }
+
+  async function handleSaveMemo() {
+    if (!page || !newMemoText.trim() || !memoSheetHighlightId) return;
+    setMemoSaving(true);
+    try {
+      const now = new Date().toISOString();
+      const existingMemos: Memo[] = page.memos ?? [];
+      const linkedMemos = existingMemos.filter(
+        (m) => m.highlightId === memoSheetHighlightId
+      );
+      const newMemo: Memo = {
+        id: generateMemoId(),
+        type: 'linked',
+        note: newMemoText.trim(),
+        highlightId: memoSheetHighlightId,
+        highlightText: memoSheetHighlightText,
+        highlightColor: tappedHighlightColor || '#FFEB3B',
+        tags: [],
+        createdAt: now,
+        updatedAt: now,
+        order: linkedMemos.length,
+      };
+      await saveMemo(page.id, newMemo);
+      setPage((prev) =>
+        prev
+          ? { ...prev, memos: [...(prev.memos ?? []), newMemo] }
+          : prev
+      );
+      setNewMemoText('');
+    } catch (error) {
+      console.error('Failed to save memo:', error);
+    } finally {
+      setMemoSaving(false);
+    }
+  }
+
+  async function handleDeleteMemo(memoId: string) {
+    if (!page) return;
+    try {
+      await deleteMemo(page.id, memoId);
+      setPage((prev) =>
+        prev
+          ? { ...prev, memos: (prev.memos ?? []).filter((m) => m.id !== memoId) }
+          : prev
+      );
+    } catch (error) {
+      console.error('Failed to delete memo:', error);
     }
   }
 
@@ -505,6 +602,25 @@ export default function PageScreen() {
               ))}
             </View>
             <TouchableOpacity
+              style={styles.memoButton}
+              onPress={() => {
+                dismissHighlightEdit();
+                openMemoSheet(tappedHighlightId, tappedHighlightText);
+              }}
+              accessibilityLabel="메모 보기/추가"
+            >
+              <Ionicons name="chatbubble-outline" size={16} color={accentPrimary} />
+              <Text style={styles.memoButtonText}>
+                메모{' '}
+                {(() => {
+                  const count = (page?.memos ?? []).filter(
+                    (m) => m.highlightId === tappedHighlightId
+                  ).length;
+                  return count > 0 ? `(${count})` : '';
+                })()}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={styles.deleteButton}
               onPress={applyHighlightDelete}
               accessibilityLabel="하이라이트 삭제"
@@ -517,6 +633,106 @@ export default function PageScreen() {
             </TouchableOpacity>
           </Pressable>
         </Pressable>
+      </Modal>
+
+      {/* Memo Bottom Sheet */}
+      <Modal
+        visible={showMemoSheet}
+        transparent
+        animationType="none"
+        onRequestClose={closeMemoSheet}
+      >
+        <KeyboardAvoidingView
+          style={styles.memoSheetWrapper}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <Pressable style={styles.memoSheetOverlay} onPress={closeMemoSheet} />
+          <Animated.View
+            style={[
+              styles.memoSheetContainer,
+              { paddingBottom: insets.bottom + 16, transform: [{ translateY: memoSlideAnim }] },
+            ]}
+          >
+            {/* Sheet Handle */}
+            <View style={styles.memoSheetHandle} />
+
+            {/* Sheet Header */}
+            <View style={styles.memoSheetHeader}>
+              <Text style={styles.memoSheetTitle} numberOfLines={2}>
+                "{memoSheetHighlightText.length > 50
+                  ? memoSheetHighlightText.slice(0, 50) + '…'
+                  : memoSheetHighlightText}"
+              </Text>
+              <TouchableOpacity onPress={closeMemoSheet} accessibilityLabel="닫기">
+                <Ionicons name="close" size={22} color={textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Existing memos list */}
+            {(() => {
+              const linkedMemos = (page?.memos ?? [])
+                .filter((m) => m.highlightId === memoSheetHighlightId)
+                .sort((a, b) => a.order - b.order);
+              return linkedMemos.length === 0 ? (
+                <Text style={styles.memoEmptyText}>아직 메모가 없습니다.</Text>
+              ) : (
+                <ScrollView style={styles.memoList} keyboardShouldPersistTaps="handled">
+                  {linkedMemos.map((memo) => (
+                    <View key={memo.id} style={styles.memoItem}>
+                      <View style={styles.memoItemBody}>
+                        <Text style={styles.memoItemNote}>{memo.note}</Text>
+                        <Text style={styles.memoItemDate}>
+                          {new Date(memo.createdAt).toLocaleDateString('ko-KR', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => handleDeleteMemo(memo.id)}
+                        accessibilityLabel="메모 삭제"
+                        style={styles.memoDeleteBtn}
+                      >
+                        <Ionicons name="trash-outline" size={16} color="#FF6B6B" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              );
+            })()}
+
+            {/* New memo input */}
+            <View style={styles.memoInputRow}>
+              <TextInput
+                style={styles.memoInput}
+                placeholder="새 메모를 입력하세요..."
+                placeholderTextColor={textSecondary}
+                value={newMemoText}
+                onChangeText={setNewMemoText}
+                multiline
+                maxLength={500}
+                accessibilityLabel="메모 입력"
+              />
+              <TouchableOpacity
+                style={[
+                  styles.memoSaveBtn,
+                  (!newMemoText.trim() || memoSaving) && styles.memoSaveBtnDisabled,
+                ]}
+                onPress={handleSaveMemo}
+                disabled={!newMemoText.trim() || memoSaving}
+                accessibilityLabel="메모 저장"
+              >
+                {memoSaving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="checkmark" size={20} color="#fff" />
+                )}
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -682,5 +898,128 @@ const styles = StyleSheet.create({
   cancelText: {
     color: textSecondary,
     fontSize: 14,
+  },
+  // Memo button inside highlight edit popover
+  memoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginBottom: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: accentPrimary,
+    gap: 6,
+  },
+  memoButtonText: {
+    color: accentPrimary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  // Memo bottom sheet
+  memoSheetWrapper: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  memoSheetOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  memoSheetContainer: {
+    backgroundColor: bgSecondary,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    maxHeight: SCREEN_HEIGHT * 0.75,
+    borderTopWidth: 1,
+    borderColor: border,
+  },
+  memoSheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: border,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  memoSheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  memoSheetTitle: {
+    flex: 1,
+    color: textSecondary,
+    fontSize: 12,
+    fontStyle: 'italic',
+    lineHeight: 18,
+  },
+  memoEmptyText: {
+    color: textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
+  memoList: {
+    maxHeight: SCREEN_HEIGHT * 0.35,
+    marginBottom: 12,
+  },
+  memoItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: bgTertiary,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8,
+    gap: 8,
+  },
+  memoItemBody: {
+    flex: 1,
+  },
+  memoItemNote: {
+    color: textPrimary,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  memoItemDate: {
+    color: textSecondary,
+    fontSize: 11,
+  },
+  memoDeleteBtn: {
+    padding: 4,
+    marginTop: 2,
+  },
+  memoInputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+    marginTop: 4,
+  },
+  memoInput: {
+    flex: 1,
+    backgroundColor: bgTertiary,
+    color: textPrimary,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: border,
+  },
+  memoSaveBtn: {
+    backgroundColor: accentPrimary,
+    borderRadius: 8,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  memoSaveBtnDisabled: {
+    opacity: 0.4,
   },
 });
