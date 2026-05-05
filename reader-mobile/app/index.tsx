@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -9,8 +9,6 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { loadPages } from '@/services/cacheService';
 import { syncRepository, validateRepoUrl } from '@/services/githubService';
@@ -27,12 +25,10 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [columns, setColumns] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncProgress, setSyncProgress] = useState('');
-  const [hasData, setHasData] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -47,7 +43,8 @@ export default function HomeScreen() {
       if (pages.length > 0) {
         const cols = extractColumns(pages);
         setColumns(cols);
-        setHasData(true);
+      } else {
+        setColumns([]);
       }
     } catch (error) {
       console.error('Failed to load cached data:', error);
@@ -116,46 +113,38 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, {
-      paddingBottom: insets.bottom,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-    }]}>
-      {/* App Bar */}
-      <View style={[styles.appBar, { paddingTop: insets.top }]}>
-        <View style={styles.appBarRow}>
-          <View style={styles.appBarLeft}>
-            <Text style={styles.appBarTitle}>Pale Blue Dot</Text>
-            {syncing && (
-              <Text style={styles.progressText}>{syncProgress}</Text>
-            )}
-          </View>
-          <View style={styles.appBarRight}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={handleSync}
-              disabled={syncing}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityLabel="동기화"
-            >
-              {syncing
-                ? <ActivityIndicator size="small" color={accentPrimary} />
-                : <Ionicons name="refresh-outline" size={20} color={textPrimary} />
-              }
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => router.push('/config')}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityLabel="설정"
-            >
-              <Ionicons name="settings-outline" size={20} color={textPrimary} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+    <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <View style={styles.headerRight}>
+              <TouchableOpacity
+                onPress={handleSync}
+                disabled={syncing}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityLabel="동기화"
+              >
+                {syncing
+                  ? <ActivityIndicator size="small" color={accentPrimary} />
+                  : <Ionicons name="refresh-outline" size={22} color={textPrimary} />
+                }
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/config')}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityLabel="설정"
+              >
+                <Ionicons name="settings-outline" size={22} color={textPrimary} />
+              </TouchableOpacity>
+            </View>
+          ),
+        }}
+      />
 
-      {/* Columns List */}
+      {syncing && (
+        <Text style={styles.progressText}>{syncProgress}</Text>
+      )}
+
       {columns.length > 0 ? (
         <View style={styles.columnsSection}>
           <Text style={styles.sectionTitle}>Columns</Text>
@@ -203,38 +192,20 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
   },
-  appBar: {
-    backgroundColor: bgSecondary,
-    borderBottomWidth: 1,
-    borderBottomColor: border,
-  },
-  appBarRow: {
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  appBarLeft: {
-    flex: 1,
-  },
-  appBarTitle: {
-    color: textPrimary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  appBarRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  iconButton: {
-    padding: 4,
+    gap: 12,
+    marginRight: 4,
   },
   progressText: {
     color: accentPrimary,
-    fontSize: 11,
-    marginTop: 2,
+    fontSize: 12,
+    textAlign: 'center',
+    paddingVertical: 6,
+    backgroundColor: bgSecondary,
+    borderBottomWidth: 1,
+    borderBottomColor: border,
   },
   columnsSection: {
     flex: 1,
