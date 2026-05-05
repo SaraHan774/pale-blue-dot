@@ -122,34 +122,36 @@ export default function HomeScreen() {
       paddingRight: insets.right,
     }]}>
       {/* App Bar */}
-      <View style={[styles.appBar, { paddingTop: insets.top + 4 }]}>
-        <View style={styles.appBarLeft}>
-          <Text style={styles.appBarTitle}>Pale Blue Dot</Text>
-          {syncing && (
-            <Text style={styles.progressText}>{syncProgress}</Text>
-          )}
-        </View>
-        <View style={styles.appBarRight}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleSync}
-            disabled={syncing}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityLabel="동기화"
-          >
-            {syncing
-              ? <ActivityIndicator size="small" color={accentPrimary} />
-              : <Ionicons name="refresh-outline" size={20} color={textPrimary} />
-            }
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => router.push('/config')}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityLabel="설정"
-          >
-            <Ionicons name="settings-outline" size={20} color={textPrimary} />
-          </TouchableOpacity>
+      <View style={[styles.appBar, { paddingTop: insets.top }]}>
+        <View style={styles.appBarRow}>
+          <View style={styles.appBarLeft}>
+            <Text style={styles.appBarTitle}>Pale Blue Dot</Text>
+            {syncing && (
+              <Text style={styles.progressText}>{syncProgress}</Text>
+            )}
+          </View>
+          <View style={styles.appBarRight}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleSync}
+              disabled={syncing}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel="동기화"
+            >
+              {syncing
+                ? <ActivityIndicator size="small" color={accentPrimary} />
+                : <Ionicons name="refresh-outline" size={20} color={textPrimary} />
+              }
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => router.push('/config')}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel="설정"
+            >
+              <Ionicons name="settings-outline" size={20} color={textPrimary} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -202,18 +204,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: bgSecondary,
-    paddingHorizontal: 16,
-    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: border,
   },
+  appBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
   appBarLeft: {
     flex: 1,
-    justifyContent: 'center',
   },
   appBarTitle: {
     color: textPrimary,
@@ -231,7 +234,7 @@ const styles = StyleSheet.create({
   progressText: {
     color: accentPrimary,
     fontSize: 11,
-    marginTop: 1,
+    marginTop: 2,
   },
   columnsSection: {
     flex: 1,
