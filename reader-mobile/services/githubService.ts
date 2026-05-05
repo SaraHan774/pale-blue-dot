@@ -532,7 +532,6 @@ export async function validateRepoUrl(repoUrl: string): Promise<boolean> {
       return false;
     }
 
-    // Try to fetch repo info
     const url = `${GITHUB_API_BASE}/repos/${config.owner}/${config.repo}`;
     const headers = await getHeaders();
     console.log('Validating repo:', url);
@@ -543,11 +542,15 @@ export async function validateRepoUrl(repoUrl: string): Promise<boolean> {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error('Validation failed:', response.status, errorBody);
+      // Surface status code so callers can show meaningful errors
+      const err = new Error(`HTTP ${response.status}`);
+      (err as any).status = response.status;
+      throw err;
     }
 
-    return response.ok;
+    return true;
   } catch (error) {
     console.error('Validation error:', error);
-    return false;
+    throw error;
   }
 }

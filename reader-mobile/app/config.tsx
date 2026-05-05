@@ -109,15 +109,16 @@ export default function ConfigScreen() {
     setSyncing(true);
     setSyncProgress('저장소 확인 중...');
     try {
-      const isValid = await validateRepoUrl(urlToSync);
-      if (!isValid) {
-        const hasToken = await getGithubToken();
-        Alert.alert(
-          '연결 실패',
-          hasToken
-            ? '저장소를 찾을 수 없거나 토큰이 유효하지 않습니다.\n\n• URL을 확인하세요\n• 토큰에 "repo" 권한이 있는지 확인하세요'
-            : '저장소를 찾을 수 없습니다.\n\nPrivate 레포라면 Access Token을 입력해주세요.'
-        );
+      try {
+        await validateRepoUrl(urlToSync);
+      } catch (e: any) {
+        const status = e?.status;
+        const hint = status === 401 || status === 403
+          ? '토큰이 없거나 권한이 없습니다.\n\n• 토큰에 "repo" (또는 Contents Read) 권한이 있는지 확인하세요\n• 만료된 토큰은 재발급이 필요합니다'
+          : status === 404
+          ? '저장소를 찾을 수 없습니다.\n\n• URL을 다시 확인해주세요\n• Private 레포라면 올바른 Access Token이 필요합니다'
+          : `저장소 연결 실패 (${e.message})`;
+        Alert.alert('연결 실패', hint);
         return;
       }
 
