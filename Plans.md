@@ -35,7 +35,7 @@
 | T1 | `<mark>` 태그 파싱 및 하이라이트 색상 렌더링 — DoD: MarkdownRenderer가 `data-highlight-color` 속성을 읽어 배경색이 적용된 텍스트로 렌더링됨, `npx tsc --noEmit` 통과, 통합 테스트 1개 | cc:완료 |
 | T2 | 텍스트 선택 시 하이라이트 생성 — touch 기반 버블 메뉴 — DoD: 롱프레스로 텍스트 선택 후 색상 버튼 탭 시 `<mark>` 태그가 content에 삽입되고 cacheService로 저장됨, `npx tsc --noEmit` 통과 | cc:완료 |
 | T3 | 기존 하이라이트 탭 시 색상 변경·삭제 팝오버 — DoD: 하이라이트 텍스트 탭으로 팝오버 오픈, 색상 변경·삭제 후 저장 확인, `npx tsc --noEmit` 통과 | cc:완료 |
-| T4 | 메모 바텀 시트 — DoD: 하이라이트 탭 시 linked memo 조회·작성 가능한 바텀 시트 노출, `Memo` 타입을 `types/index.ts`에 추가, `npx tsc --noEmit` 통과 | pm:요청 |
+| T4 | 메모 바텀 시트 — DoD: 하이라이트 탭 시 linked memo 조회·작성 가능한 바텀 시트 노출, `Memo` 타입을 `types/index.ts`에 추가, `npx tsc --noEmit` 통과 | cc:완료 |
 | T5 | 전체 통합 및 에뮬레이터 회귀 점검 — DoD: Pixel 9 Pro 에뮬레이터에서 T1~T4 기능 동작 확인, `npx tsc --noEmit` 통과, 기존 페이지 뷰 회귀 없음 | pm:요청 |
 
 ---
