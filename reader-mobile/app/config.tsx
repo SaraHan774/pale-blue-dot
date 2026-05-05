@@ -45,15 +45,22 @@ export default function ConfigScreen() {
   // Toast animation
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 언마운트 후 setState/Alert 호출 방지
+  const isMountedRef = useRef(true);
 
   useFocusEffect(
     useCallback(() => {
+      isMountedRef.current = true;
       loadInitialValues();
+      return () => {
+        isMountedRef.current = false;
+      };
     }, [])
   );
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
       }
@@ -111,12 +118,14 @@ export default function ConfigScreen() {
   }
 
   async function startSync(urlToSync: string) {
+    if (!isMountedRef.current) return;
     setSyncing(true);
     setSyncProgress('저장소 확인 중...');
     try {
       try {
         await validateRepoUrl(urlToSync);
       } catch (e: any) {
+        if (!isMountedRef.current) return;
         const status = e?.status;
         const hint = status === 401 || status === 403
           ? '토큰이 없거나 권한이 없습니다.\n\n• 토큰에 "repo" (또는 Contents Read) 권한이 있는지 확인하세요\n• 만료된 토큰은 재발급이 필요합니다'
@@ -127,8 +136,11 @@ export default function ConfigScreen() {
         return;
       }
 
+      if (!isMountedRef.current) return;
       setSyncProgress('다운로드 중...');
+
       const result = await syncRepository(urlToSync, (stage, current, total) => {
+        if (!isMountedRef.current) return;
         if (current !== undefined && total !== undefined) {
           setSyncProgress(`${stage} (${current}/${total})`);
         } else {
@@ -136,18 +148,22 @@ export default function ConfigScreen() {
         }
       });
 
+      if (!isMountedRef.current) return;
       const { stats } = result;
       const detail = stats
         ? `${result.pages.length}개 페이지, ${result.imageCount}개 이미지\n다운로드: ${stats.filesDownloaded}개 / 캐시: ${stats.filesCached}개`
         : `${result.pages.length}개 페이지, ${result.imageCount}개 이미지`;
       Alert.alert('동기화 완료', detail, [
-        { text: '확인', onPress: () => router.back() },
+        { text: '확인', onPress: () => { if (isMountedRef.current) router.back(); } },
       ]);
     } catch (error: any) {
+      if (!isMountedRef.current) return;
       Alert.alert('동기화 실패', error.message || '저장소 동기화 중 오류가 발생했습니다.');
     } finally {
-      setSyncing(false);
-      setSyncProgress('');
+      if (isMountedRef.current) {
+        setSyncing(false);
+        setSyncProgress('');
+      }
     }
   }
 
@@ -159,7 +175,20 @@ export default function ConfigScreen() {
       {/* Nav Bar */}
       <View style={[styles.navBar, { paddingTop: insets.top + 8 }]}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => {
+            if (syncing) {
+              Alert.alert(
+                '동기화 진행 중',
+                '동기화가 완료되지 않았습니다. 지금 나가시겠습니까?\n(동기화는 백그라운드에서 계속됩니다)',
+                [
+                  { text: '계속 기다리기', style: 'cancel' },
+                  { text: '나가기', onPress: () => router.back() },
+                ]
+              );
+            } else {
+              router.back();
+            }
+          }}
           style={styles.backButton}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
