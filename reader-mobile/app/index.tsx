@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { loadPages, loadRepoConfig } from '@/services/cacheService';
 import { syncRepository, validateRepoUrl } from '@/services/githubService';
 import { extractColumns } from '@/services/parserService';
@@ -206,6 +207,19 @@ export default function HomeScreen() {
       paddingLeft: insets.left,
       paddingRight: insets.right,
     }]}>
+      {/* App Bar */}
+      <View style={[styles.appBar, { paddingTop: insets.top + 8 }]}>
+        <Text style={styles.appBarTitle}>Pale Blue Dot</Text>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => router.push('/config')}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel="설정"
+        >
+          <Ionicons name="settings-outline" size={22} color={textPrimary} />
+        </TouchableOpacity>
+      </View>
+
       {/* Repo URL Input */}
       <View style={styles.inputSection}>
         <TouchableOpacity
@@ -381,6 +395,24 @@ const styles = StyleSheet.create({
     color: textPrimary,
     marginTop: 12,
     fontSize: 14,
+  },
+  appBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: bgSecondary,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: border,
+  },
+  appBarTitle: {
+    color: textPrimary,
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  settingsButton: {
+    padding: 4,
   },
   inputSection: {
     padding: 16,
