@@ -565,13 +565,37 @@ export function Home() {
           {columns.map((col) => {
             const columnCards = columnCardsMap.get(col.toLowerCase()) || [];
             return (
-              <div key={col} className="compact-column">
+              <div key={col} className="compact-col-wrap">
+                <div className="compact-column">
+                  <div className="compact-column-header">
+                    <h4>{col}</h4>
+                    <span className="compact-card-count">{columnCards.length}</span>
+                  </div>
+                  <div className="compact-column-list">
+                    {columnCards.map(card => (
+                      <Link
+                        key={card.id}
+                        to={`/page/${card.id}`}
+                        className="compact-card-item"
+                      >
+                        {card.pinned && <span className="compact-pin-indicator material-symbols-outlined">keep</span>}
+                        <span className="compact-card-title">{card.title}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {hasUncategorized && (
+            <div className="compact-col-wrap">
+              <div className="compact-column">
                 <div className="compact-column-header">
-                  <h4>{col}</h4>
-                  <span className="compact-card-count">{columnCards.length}</span>
+                  <h4>Uncategorized</h4>
+                  <span className="compact-card-count">{uncategorizedCards.length}</span>
                 </div>
                 <div className="compact-column-list">
-                  {columnCards.map(card => (
+                  {uncategorizedCards.map(card => (
                     <Link
                       key={card.id}
                       to={`/page/${card.id}`}
@@ -582,26 +606,6 @@ export function Home() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            );
-          })}
-          {hasUncategorized && (
-            <div className="compact-column">
-              <div className="compact-column-header">
-                <h4>Uncategorized</h4>
-                <span className="compact-card-count">{uncategorizedCards.length}</span>
-              </div>
-              <div className="compact-column-list">
-                {uncategorizedCards.map(card => (
-                  <Link
-                    key={card.id}
-                    to={`/page/${card.id}`}
-                    className="compact-card-item"
-                  >
-                    {card.pinned && <span className="compact-pin-indicator material-symbols-outlined">keep</span>}
-                    <span className="compact-card-title">{card.title}</span>
-                  </Link>
-                ))}
               </div>
             </div>
           )}

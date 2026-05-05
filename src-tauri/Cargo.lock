@@ -2527,7 +2527,7 @@ dependencies = [
 
 [[package]]
 name = "pale-blue-dot"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "notify",
  "notify-debouncer-full",

@@ -593,10 +593,8 @@
    "Looking at all your notes from a distance, like Earth from space"
    ═══════════════════════════════════════════════════════════════ */
 
-/* Wrapper enables horizontal scroll when compact columns overflow */
 .compact-grid-scroll-wrapper {
   flex: 1;
-  overflow-x: auto;
   overflow-y: auto;
   align-self: stretch;
 }
@@ -605,18 +603,21 @@
   --compact-col-min-width: 260px;
   --compact-col-gap: 1.5rem;
 
-  display: grid;
-  /* Each column keeps a minimum width; the grid never shrinks tracks below that */
-  grid-template-columns: repeat(auto-fill, minmax(var(--compact-col-min-width), 320px));
-  gap: var(--compact-col-gap);
-  /* Force the container to be at least wide enough for its content
-     so the scroll-wrapper can activate horizontal scroll instead of
-     squeezing columns to 1 */
-  min-width: max-content;
-  align-items: start;
-  align-content: start;
+  /* CSS multi-column masonry: browser places each .compact-column in the
+     shortest column, eliminating the row-height problem of CSS grid. */
+  columns: var(--compact-col-min-width);
+  column-gap: var(--compact-col-gap);
   padding: 2rem 2.5rem;
   padding-bottom: 2rem;
+}
+
+/* Block-level wrapper: break-inside only works reliably on block elements,
+   not on flex containers — so we wrap .compact-column in a plain block. */
+.compact-col-wrap {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  margin-bottom: var(--compact-col-gap);
 }
 
 /* Column - Minimal, Serene Container */
