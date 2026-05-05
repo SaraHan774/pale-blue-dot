@@ -543,8 +543,31 @@
   border-bottom: none;
 }
 
+.list-row:nth-child(even) {
+  background-color: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+}
+
 .list-row:hover {
-  background-color: color-mix(in srgb, var(--accent-primary) 4%, transparent);
+  background-color: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+}
+
+.list-sort-icon {
+  font-size: 0.875rem;
+  line-height: 1;
+  vertical-align: middle;
+  opacity: 0.4;
+}
+
+.list-col-header.active .list-sort-icon {
+  opacity: 1;
+}
+
+.list-pin-icon {
+  font-size: 0.875rem;
+  color: var(--accent-primary);
+  margin-right: 0.25rem;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .list-cell {
@@ -558,6 +581,8 @@
 .list-cell-title {
   font-weight: 500;
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
 }
 
 .list-cell-date {

@@ -208,6 +208,18 @@ export function Home() {
   const uncategorizedCards = columnCardsMap.get('__uncategorized__') || [];
   const hasUncategorized = uncategorizedCards.length > 0;
 
+  // Helper: relative date string (Korean)
+  function relativeDate(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return '오늘';
+    if (days === 1) return '어제';
+    if (days < 7) return `${days}일 전`;
+    if (days < 30) return `${Math.floor(days / 7)}주 전`;
+    if (days < 365) return `${Math.floor(days / 30)}개월 전`;
+    return `${Math.floor(days / 365)}년 전`;
+  }
+
   // Pre-sort for list view
   const sortedListPages = useMemo(() => {
     const sorted = [...rootPages];
@@ -762,7 +774,10 @@ export function Home() {
                 else { setListSortField('title'); setListSortDir('asc'); }
               }}
             >
-              Title {listSortField === 'title' ? (listSortDir === 'asc' ? '↑' : '↓') : ''}
+              Title
+              <span className="material-symbols-outlined list-sort-icon">
+                {listSortField === 'title' ? (listSortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
+              </span>
             </span>
             <span
               className={`list-col-header sortable ${listSortField === 'kanbanColumn' ? 'active' : ''}`}
@@ -771,7 +786,10 @@ export function Home() {
                 else { setListSortField('kanbanColumn'); setListSortDir('asc'); }
               }}
             >
-              Column {listSortField === 'kanbanColumn' ? (listSortDir === 'asc' ? '↑' : '↓') : ''}
+              Column
+              <span className="material-symbols-outlined list-sort-icon">
+                {listSortField === 'kanbanColumn' ? (listSortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
+              </span>
             </span>
             <span
               className={`list-col-header sortable ${listSortField === 'dueDate' ? 'active' : ''}`}
@@ -780,7 +798,10 @@ export function Home() {
                 else { setListSortField('dueDate'); setListSortDir('asc'); }
               }}
             >
-              Due Date {listSortField === 'dueDate' ? (listSortDir === 'asc' ? '↑' : '↓') : ''}
+              Due Date
+              <span className="material-symbols-outlined list-sort-icon">
+                {listSortField === 'dueDate' ? (listSortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
+              </span>
             </span>
             <span
               className={`list-col-header sortable ${listSortField === 'createdAt' ? 'active' : ''}`}
@@ -789,13 +810,21 @@ export function Home() {
                 else { setListSortField('createdAt'); setListSortDir('desc'); }
               }}
             >
-              Created {listSortField === 'createdAt' ? (listSortDir === 'asc' ? '↑' : '↓') : ''}
+              Created
+              <span className="material-symbols-outlined list-sort-icon">
+                {listSortField === 'createdAt' ? (listSortDir === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
+              </span>
             </span>
           </div>
           {(() => {
             return sortedListPages.length > 0 ? sortedListPages.map(page => (
               <Link key={page.id} to={`/page/${page.id}`} className="list-row">
-                <span className="list-cell list-cell-title">{page.title}</span>
+                <span className="list-cell list-cell-title">
+                  {page.pinned && (
+                    <span className="material-symbols-outlined list-pin-icon">keep</span>
+                  )}
+                  {page.title}
+                </span>
                 <span className="list-cell">
                   {page.kanbanColumn && (
                     <span className="tag-small" style={{ backgroundColor: getColumnColor(page.kanbanColumn), color: 'white' }}>
@@ -803,11 +832,11 @@ export function Home() {
                     </span>
                   )}
                 </span>
-                <span className="list-cell list-cell-date">
-                  {page.dueDate ? new Date(page.dueDate).toLocaleDateString() : '—'}
+                <span className="list-cell list-cell-date" title={page.dueDate ? new Date(page.dueDate).toLocaleDateString() : undefined}>
+                  {page.dueDate ? relativeDate(page.dueDate) : '—'}
                 </span>
-                <span className="list-cell list-cell-date">
-                  {new Date(page.createdAt).toLocaleDateString()}
+                <span className="list-cell list-cell-date" title={new Date(page.createdAt).toLocaleDateString()}>
+                  {relativeDate(page.createdAt)}
                 </span>
               </Link>
             )) : (
