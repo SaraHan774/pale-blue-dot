@@ -154,6 +154,18 @@ ${htmlBody}
     selectionTimer = setTimeout(notifySelection, 300);
   });
 
+  // Scroll position tracking (throttled)
+  var scrollTimer = null;
+  document.addEventListener('scroll', function() {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'scroll',
+        y: Math.round(window.scrollY)
+      }));
+    }, 100);
+  }, { passive: true });
+
   // Highlight tap: notify RN when user taps an existing <mark> tag
   document.addEventListener('click', function(e) {
     var target = e.target;
@@ -446,6 +458,10 @@ export default function PageScreen() {
   // Raw content (original markdown, for highlight insertion)
   const rawContentRef = useRef<string>('');
 
+  // WebView ref and scroll position tracking
+  const webViewRef = useRef<WebView>(null);
+  const scrollYRef = useRef<number>(0);
+
   // WebView HTML
   const [webViewHtml, setWebViewHtml] = useState<string>('');
 
@@ -510,7 +526,9 @@ export default function PageScreen() {
         highlightColor?: string;
         highlightText?: string;
       };
-      if (msg.type === 'selection' && msg.text && msg.text.trim().length > 0) {
+      if (msg.type === 'scroll') {
+        scrollYRef.current = (msg as { type: string; y?: number }).y ?? 0;
+      } else if (msg.type === 'selection' && msg.text && msg.text.trim().length > 0) {
         setSelectedText(msg.text.trim());
         openSheet('new');
       } else if (msg.type === 'selectionClear') {
@@ -693,9 +711,16 @@ export default function PageScreen() {
 
       {/* Page Content via WebView */}
       <WebView
+        ref={webViewRef}
         style={styles.webView}
         source={{ html: webViewHtml }}
         onMessage={handleWebViewMessage}
+        onLoadEnd={() => {
+          const y = scrollYRef.current;
+          if (y > 0) {
+            webViewRef.current?.injectJavaScript(`window.scrollTo(0, ${y}); true;`);
+          }
+        }}
         scrollEnabled={true}
         showsVerticalScrollIndicator={true}
         originWhitelist={['*']}
