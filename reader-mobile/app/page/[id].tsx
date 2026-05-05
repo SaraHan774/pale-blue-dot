@@ -181,6 +181,258 @@ ${htmlBody}
 </html>`;
 }
 
+// ─── Unified Highlight Bottom Sheet ──────────────────────────────────
+// Handles both new-selection color pick AND existing-highlight edit+memo.
+// Isolated component so TextInput state changes don't re-render the WebView.
+
+interface HighlightSheetProps {
+  visible: boolean;
+  mode: 'new' | 'edit';
+  highlightText: string;
+  highlightColor: string;
+  highlightId: string;
+  memos: import('@/types').Memo[];
+  slideAnim: Animated.Value;
+  bottomInset: number;
+  onClose: () => void;
+  onSelectColor: (color: string) => void;
+  onDelete: () => void;
+  onSaveMemo: (text: string) => Promise<void>;
+  onDeleteMemo: (memoId: string) => Promise<void>;
+}
+
+function HighlightSheet({
+  visible,
+  mode,
+  highlightText,
+  highlightColor,
+  highlightId,
+  memos,
+  slideAnim,
+  bottomInset,
+  onClose,
+  onSelectColor,
+  onDelete,
+  onSaveMemo,
+  onDeleteMemo,
+}: HighlightSheetProps) {
+  const [newMemoText, setNewMemoText] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const linkedMemos = memos
+    .filter((m) => m.highlightId === highlightId)
+    .sort((a, b) => a.order - b.order);
+
+  async function handleSaveMemo() {
+    if (!newMemoText.trim() || saving) return;
+    setSaving(true);
+    try {
+      await onSaveMemo(newMemoText.trim());
+      setNewMemoText('');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const label = highlightText.length > 45
+    ? highlightText.slice(0, 45) + '…'
+    : highlightText;
+
+  return (
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        style={sheetStyles.wrapper}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Pressable style={sheetStyles.overlay} onPress={onClose} />
+        <Animated.View
+          style={[
+            sheetStyles.container,
+            { paddingBottom: bottomInset + 20, transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          {/* Handle */}
+          <View style={sheetStyles.handle} />
+
+          {/* Header */}
+          <View style={sheetStyles.header}>
+            <View style={[sheetStyles.quoteBar, { backgroundColor: highlightColor || '#FFEB3B' }]} />
+            <Text style={sheetStyles.headerText} numberOfLines={2}>{label}</Text>
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name="close" size={20} color={textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Color row */}
+          <View style={sheetStyles.section}>
+            <Text style={sheetStyles.sectionLabel}>
+              {mode === 'new' ? '색상 선택' : '색상'}
+            </Text>
+            <View style={sheetStyles.colorRow}>
+              {HIGHLIGHT_COLORS.map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  style={[
+                    sheetStyles.colorDot,
+                    { backgroundColor: color },
+                    mode === 'edit' && color === highlightColor && sheetStyles.colorDotActive,
+                  ]}
+                  onPress={() => onSelectColor(color)}
+                  accessibilityLabel={`색상 ${color}`}
+                >
+                  {mode === 'edit' && color === highlightColor && (
+                    <Ionicons name="checkmark" size={16} color="rgba(0,0,0,0.5)" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Memo section — only in edit mode */}
+          {mode === 'edit' && (
+            <>
+              <View style={sheetStyles.divider} />
+              <View style={sheetStyles.section}>
+                <Text style={sheetStyles.sectionLabel}>메모</Text>
+
+                {linkedMemos.length > 0 && (
+                  <ScrollView
+                    style={sheetStyles.memoList}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {linkedMemos.map((memo) => (
+                      <View key={memo.id} style={sheetStyles.memoItem}>
+                        <Text style={sheetStyles.memoNote}>{memo.note}</Text>
+                        <View style={sheetStyles.memoFooter}>
+                          <Text style={sheetStyles.memoDate}>
+                            {new Date(memo.createdAt).toLocaleDateString('ko-KR', {
+                              month: 'short', day: 'numeric',
+                              hour: '2-digit', minute: '2-digit',
+                            })}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => onDeleteMemo(memo.id)}
+                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                          >
+                            <Ionicons name="trash-outline" size={14} color="#FF6B6B" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
+                )}
+
+                <View style={sheetStyles.inputRow}>
+                  <TextInput
+                    style={sheetStyles.input}
+                    placeholder="메모 추가..."
+                    placeholderTextColor={textSecondary}
+                    value={newMemoText}
+                    onChangeText={setNewMemoText}
+                    multiline
+                    maxLength={500}
+                    accessibilityLabel="메모 입력"
+                  />
+                  <TouchableOpacity
+                    style={[sheetStyles.sendBtn, (!newMemoText.trim() || saving) && sheetStyles.sendBtnDisabled]}
+                    onPress={handleSaveMemo}
+                    disabled={!newMemoText.trim() || saving}
+                    accessibilityLabel="메모 저장"
+                  >
+                    {saving
+                      ? <ActivityIndicator size="small" color="#fff" />
+                      : <Ionicons name="arrow-up" size={18} color="#fff" />
+                    }
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Delete highlight */}
+              <View style={sheetStyles.divider} />
+              <TouchableOpacity style={sheetStyles.deleteRow} onPress={onDelete}>
+                <Ionicons name="trash-outline" size={16} color="#FF6B6B" />
+                <Text style={sheetStyles.deleteText}>하이라이트 삭제</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </Animated.View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+const sheetStyles = StyleSheet.create({
+  wrapper: { flex: 1, justifyContent: 'flex-end' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+  container: {
+    backgroundColor: bgSecondary,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    maxHeight: SCREEN_HEIGHT * 0.78,
+    borderTopWidth: 1,
+    borderColor: border,
+  },
+  handle: {
+    width: 36, height: 4, backgroundColor: border, borderRadius: 2,
+    alignSelf: 'center', marginBottom: 14,
+  },
+  header: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    gap: 10, marginBottom: 16,
+  },
+  quoteBar: {
+    width: 3, borderRadius: 2, minHeight: 16, marginTop: 2,
+  },
+  headerText: {
+    flex: 1, color: textSecondary, fontSize: 13, lineHeight: 19,
+  },
+  section: { marginBottom: 4 },
+  sectionLabel: {
+    color: textSecondary, fontSize: 11, fontWeight: '600',
+    letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 10,
+  },
+  colorRow: { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  colorDot: {
+    width: 40, height: 40, borderRadius: 20,
+    justifyContent: 'center', alignItems: 'center',
+    borderWidth: 2, borderColor: 'transparent',
+  },
+  colorDotActive: {
+    borderColor: 'rgba(255,255,255,0.7)',
+    transform: [{ scale: 1.1 }],
+  },
+  divider: { height: 1, backgroundColor: border, marginVertical: 14 },
+  memoList: { maxHeight: SCREEN_HEIGHT * 0.28, marginBottom: 10 },
+  memoItem: {
+    backgroundColor: bgTertiary, borderRadius: 10,
+    padding: 12, marginBottom: 8,
+  },
+  memoNote: { color: textPrimary, fontSize: 14, lineHeight: 20, marginBottom: 6 },
+  memoFooter: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  },
+  memoDate: { color: textSecondary, fontSize: 11 },
+  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+  input: {
+    flex: 1, backgroundColor: bgTertiary, color: textPrimary, borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 10, fontSize: 14,
+    maxHeight: 90, borderWidth: 1, borderColor: border,
+  },
+  sendBtn: {
+    backgroundColor: accentPrimary, borderRadius: 20, width: 40, height: 40,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  sendBtnDisabled: { opacity: 0.35 },
+  deleteRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 10,
+  },
+  deleteText: { color: '#FF6B6B', fontSize: 14 },
+});
+
 // ─── Main Screen ─────────────────────────────────────────────────────
 
 export default function PageScreen() {
@@ -199,21 +451,15 @@ export default function PageScreen() {
 
   // Highlight UI state — new selection
   const [selectedText, setSelectedText] = useState<string>('');
-  const [showColorPicker, setShowColorPicker] = useState(false);
 
   // Highlight UI state — existing highlight tap
   const [tappedHighlightId, setTappedHighlightId] = useState<string>('');
   const [tappedHighlightColor, setTappedHighlightColor] = useState<string>('');
   const [tappedHighlightText, setTappedHighlightText] = useState<string>('');
-  const [showHighlightEdit, setShowHighlightEdit] = useState(false);
 
-  // Memo bottom sheet state
-  const [showMemoSheet, setShowMemoSheet] = useState(false);
-  const [memoSheetHighlightId, setMemoSheetHighlightId] = useState<string>('');
-  const [memoSheetHighlightText, setMemoSheetHighlightText] = useState<string>('');
-  const [newMemoText, setNewMemoText] = useState<string>('');
-  const [memoSaving, setMemoSaving] = useState(false);
-  const memoSlideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  // Unified bottom sheet: 'none' | 'new' | 'edit'
+  const [sheetMode, setSheetMode] = useState<'none' | 'new' | 'edit'>('none');
+  const sheetSlideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     loadPage();
@@ -266,115 +512,98 @@ export default function PageScreen() {
       };
       if (msg.type === 'selection' && msg.text && msg.text.trim().length > 0) {
         setSelectedText(msg.text.trim());
-        setShowColorPicker(true);
+        openSheet('new');
       } else if (msg.type === 'selectionClear') {
-        // Only hide if color picker is not open
-        setShowColorPicker(false);
-        setSelectedText('');
-      } else if (
-        msg.type === 'highlightTap' &&
-        msg.highlightId
-      ) {
+        if (sheetModeRef.current === 'new') closeSheet();
+      } else if (msg.type === 'highlightTap' && msg.highlightId) {
         setTappedHighlightId(msg.highlightId);
         setTappedHighlightColor(msg.highlightColor ?? '#FFEB3B');
         setTappedHighlightText(msg.highlightText ?? '');
-        setShowHighlightEdit(true);
+        openSheet('edit');
       }
     } catch {
       // ignore malformed messages
     }
   }, []);
 
-  async function applyHighlight(color: string) {
-    if (!page || !selectedText) return;
+  const sheetModeRef = useRef<'none' | 'new' | 'edit'>('none');
 
-    setShowColorPicker(false);
-
-    const newId = generateId();
-    const updatedContent = insertHighlight(rawContentRef.current, selectedText, color, newId);
-
-    if (updatedContent === rawContentRef.current) {
-      // Text not found, nothing to do
-      setSelectedText('');
-      return;
-    }
-
-    // Update in-memory state
-    rawContentRef.current = updatedContent;
-    const updatedPage = { ...page, content: updatedContent };
-    setPage(updatedPage);
-    rebuildWebView(updatedContent);
-    setSelectedText('');
-
-    // Persist to cache
-    try {
-      await updatePageContent(page.id, updatedContent);
-    } catch (error) {
-      console.error('Failed to save highlight:', error);
-    }
-  }
-
-  // ── Memo bottom sheet helpers ──────────────────────────────────────
-
-  function openMemoSheet(highlightId: string, highlightText: string) {
-    setMemoSheetHighlightId(highlightId);
-    setMemoSheetHighlightText(highlightText);
-    setNewMemoText('');
-    setShowMemoSheet(true);
-    Animated.spring(memoSlideAnim, {
+  function openSheet(mode: 'new' | 'edit') {
+    sheetModeRef.current = mode;
+    setSheetMode(mode);
+    Animated.spring(sheetSlideAnim, {
       toValue: 0,
       useNativeDriver: true,
-      tension: 65,
-      friction: 11,
+      tension: 70,
+      friction: 12,
     }).start();
   }
 
-  function closeMemoSheet() {
-    Animated.timing(memoSlideAnim, {
+  function closeSheet() {
+    Animated.timing(sheetSlideAnim, {
       toValue: SCREEN_HEIGHT,
-      duration: 250,
+      duration: 220,
       useNativeDriver: true,
     }).start(() => {
-      setShowMemoSheet(false);
-      setMemoSheetHighlightId('');
-      setMemoSheetHighlightText('');
-      setNewMemoText('');
+      sheetModeRef.current = 'none';
+      setSheetMode('none');
+      setSelectedText('');
+      setTappedHighlightId('');
+      setTappedHighlightColor('');
+      setTappedHighlightText('');
     });
   }
 
-  async function handleSaveMemo() {
-    if (!page || !newMemoText.trim() || !memoSheetHighlightId) return;
-    setMemoSaving(true);
-    try {
-      const now = new Date().toISOString();
-      const existingMemos: Memo[] = page.memos ?? [];
-      const linkedMemos = existingMemos.filter(
-        (m) => m.highlightId === memoSheetHighlightId
-      );
-      const newMemo: Memo = {
-        id: generateMemoId(),
-        type: 'linked',
-        note: newMemoText.trim(),
-        highlightId: memoSheetHighlightId,
-        highlightText: memoSheetHighlightText,
-        highlightColor: tappedHighlightColor || '#FFEB3B',
-        tags: [],
-        createdAt: now,
-        updatedAt: now,
-        order: linkedMemos.length,
-      };
-      await saveMemo(page.id, newMemo);
-      setPage((prev) =>
-        prev
-          ? { ...prev, memos: [...(prev.memos ?? []), newMemo] }
-          : prev
-      );
-      setNewMemoText('');
-    } catch (error) {
-      console.error('Failed to save memo:', error);
-    } finally {
-      setMemoSaving(false);
+  async function handleSelectColor(color: string) {
+    if (sheetMode === 'new') {
+      if (!page || !selectedText) return;
+      closeSheet();
+      const newId = generateId();
+      const updatedContent = insertHighlight(rawContentRef.current, selectedText, color, newId);
+      if (updatedContent === rawContentRef.current) return;
+      rawContentRef.current = updatedContent;
+      setPage({ ...page, content: updatedContent });
+      rebuildWebView(updatedContent);
+      try { await updatePageContent(page.id, updatedContent); } catch { /* noop */ }
+    } else {
+      if (!page || !tappedHighlightId) return;
+      setTappedHighlightColor(color);
+      const updatedContent = changeHighlightColor(rawContentRef.current, tappedHighlightId, color);
+      rawContentRef.current = updatedContent;
+      setPage({ ...page, content: updatedContent });
+      rebuildWebView(updatedContent);
+      try { await updatePageContent(page.id, updatedContent); } catch { /* noop */ }
     }
+  }
+
+  async function handleHighlightDelete() {
+    if (!page || !tappedHighlightId) return;
+    closeSheet();
+    const updatedContent = removeHighlight(rawContentRef.current, tappedHighlightId);
+    rawContentRef.current = updatedContent;
+    setPage({ ...page, content: updatedContent });
+    rebuildWebView(updatedContent);
+    try { await updatePageContent(page.id, updatedContent); } catch { /* noop */ }
+  }
+
+  async function handleSaveMemo(text: string) {
+    if (!page || !text.trim() || !tappedHighlightId) return;
+    const now = new Date().toISOString();
+    const linkedMemos = (page.memos ?? []).filter((m) => m.highlightId === tappedHighlightId);
+    const newMemo: Memo = {
+      id: generateMemoId(),
+      type: 'linked',
+      note: text,
+      highlightId: tappedHighlightId,
+      highlightText: tappedHighlightText,
+      highlightColor: tappedHighlightColor || '#FFEB3B',
+      tags: [],
+      createdAt: now,
+      updatedAt: now,
+      order: linkedMemos.length,
+    };
+    await saveMemo(page.id, newMemo);
+    setPage((prev) => prev ? { ...prev, memos: [...(prev.memos ?? []), newMemo] } : prev);
   }
 
   async function handleDeleteMemo(memoId: string) {
@@ -382,69 +611,11 @@ export default function PageScreen() {
     try {
       await deleteMemo(page.id, memoId);
       setPage((prev) =>
-        prev
-          ? { ...prev, memos: (prev.memos ?? []).filter((m) => m.id !== memoId) }
-          : prev
+        prev ? { ...prev, memos: (prev.memos ?? []).filter((m) => m.id !== memoId) } : prev
       );
     } catch (error) {
       console.error('Failed to delete memo:', error);
     }
-  }
-
-  function dismissColorPicker() {
-    setShowColorPicker(false);
-    setSelectedText('');
-  }
-
-  function dismissHighlightEdit() {
-    setShowHighlightEdit(false);
-    setTappedHighlightId('');
-    setTappedHighlightColor('');
-    setTappedHighlightText('');
-  }
-
-  async function applyHighlightColorChange(newColor: string) {
-    if (!page || !tappedHighlightId) return;
-
-    setShowHighlightEdit(false);
-
-    const updatedContent = changeHighlightColor(rawContentRef.current, tappedHighlightId, newColor);
-
-    rawContentRef.current = updatedContent;
-    setPage({ ...page, content: updatedContent });
-    rebuildWebView(updatedContent);
-
-    try {
-      await updatePageContent(page.id, updatedContent);
-    } catch (error) {
-      console.error('Failed to save highlight color change:', error);
-    }
-
-    setTappedHighlightId('');
-    setTappedHighlightColor('');
-    setTappedHighlightText('');
-  }
-
-  async function applyHighlightDelete() {
-    if (!page || !tappedHighlightId) return;
-
-    setShowHighlightEdit(false);
-
-    const updatedContent = removeHighlight(rawContentRef.current, tappedHighlightId);
-
-    rawContentRef.current = updatedContent;
-    setPage({ ...page, content: updatedContent });
-    rebuildWebView(updatedContent);
-
-    try {
-      await updatePageContent(page.id, updatedContent);
-    } catch (error) {
-      console.error('Failed to save highlight deletion:', error);
-    }
-
-    setTappedHighlightId('');
-    setTappedHighlightColor('');
-    setTappedHighlightText('');
   }
 
   function formatDate(dateString: string): string {
@@ -490,41 +661,35 @@ export default function PageScreen() {
 
         <View style={styles.metadata}>
           {page.kanbanColumn && (
-            <View style={styles.metadataItem}>
-              <Text style={styles.metadataLabel}>Column:</Text>
-              <Text style={styles.metadataValue}>{page.kanbanColumn}</Text>
+            <View style={styles.columnChip}>
+              <Ionicons name="folder-outline" size={11} color={accentPrimary} />
+              <Text style={styles.columnChipText}>{page.kanbanColumn}</Text>
             </View>
           )}
 
           {page.tags && page.tags.length > 0 && (
-            <View style={styles.tagsContainer}>
+            <>
               {page.tags.map((tag) => (
                 <View key={tag} style={styles.tag}>
-                  <Text style={styles.tagText}>{tag}</Text>
+                  <Text style={styles.tagText}>#{tag}</Text>
                 </View>
               ))}
-            </View>
+            </>
           )}
 
           {page.dueDate && (
-            <View style={styles.metadataItem}>
-              <Text style={styles.metadataLabel}>Due:</Text>
-              <Text style={styles.dueDateValue}>{formatDate(page.dueDate)}</Text>
+            <View style={styles.dueDateChip}>
+              <Ionicons name="calendar-outline" size={11} color={warning} />
+              <Text style={styles.dueDateChipText}>{formatDate(page.dueDate)}</Text>
             </View>
           )}
-
-          <View style={styles.metadataItem}>
-            <Text style={styles.metadataLabel}>Updated:</Text>
-            <Text style={styles.metadataValue}>{formatDate(page.updatedAt)}</Text>
-          </View>
         </View>
+
+        <Text style={styles.updatedAt}>
+          {formatDate(page.updatedAt)}
+        </Text>
       </View>
 
-      {/* Highlight hint banner */}
-      <View style={styles.hintBanner}>
-        <Ionicons name="hand-left-outline" size={12} color={textSecondary} />
-        <Text style={styles.hintText}>  롱프레스로 텍스트 선택 후 색상 버튼을 눌러 하이라이트 추가</Text>
-      </View>
 
       {/* Page Content via WebView */}
       <WebView
@@ -542,198 +707,22 @@ export default function PageScreen() {
         mixedContentMode="always"
       />
 
-      {/* Color Picker Modal — new highlight */}
-      <Modal
-        visible={showColorPicker}
-        transparent
-        animationType="fade"
-        onRequestClose={dismissColorPicker}
-      >
-        <Pressable style={styles.modalOverlay} onPress={dismissColorPicker}>
-          <Pressable style={styles.colorPickerPanel} onPress={() => {}}>
-            <Text style={styles.colorPickerTitle} numberOfLines={2}>
-              "{selectedText.length > 40 ? selectedText.slice(0, 40) + '…' : selectedText}"
-            </Text>
-            <Text style={styles.colorPickerSubtitle}>하이라이트 색상 선택</Text>
-            <View style={styles.colorRow}>
-              {HIGHLIGHT_COLORS.map((color) => (
-                <TouchableOpacity
-                  key={color}
-                  style={[styles.colorButton, { backgroundColor: color }]}
-                  onPress={() => applyHighlight(color)}
-                  accessibilityLabel={`하이라이트 색상 ${color}`}
-                />
-              ))}
-            </View>
-            <TouchableOpacity style={styles.cancelButton} onPress={dismissColorPicker}>
-              <Text style={styles.cancelText}>취소</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* Highlight Edit Popover — tap on existing highlight */}
-      <Modal
-        visible={showHighlightEdit}
-        transparent
-        animationType="fade"
-        onRequestClose={dismissHighlightEdit}
-      >
-        <Pressable style={styles.modalOverlay} onPress={dismissHighlightEdit}>
-          <Pressable style={styles.colorPickerPanel} onPress={() => {}}>
-            <Text style={styles.colorPickerTitle} numberOfLines={2}>
-              "{tappedHighlightText.length > 40
-                ? tappedHighlightText.slice(0, 40) + '…'
-                : tappedHighlightText}"
-            </Text>
-            <Text style={styles.colorPickerSubtitle}>색상 변경</Text>
-            <View style={styles.colorRow}>
-              {HIGHLIGHT_COLORS.map((color) => (
-                <TouchableOpacity
-                  key={color}
-                  style={[
-                    styles.colorButton,
-                    { backgroundColor: color },
-                    color === tappedHighlightColor && styles.colorButtonSelected,
-                  ]}
-                  onPress={() => applyHighlightColorChange(color)}
-                  accessibilityLabel={`하이라이트 색상 변경 ${color}`}
-                />
-              ))}
-            </View>
-            <TouchableOpacity
-              style={styles.memoButton}
-              onPress={() => {
-                dismissHighlightEdit();
-                openMemoSheet(tappedHighlightId, tappedHighlightText);
-              }}
-              accessibilityLabel="메모 보기/추가"
-            >
-              <Ionicons name="chatbubble-outline" size={16} color={accentPrimary} />
-              <Text style={styles.memoButtonText}>
-                메모{' '}
-                {(() => {
-                  const count = (page?.memos ?? []).filter(
-                    (m) => m.highlightId === tappedHighlightId
-                  ).length;
-                  return count > 0 ? `(${count})` : '';
-                })()}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={applyHighlightDelete}
-              accessibilityLabel="하이라이트 삭제"
-            >
-              <Ionicons name="trash-outline" size={16} color="#FF6B6B" />
-              <Text style={styles.deleteText}>하이라이트 삭제</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={dismissHighlightEdit}>
-              <Text style={styles.cancelText}>취소</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* Memo Bottom Sheet */}
-      <Modal
-        visible={showMemoSheet}
-        transparent
-        animationType="none"
-        onRequestClose={closeMemoSheet}
-      >
-        <KeyboardAvoidingView
-          style={styles.memoSheetWrapper}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <Pressable style={styles.memoSheetOverlay} onPress={closeMemoSheet} />
-          <Animated.View
-            style={[
-              styles.memoSheetContainer,
-              { paddingBottom: insets.bottom + 16, transform: [{ translateY: memoSlideAnim }] },
-            ]}
-          >
-            {/* Sheet Handle */}
-            <View style={styles.memoSheetHandle} />
-
-            {/* Sheet Header */}
-            <View style={styles.memoSheetHeader}>
-              <Text style={styles.memoSheetTitle} numberOfLines={2}>
-                "{memoSheetHighlightText.length > 50
-                  ? memoSheetHighlightText.slice(0, 50) + '…'
-                  : memoSheetHighlightText}"
-              </Text>
-              <TouchableOpacity onPress={closeMemoSheet} accessibilityLabel="닫기">
-                <Ionicons name="close" size={22} color={textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Existing memos list */}
-            {(() => {
-              const linkedMemos = (page?.memos ?? [])
-                .filter((m) => m.highlightId === memoSheetHighlightId)
-                .sort((a, b) => a.order - b.order);
-              return linkedMemos.length === 0 ? (
-                <Text style={styles.memoEmptyText}>아직 메모가 없습니다.</Text>
-              ) : (
-                <ScrollView style={styles.memoList} keyboardShouldPersistTaps="handled">
-                  {linkedMemos.map((memo) => (
-                    <View key={memo.id} style={styles.memoItem}>
-                      <View style={styles.memoItemBody}>
-                        <Text style={styles.memoItemNote}>{memo.note}</Text>
-                        <Text style={styles.memoItemDate}>
-                          {new Date(memo.createdAt).toLocaleDateString('ko-KR', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => handleDeleteMemo(memo.id)}
-                        accessibilityLabel="메모 삭제"
-                        style={styles.memoDeleteBtn}
-                      >
-                        <Ionicons name="trash-outline" size={16} color="#FF6B6B" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </ScrollView>
-              );
-            })()}
-
-            {/* New memo input */}
-            <View style={styles.memoInputRow}>
-              <TextInput
-                style={styles.memoInput}
-                placeholder="새 메모를 입력하세요..."
-                placeholderTextColor={textSecondary}
-                value={newMemoText}
-                onChangeText={setNewMemoText}
-                multiline
-                maxLength={500}
-                accessibilityLabel="메모 입력"
-              />
-              <TouchableOpacity
-                style={[
-                  styles.memoSaveBtn,
-                  (!newMemoText.trim() || memoSaving) && styles.memoSaveBtnDisabled,
-                ]}
-                onPress={handleSaveMemo}
-                disabled={!newMemoText.trim() || memoSaving}
-                accessibilityLabel="메모 저장"
-              >
-                {memoSaving ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <Ionicons name="checkmark" size={20} color="#fff" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Unified Highlight Bottom Sheet */}
+      <HighlightSheet
+        visible={sheetMode !== 'none'}
+        mode={sheetMode === 'none' ? 'new' : sheetMode}
+        highlightText={sheetMode === 'new' ? selectedText : tappedHighlightText}
+        highlightColor={tappedHighlightColor}
+        highlightId={tappedHighlightId}
+        memos={page?.memos ?? []}
+        slideAnim={sheetSlideAnim}
+        bottomInset={insets.bottom}
+        onClose={closeSheet}
+        onSelectColor={handleSelectColor}
+        onDelete={handleHighlightDelete}
+        onSaveMemo={handleSaveMemo}
+        onDeleteMemo={handleDeleteMemo}
+      />
     </View>
   );
 }
@@ -780,246 +769,61 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   metadata: {
-    gap: 8,
-  },
-  metadataItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  metadataLabel: {
-    color: textSecondary,
-    fontSize: 12,
-    marginRight: 8,
-  },
-  metadataValue: {
-    color: textPrimary,
-    fontSize: 12,
-  },
-  dueDateValue: {
-    color: warning,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+    marginTop: 2,
+  },
+  columnChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(99,102,241,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.3)',
+  },
+  columnChipText: {
+    color: accentPrimary,
+    fontSize: 11,
+    fontWeight: '500',
   },
   tag: {
     backgroundColor: bgTertiary,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    paddingVertical: 3,
+    borderRadius: 12,
   },
   tagText: {
-    color: accentPrimary,
-    fontSize: 11,
-  },
-  hintBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: bgTertiary,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: border,
-  },
-  hintText: {
     color: textSecondary,
     fontSize: 11,
+  },
+  dueDateChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,160,0,0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,160,0,0.25)',
+  },
+  dueDateChipText: {
+    color: warning,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  updatedAt: {
+    color: textSecondary,
+    fontSize: 11,
+    marginTop: 8,
+    opacity: 0.6,
   },
   webView: {
     flex: 1,
     backgroundColor: bgPrimary,
-  },
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  colorPickerPanel: {
-    backgroundColor: bgSecondary,
-    borderRadius: 12,
-    padding: 20,
-    width: 300,
-    borderWidth: 1,
-    borderColor: border,
-  },
-  colorPickerTitle: {
-    color: textPrimary,
-    fontSize: 13,
-    fontStyle: 'italic',
-    marginBottom: 8,
-  },
-  colorPickerSubtitle: {
-    color: textSecondary,
-    fontSize: 12,
-    marginBottom: 16,
-  },
-  colorRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 8,
-  },
-  colorButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
-  },
-  colorButtonSelected: {
-    borderWidth: 3,
-    borderColor: '#fff',
-  },
-  deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    marginBottom: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#FF6B6B',
-    gap: 6,
-  },
-  deleteText: {
-    color: '#FF6B6B',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  cancelButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  cancelText: {
-    color: textSecondary,
-    fontSize: 14,
-  },
-  // Memo button inside highlight edit popover
-  memoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    marginBottom: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: accentPrimary,
-    gap: 6,
-  },
-  memoButtonText: {
-    color: accentPrimary,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  // Memo bottom sheet
-  memoSheetWrapper: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  memoSheetOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  memoSheetContainer: {
-    backgroundColor: bgSecondary,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    maxHeight: SCREEN_HEIGHT * 0.75,
-    borderTopWidth: 1,
-    borderColor: border,
-  },
-  memoSheetHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 12,
-  },
-  memoSheetHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    gap: 8,
-  },
-  memoSheetTitle: {
-    flex: 1,
-    color: textSecondary,
-    fontSize: 12,
-    fontStyle: 'italic',
-    lineHeight: 18,
-  },
-  memoEmptyText: {
-    color: textSecondary,
-    fontSize: 13,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  memoList: {
-    maxHeight: SCREEN_HEIGHT * 0.35,
-    marginBottom: 12,
-  },
-  memoItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: bgTertiary,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    gap: 8,
-  },
-  memoItemBody: {
-    flex: 1,
-  },
-  memoItemNote: {
-    color: textPrimary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  memoItemDate: {
-    color: textSecondary,
-    fontSize: 11,
-  },
-  memoDeleteBtn: {
-    padding: 4,
-    marginTop: 2,
-  },
-  memoInputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-    marginTop: 4,
-  },
-  memoInput: {
-    flex: 1,
-    backgroundColor: bgTertiary,
-    color: textPrimary,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    maxHeight: 100,
-    borderWidth: 1,
-    borderColor: border,
-  },
-  memoSaveBtn: {
-    backgroundColor: accentPrimary,
-    borderRadius: 8,
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  memoSaveBtnDisabled: {
-    opacity: 0.4,
   },
 });
