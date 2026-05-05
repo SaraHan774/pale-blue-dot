@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -462,6 +462,21 @@ export default function PageScreen() {
   const webViewRef = useRef<WebView>(null);
   const scrollYRef = useRef<number>(0);
 
+  // Collapsing header animation
+  const headerAnim = useRef(new Animated.Value(1)).current;
+  const headerHiddenRef = useRef(false);
+  const [measuredHeaderHeight, setMeasuredHeaderHeight] = useState(0);
+
+  // Header maxHeight interpolation — recomputed once height is measured
+  const headerMaxHeight = useMemo(
+    () =>
+      headerAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, measuredHeaderHeight > 0 ? measuredHeaderHeight : 300],
+      }),
+    [measuredHeaderHeight]
+  );
+
   // WebView HTML
   const [webViewHtml, setWebViewHtml] = useState<string>('');
 
@@ -527,7 +542,18 @@ export default function PageScreen() {
         highlightText?: string;
       };
       if (msg.type === 'scroll') {
-        scrollYRef.current = (msg as { type: string; y?: number }).y ?? 0;
+        const y = (msg as { type: string; y?: number }).y ?? 0;
+        scrollYRef.current = y;
+
+        const shouldHide = y > 40;
+        const shouldShow = y < 10;
+        if (shouldHide && !headerHiddenRef.current) {
+          headerHiddenRef.current = true;
+          Animated.timing(headerAnim, { toValue: 0, duration: 220, useNativeDriver: false }).start();
+        } else if (shouldShow && headerHiddenRef.current) {
+          headerHiddenRef.current = false;
+          Animated.timing(headerAnim, { toValue: 1, duration: 220, useNativeDriver: false }).start();
+        }
       } else if (msg.type === 'selection' && msg.text && msg.text.trim().length > 0) {
         setSelectedText(msg.text.trim());
         openSheet('new');
@@ -673,8 +699,21 @@ export default function PageScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Page Header */}
-      <View style={styles.header}>
+      {/* Page Header — collapses when scrolling down */}
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            maxHeight: headerMaxHeight,
+            opacity: headerAnim,
+            overflow: 'hidden',
+          },
+        ]}
+        onLayout={(e) => {
+          const h = e.nativeEvent.layout.height;
+          if (h > 0 && measuredHeaderHeight === 0) setMeasuredHeaderHeight(h);
+        }}
+      >
         <Text style={styles.title}>{page.title}</Text>
 
         <View style={styles.metadata}>
@@ -706,7 +745,7 @@ export default function PageScreen() {
         <Text style={styles.updatedAt}>
           {formatDate(page.updatedAt)}
         </Text>
-      </View>
+      </Animated.View>
 
 
       {/* Page Content via WebView */}
