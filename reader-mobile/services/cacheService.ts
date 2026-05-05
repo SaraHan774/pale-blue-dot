@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy';
-import type { CachedData, Page, RepoConfig, CacheMetadata } from '@/types';
+import type { CachedData, Page, RepoConfig, CacheMetadata, Memo } from '@/types';
 
 const CACHE_DIR = `${FileSystem.documentDirectory}cache/`;
 const IMAGES_DIR = `${CACHE_DIR}images/`;
@@ -277,6 +277,62 @@ export async function updatePageContent(pageId: string, newContent: string): Pro
     await savePages(pages);
   } catch (error) {
     console.error('Failed to update page content:', error);
+    throw error;
+  }
+}
+
+/**
+ * Save (add or update) a memo linked to a specific page.
+ * If a memo with the same id already exists it is replaced in-place;
+ * otherwise it is appended to the memos array.
+ */
+export async function saveMemo(pageId: string, memo: Memo): Promise<void> {
+  try {
+    const pages = await loadPages();
+    const index = pages.findIndex((p) => p.id === pageId);
+    if (index === -1) {
+      throw new Error(`Page not found in cache: ${pageId}`);
+    }
+    const existingMemos: Memo[] = pages[index].memos ?? [];
+    const memoIndex = existingMemos.findIndex((m) => m.id === memo.id);
+    let updatedMemos: Memo[];
+    if (memoIndex !== -1) {
+      updatedMemos = existingMemos.map((m, i) => (i === memoIndex ? memo : m));
+    } else {
+      updatedMemos = [...existingMemos, memo];
+    }
+    pages[index] = {
+      ...pages[index],
+      memos: updatedMemos,
+      updatedAt: new Date().toISOString(),
+    };
+    await savePages(pages);
+  } catch (error) {
+    console.error('Failed to save memo:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a memo by id from a specific page.
+ * No-op if the memo is not found.
+ */
+export async function deleteMemo(pageId: string, memoId: string): Promise<void> {
+  try {
+    const pages = await loadPages();
+    const index = pages.findIndex((p) => p.id === pageId);
+    if (index === -1) {
+      throw new Error(`Page not found in cache: ${pageId}`);
+    }
+    const existingMemos: Memo[] = pages[index].memos ?? [];
+    pages[index] = {
+      ...pages[index],
+      memos: existingMemos.filter((m) => m.id !== memoId),
+      updatedAt: new Date().toISOString(),
+    };
+    await savePages(pages);
+  } catch (error) {
+    console.error('Failed to delete memo:', error);
     throw error;
   }
 }

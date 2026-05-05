@@ -1,3 +1,16 @@
+export interface Memo {
+  id: string;
+  type: 'linked' | 'independent';
+  note: string;
+  highlightId?: string;
+  highlightText?: string;
+  highlightColor?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+  order: number;
+}
+
 export interface Page {
   id: string;
   title: string;
@@ -11,6 +24,7 @@ export interface Page {
   viewType?: 'document' | 'kanban';
   pinned?: boolean;
   pinnedAt?: string;
+  memos?: Memo[];
 }
 
 export interface RepoConfig {
