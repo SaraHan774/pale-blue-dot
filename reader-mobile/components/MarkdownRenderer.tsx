@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useWindowDimensions, Linking, Alert, ScrollView, StyleSheet, Image, View, Text, TouchableOpacity } from 'react-native';
 import ImageView from 'react-native-image-viewing';
-import RenderHTML, { CustomBlockRenderer, defaultHTMLElementModels, HTMLContentModel } from 'react-native-render-html';
+import RenderHTML, { CustomBlockRenderer, CustomTextualRenderer, defaultHTMLElementModels, HTMLContentModel } from 'react-native-render-html';
 import { marked } from 'marked';
 import {
   bgSecondary,
@@ -215,6 +215,29 @@ const PreRenderer: CustomBlockRenderer = ({ TDefaultRenderer, ...props }) => {
   );
 };
 
+// ─── Highlight (Mark) Renderer ──────────────────────────────────────
+
+const DEFAULT_HIGHLIGHT_COLOR = '#FFEB3B';
+
+const MarkRenderer: CustomTextualRenderer = ({ TDefaultRenderer, tnode, ...props }) => {
+  const highlightColor =
+    (tnode.attributes['data-highlight-color'] as string | undefined) ||
+    DEFAULT_HIGHLIGHT_COLOR;
+  return (
+    <TDefaultRenderer
+      tnode={tnode}
+      {...props}
+      textProps={{
+        ...props.textProps,
+        style: [
+          props.textProps?.style,
+          { backgroundColor: highlightColor },
+        ],
+      }}
+    />
+  );
+};
+
 // ─── Image Viewer (with pinch-to-zoom) ──────────────────────────────
 // Note: This uses react-native-image-viewing which provides:
 // - Pinch to zoom
@@ -275,6 +298,7 @@ const ImageRenderer = (props: any) => {
 const renderers = {
   img: ImageRenderer,
   pre: PreRenderer,
+  mark: MarkRenderer,
 };
 
 const customHTMLElementModels = {
