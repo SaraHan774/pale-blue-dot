@@ -4,6 +4,7 @@ import { savePages, saveImage, saveRepoConfig, loadCacheMetadata, saveCacheMetad
 import { loadToken } from './tokenService';
 
 const GITHUB_API_BASE = 'https://api.github.com';
+const FETCH_TIMEOUT_MS = 30_000;
 
 /**
  * Parallel download configuration
@@ -12,6 +13,18 @@ const GITHUB_API_BASE = 'https://api.github.com';
  * - Aggressive (20): Fast connections, more memory, may hit rate limits
  */
 const PARALLEL_DOWNLOAD_BATCH_SIZE = 10; // Download 10 files concurrently
+
+function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...options, signal: controller.signal })
+    .then(res => { clearTimeout(timer); return res; })
+    .catch(err => {
+      clearTimeout(timer);
+      if (err.name === 'AbortError') throw new Error('요청 시간이 초과됐습니다 (30초). 네트워크를 확인해주세요.');
+      throw err;
+    });
+}
 
 /**
  * Get GitHub API headers with optional authentication
@@ -83,7 +96,7 @@ async function fetchRepoContents(
     console.log('Fetching:', url);
     console.log('Has token:', headers['Authorization'] ? 'Yes' : 'No');
 
-    const response = await fetch(url, { headers });
+    const response = await fetchWithTimeout(url, { headers });
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -113,7 +126,7 @@ async function fetchRepoContents(
 async function downloadFile(downloadUrl: string): Promise<string> {
   try {
     const headers = await getHeaders();
-    const response = await fetch(downloadUrl, { headers });
+    const response = await fetchWithTimeout(downloadUrl, { headers });
     if (!response.ok) {
       throw new Error(`Failed to download file: ${response.status}`);
     }
@@ -157,7 +170,7 @@ async function getLfsDownloadUrls(
 
   console.log(`Requesting LFS download URLs for ${objects.length} objects`);
 
-  const response = await fetch(lfsUrl, {
+  const response = await fetchWithTimeout(lfsUrl, {
     method: 'POST',
     headers: {
       ...headers,
@@ -538,7 +551,7 @@ export async function validateRepoUrl(repoUrl: string): Promise<boolean> {
     console.log('Validating repo:', url);
     console.log('Has token:', headers['Authorization'] ? 'Yes' : 'No');
 
-    const response = await fetch(url, { headers });
+    const response = await fetchWithTimeout(url, { headers });
 
     if (!response.ok) {
       const errorBody = await response.text();
