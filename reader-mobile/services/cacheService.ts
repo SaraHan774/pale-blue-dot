@@ -259,6 +259,29 @@ export async function saveCacheMetadata(metadata: CacheMetadata): Promise<void> 
 }
 
 /**
+ * Update a single page's content in the cache.
+ * Loads all pages, replaces the target page, and saves back.
+ */
+export async function updatePageContent(pageId: string, newContent: string): Promise<void> {
+  try {
+    const pages = await loadPages();
+    const index = pages.findIndex((p) => p.id === pageId);
+    if (index === -1) {
+      throw new Error(`Page not found in cache: ${pageId}`);
+    }
+    pages[index] = {
+      ...pages[index],
+      content: newContent,
+      updatedAt: new Date().toISOString(),
+    };
+    await savePages(pages);
+  } catch (error) {
+    console.error('Failed to update page content:', error);
+    throw error;
+  }
+}
+
+/**
  * Load cache metadata
  */
 export async function loadCacheMetadata(): Promise<CacheMetadata | null> {
