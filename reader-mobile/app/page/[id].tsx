@@ -167,10 +167,25 @@ ${htmlBody}
     }, 100);
   }, { passive: true });
 
+  // Link tap: open external links in native browser, block in-WebView navigation
+  document.addEventListener('click', function(e) {
+    var target = e.target;
+    while (target && target !== document.body) {
+      if (target.tagName && target.tagName.toLowerCase() === 'a') {
+        var href = target.getAttribute('href');
+        if (href && (href.indexOf('http://') === 0 || href.indexOf('https://') === 0)) {
+          e.preventDefault();
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'linkPress', url: href }));
+          return;
+        }
+      }
+      target = target.parentElement;
+    }
+  });
+
   // Highlight tap: notify RN when user taps an existing <mark> tag
   document.addEventListener('click', function(e) {
     var target = e.target;
-    // Walk up the DOM in case the click lands on a child of <mark>
     while (target && target !== document.body) {
       if (target.tagName && target.tagName.toLowerCase() === 'mark') {
         var highlightId = target.getAttribute('data-highlight-id');
@@ -542,7 +557,9 @@ export default function PageScreen() {
         highlightColor?: string;
         highlightText?: string;
       };
-      if (msg.type === 'scroll') {
+      if (msg.type === 'linkPress' && (msg as any).url) {
+        Linking.openURL((msg as any).url).catch(console.error);
+      } else if (msg.type === 'scroll') {
         const y = (msg as { type: string; y?: number }).y ?? 0;
         scrollYRef.current = y;
 

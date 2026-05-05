@@ -32,7 +32,7 @@
 
 | Task | 내용 | Status |
 |------|------|--------|
-| T1 | TiptapEditor 체크박스 인터랙션 구현 — DoD: `@tiptap/extension-task-list` + `@tiptap/extension-task-item` 설치 및 TiptapEditor extensions 배열에 추가; `- [ ]` / `- [x]` 마크다운이 인터랙티브 체크박스로 렌더링; 체크박스 클릭 시 `[ ]`↔`[x]` 토글 후 `onChange` 경유 파일 자동 저장; 완료 항목에 취소선 + 흐리게 CSS(Tiptap `li[data-checked="true"]` 셀렉터 기준); `tiptap-markdown`이 저장 시 GFM `- [ ]`/`- [x]` 형식 유지 확인; `npm run build` + `npx tsc --noEmit` 통과 | pm:요청 |
+| T1 | TiptapEditor 체크박스 인터랙션 구현 — DoD: `@tiptap/extension-task-list` + `@tiptap/extension-task-item` 설치 및 TiptapEditor extensions 배열에 추가(`TaskItem.configure({ nested: true })`); `- [ ]` / `- [x]` 마크다운이 인터랙티브 체크박스로 렌더링; **체크박스 아이콘 영역 클릭만** 토글 트리거(텍스트 클릭은 편집); 체크 색상 `accent-color: var(--accent-primary)` 적용; 완료 항목에 `line-through + opacity 0.6` CSS(`li[data-checked="true"]` 셀렉터); 중첩 하위 체크박스 허용(Tab 들여쓰기); `tiptap-markdown`이 저장 시 GFM `- [ ]`/`- [x]` 형식 유지 확인; `npm run build` + `npx tsc --noEmit` 통과 | cc:완료 |
 
 ---
 
