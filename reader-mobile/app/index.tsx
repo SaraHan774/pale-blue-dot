@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   View,
   Text,
@@ -33,9 +34,11 @@ export default function HomeScreen() {
   const [syncProgress, setSyncProgress] = useState('');
   const [hasData, setHasData] = useState(false);
 
-  useEffect(() => {
-    loadCachedData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadCachedData();
+    }, [])
+  );
 
   async function loadCachedData() {
     try {
