@@ -31,7 +31,37 @@ import { marked } from 'marked';
 
 export const HIGHLIGHT_COLORS = ['#FFEB3B', '#90EE90', '#ADD8E6', '#FFB6C1', '#FFA500'];
 
-// ─── Pure helper: insert <mark> tag into content ─────────────────────
+// ─── Pure helpers: insert / change / remove <mark> tags ─────────────
+
+/**
+ * Changes the highlight color of an existing <mark> tag identified by
+ * `highlightId`. Returns the original content unchanged if not found.
+ */
+export function changeHighlightColor(
+  content: string,
+  highlightId: string,
+  newColor: string
+): string {
+  return content.replace(
+    new RegExp(
+      `(<mark[^>]*data-highlight-id="${highlightId}"[^>]*data-highlight-color=")[^"]*"`
+    ),
+    `$1${newColor}"`
+  );
+}
+
+/**
+ * Removes the <mark> tag identified by `highlightId`, preserving its
+ * inner text. Returns the original content unchanged if not found.
+ */
+export function removeHighlight(content: string, highlightId: string): string {
+  return content.replace(
+    new RegExp(
+      `<mark[^>]*data-highlight-id="${highlightId}"[^>]*>([\\s\\S]*?)<\\/mark>`
+    ),
+    '$1'
+  );
+}
 
 /**
  * Replaces the first occurrence of `selectedText` in `content` with
@@ -111,6 +141,28 @@ ${htmlBody}
     clearTimeout(selectionTimer);
     selectionTimer = setTimeout(notifySelection, 300);
   });
+
+  // Highlight tap: notify RN when user taps an existing <mark> tag
+  document.addEventListener('click', function(e) {
+    var target = e.target;
+    // Walk up the DOM in case the click lands on a child of <mark>
+    while (target && target !== document.body) {
+      if (target.tagName && target.tagName.toLowerCase() === 'mark') {
+        var highlightId = target.getAttribute('data-highlight-id');
+        if (highlightId) {
+          e.stopPropagation();
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'highlightTap',
+            highlightId: highlightId,
+            highlightColor: target.getAttribute('data-highlight-color') || '#FFEB3B',
+            highlightText: target.textContent || ''
+          }));
+          return;
+        }
+      }
+      target = target.parentElement;
+    }
+  });
 })();
 </script>
 </body>
@@ -133,9 +185,15 @@ export default function PageScreen() {
   // WebView HTML
   const [webViewHtml, setWebViewHtml] = useState<string>('');
 
-  // Highlight UI state
+  // Highlight UI state — new selection
   const [selectedText, setSelectedText] = useState<string>('');
   const [showColorPicker, setShowColorPicker] = useState(false);
+
+  // Highlight UI state — existing highlight tap
+  const [tappedHighlightId, setTappedHighlightId] = useState<string>('');
+  const [tappedHighlightColor, setTappedHighlightColor] = useState<string>('');
+  const [tappedHighlightText, setTappedHighlightText] = useState<string>('');
+  const [showHighlightEdit, setShowHighlightEdit] = useState(false);
 
   useEffect(() => {
     loadPage();
@@ -179,7 +237,13 @@ export default function PageScreen() {
 
   const handleWebViewMessage = useCallback((event: { nativeEvent: { data: string } }) => {
     try {
-      const msg = JSON.parse(event.nativeEvent.data) as { type: string; text?: string };
+      const msg = JSON.parse(event.nativeEvent.data) as {
+        type: string;
+        text?: string;
+        highlightId?: string;
+        highlightColor?: string;
+        highlightText?: string;
+      };
       if (msg.type === 'selection' && msg.text && msg.text.trim().length > 0) {
         setSelectedText(msg.text.trim());
         setShowColorPicker(true);
@@ -187,6 +251,14 @@ export default function PageScreen() {
         // Only hide if color picker is not open
         setShowColorPicker(false);
         setSelectedText('');
+      } else if (
+        msg.type === 'highlightTap' &&
+        msg.highlightId
+      ) {
+        setTappedHighlightId(msg.highlightId);
+        setTappedHighlightColor(msg.highlightColor ?? '#FFEB3B');
+        setTappedHighlightText(msg.highlightText ?? '');
+        setShowHighlightEdit(true);
       }
     } catch {
       // ignore malformed messages
@@ -225,6 +297,57 @@ export default function PageScreen() {
   function dismissColorPicker() {
     setShowColorPicker(false);
     setSelectedText('');
+  }
+
+  function dismissHighlightEdit() {
+    setShowHighlightEdit(false);
+    setTappedHighlightId('');
+    setTappedHighlightColor('');
+    setTappedHighlightText('');
+  }
+
+  async function applyHighlightColorChange(newColor: string) {
+    if (!page || !tappedHighlightId) return;
+
+    setShowHighlightEdit(false);
+
+    const updatedContent = changeHighlightColor(rawContentRef.current, tappedHighlightId, newColor);
+
+    rawContentRef.current = updatedContent;
+    setPage({ ...page, content: updatedContent });
+    rebuildWebView(updatedContent);
+
+    try {
+      await updatePageContent(page.id, updatedContent);
+    } catch (error) {
+      console.error('Failed to save highlight color change:', error);
+    }
+
+    setTappedHighlightId('');
+    setTappedHighlightColor('');
+    setTappedHighlightText('');
+  }
+
+  async function applyHighlightDelete() {
+    if (!page || !tappedHighlightId) return;
+
+    setShowHighlightEdit(false);
+
+    const updatedContent = removeHighlight(rawContentRef.current, tappedHighlightId);
+
+    rawContentRef.current = updatedContent;
+    setPage({ ...page, content: updatedContent });
+    rebuildWebView(updatedContent);
+
+    try {
+      await updatePageContent(page.id, updatedContent);
+    } catch (error) {
+      console.error('Failed to save highlight deletion:', error);
+    }
+
+    setTappedHighlightId('');
+    setTappedHighlightColor('');
+    setTappedHighlightText('');
   }
 
   function formatDate(dateString: string): string {
@@ -322,7 +445,7 @@ export default function PageScreen() {
         mixedContentMode="always"
       />
 
-      {/* Color Picker Modal */}
+      {/* Color Picker Modal — new highlight */}
       <Modal
         visible={showColorPicker}
         transparent
@@ -346,6 +469,50 @@ export default function PageScreen() {
               ))}
             </View>
             <TouchableOpacity style={styles.cancelButton} onPress={dismissColorPicker}>
+              <Text style={styles.cancelText}>취소</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Highlight Edit Popover — tap on existing highlight */}
+      <Modal
+        visible={showHighlightEdit}
+        transparent
+        animationType="fade"
+        onRequestClose={dismissHighlightEdit}
+      >
+        <Pressable style={styles.modalOverlay} onPress={dismissHighlightEdit}>
+          <Pressable style={styles.colorPickerPanel} onPress={() => {}}>
+            <Text style={styles.colorPickerTitle} numberOfLines={2}>
+              "{tappedHighlightText.length > 40
+                ? tappedHighlightText.slice(0, 40) + '…'
+                : tappedHighlightText}"
+            </Text>
+            <Text style={styles.colorPickerSubtitle}>색상 변경</Text>
+            <View style={styles.colorRow}>
+              {HIGHLIGHT_COLORS.map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  style={[
+                    styles.colorButton,
+                    { backgroundColor: color },
+                    color === tappedHighlightColor && styles.colorButtonSelected,
+                  ]}
+                  onPress={() => applyHighlightColorChange(color)}
+                  accessibilityLabel={`하이라이트 색상 변경 ${color}`}
+                />
+              ))}
+            </View>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={applyHighlightDelete}
+              accessibilityLabel="하이라이트 삭제"
+            >
+              <Ionicons name="trash-outline" size={16} color="#FF6B6B" />
+              <Text style={styles.deleteText}>하이라이트 삭제</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={dismissHighlightEdit}>
               <Text style={styles.cancelText}>취소</Text>
             </TouchableOpacity>
           </Pressable>
@@ -487,6 +654,26 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.3)',
+  },
+  colorButtonSelected: {
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginBottom: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FF6B6B',
+    gap: 6,
+  },
+  deleteText: {
+    color: '#FF6B6B',
+    fontSize: 14,
+    fontWeight: '500',
   },
   cancelButton: {
     alignItems: 'center',
