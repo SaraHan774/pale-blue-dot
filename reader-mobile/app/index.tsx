@@ -122,8 +122,13 @@ export default function HomeScreen() {
       paddingRight: insets.right,
     }]}>
       {/* App Bar */}
-      <View style={[styles.appBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.appBarTitle}>Pale Blue Dot</Text>
+      <View style={[styles.appBar, { paddingTop: insets.top + 4 }]}>
+        <View style={styles.appBarLeft}>
+          <Text style={styles.appBarTitle}>Pale Blue Dot</Text>
+          {syncing && (
+            <Text style={styles.progressText}>{syncProgress}</Text>
+          )}
+        </View>
         <View style={styles.appBarRight}>
           <TouchableOpacity
             style={styles.iconButton}
@@ -134,7 +139,7 @@ export default function HomeScreen() {
           >
             {syncing
               ? <ActivityIndicator size="small" color={accentPrimary} />
-              : <Ionicons name="refresh-outline" size={22} color={textPrimary} />
+              : <Ionicons name="refresh-outline" size={20} color={textPrimary} />
             }
           </TouchableOpacity>
           <TouchableOpacity
@@ -143,14 +148,10 @@ export default function HomeScreen() {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityLabel="설정"
           >
-            <Ionicons name="settings-outline" size={22} color={textPrimary} />
+            <Ionicons name="settings-outline" size={20} color={textPrimary} />
           </TouchableOpacity>
         </View>
       </View>
-
-      {syncing && (
-        <Text style={styles.progressText}>{syncProgress}</Text>
-      )}
 
       {/* Columns List */}
       {columns.length > 0 ? (
@@ -206,31 +207,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: bgSecondary,
     paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: border,
   },
+  appBarLeft: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   appBarTitle: {
     color: textPrimary,
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '600',
   },
   appBarRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
   iconButton: {
     padding: 4,
   },
   progressText: {
     color: accentPrimary,
-    fontSize: 12,
-    textAlign: 'center',
-    paddingVertical: 8,
-    backgroundColor: bgSecondary,
-    borderBottomWidth: 1,
-    borderBottomColor: border,
+    fontSize: 11,
+    marginTop: 1,
   },
   columnsSection: {
     flex: 1,
