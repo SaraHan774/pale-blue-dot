@@ -1,7 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 
 const REPO_URL_KEY = 'pbd_repo_url';
-const GITHUB_TOKEN_KEY = 'pbd_github_token';
+// Same key as tokenService for backward compatibility
+const GITHUB_TOKEN_KEY = 'github_access_token';
 
 const DEFAULT_REPO_URL = 'https://github.com/SaraHan774/pbd-private';
 

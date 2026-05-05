@@ -9,6 +9,7 @@ import {
   Animated,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +20,7 @@ import {
   getGithubToken,
   setGithubToken,
 } from '@/services/secureConfigService';
+import { syncRepository, validateRepoUrl } from '@/services/githubService';
 import {
   bgPrimary,
   bgSecondary,
@@ -37,6 +39,8 @@ export default function ConfigScreen() {
   const [tokenVisible, setTokenVisible] = useState(false);
   const [hasExistingToken, setHasExistingToken] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState('');
 
   // Toast animation
   const toastOpacity = useRef(new Animated.Value(0)).current;
@@ -83,20 +87,61 @@ export default function ConfigScreen() {
   }
 
   async function handleSave() {
-    if (saving) return;
+    if (saving || syncing) return;
     setSaving(true);
     try {
-      await setRepoUrl(repoUrl.trim());
+      const urlToSave = repoUrl.trim();
+      await setRepoUrl(urlToSave);
       if (token.trim().length > 0) {
         await setGithubToken(token.trim());
         setHasExistingToken(true);
         setToken('');
       }
-      showToast();
+      setSaving(false);
+      await startSync(urlToSave);
     } catch (error) {
       console.error('Failed to save config:', error);
-    } finally {
       setSaving(false);
+    }
+  }
+
+  async function startSync(urlToSync: string) {
+    setSyncing(true);
+    setSyncProgress('저장소 확인 중...');
+    try {
+      const isValid = await validateRepoUrl(urlToSync);
+      if (!isValid) {
+        const hasToken = await getGithubToken();
+        Alert.alert(
+          '연결 실패',
+          hasToken
+            ? '저장소를 찾을 수 없거나 토큰이 유효하지 않습니다.\n\n• URL을 확인하세요\n• 토큰에 "repo" 권한이 있는지 확인하세요'
+            : '저장소를 찾을 수 없습니다.\n\nPrivate 레포라면 Access Token을 입력해주세요.'
+        );
+        return;
+      }
+
+      setSyncProgress('다운로드 중...');
+      const result = await syncRepository(urlToSync, (stage, current, total) => {
+        if (current !== undefined && total !== undefined) {
+          setSyncProgress(`${stage} (${current}/${total})`);
+        } else {
+          setSyncProgress(stage);
+        }
+      });
+
+      const { stats } = result;
+      const detail = stats
+        ? `${result.pages.length}개 페이지, ${result.imageCount}개 이미지\n다운로드: ${stats.filesDownloaded}개 / 캐시: ${stats.filesCached}개`
+        : `${result.pages.length}개 페이지, ${result.imageCount}개 이미지`;
+      Alert.alert('동기화 완료', detail, [
+        { text: '확인', onPress: () => router.back() },
+      ]);
+    } catch (error: any) {
+      Alert.alert('동기화 실패', error.message || '저장소 동기화 중 오류가 발생했습니다.');
+    } finally {
+      setSyncing(false);
+      setSyncProgress('');
     }
   }
 
@@ -181,17 +226,21 @@ export default function ConfigScreen() {
           )}
         </View>
 
-        {/* Save Button */}
+        {/* Save & Sync Button */}
         <TouchableOpacity
-          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+          style={[styles.saveButton, (saving || syncing) && styles.saveButtonDisabled]}
           onPress={handleSave}
-          disabled={saving}
-          accessibilityLabel="설정 저장"
+          disabled={saving || syncing}
+          accessibilityLabel="설정 저장 및 동기화"
         >
           <Text style={styles.saveButtonText}>
-            {saving ? '저장 중...' : '저장'}
+            {saving ? '저장 중...' : syncing ? syncProgress || '동기화 중...' : '저장 및 동기화'}
           </Text>
         </TouchableOpacity>
+
+        {syncing && (
+          <Text style={styles.syncHint}>저장소를 다운로드하고 있습니다. 잠시 기다려주세요.</Text>
+        )}
       </ScrollView>
 
       {/* Toast */}
@@ -326,6 +375,12 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  syncHint: {
+    color: textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 10,
   },
   toast: {
     position: 'absolute',
