@@ -1,6 +1,6 @@
 [package]
 name = "pale-blue-dot"
-version = "0.9.1"
+version = "0.9.2"
 description = "A contemplative, local file-based knowledge manager inspired by Carl Sagan's Pale Blue Dot"
 authors = ["you"]
 edition = "2021"
