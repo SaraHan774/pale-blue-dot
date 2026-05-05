@@ -25,7 +25,13 @@
 
 ## Active Phase
 
-_현재 진행 중인 phase 없음._
+### Phase 5: List View UI 개선
+
+**시작**: 2026-05-05
+
+| Task | 내용 | DoD | Status |
+|------|------|-----|--------|
+| T1 | List View 가독성 및 탐색 용이성 개선 | ① 짝수/홀수 행 zebra-stripe 배경 적용 ② 정렬 헤더에 material-symbols 아이콘 추가(텍스트 ↑↓ 대체) ③ 핀된 페이지에 시각적 표시(아이콘) 추가 ④ 날짜 셀에 상대적 날짜 tooltip 표시 ⑤ `npm run build && npm test` 통과 | pm:요청 |
 
 ---
 
