@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import {
@@ -46,8 +46,13 @@ export default function ConfigScreen() {
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadInitialValues();
+    }, [])
+  );
+
   useEffect(() => {
-    loadInitialValues();
     return () => {
       if (toastTimerRef.current) {
         clearTimeout(toastTimerRef.current);
@@ -93,9 +98,9 @@ export default function ConfigScreen() {
       const urlToSave = repoUrl.trim();
       await setRepoUrl(urlToSave);
       if (token.trim().length > 0) {
-        await setGithubToken(token.trim());
-        setHasExistingToken(true);
+        await setGithubToken(token.trim()); // SecureStore 저장 성공 후에만 상태 갱신
         setToken('');
+        setHasExistingToken(true);
       }
       setSaving(false);
       await startSync(urlToSave);
