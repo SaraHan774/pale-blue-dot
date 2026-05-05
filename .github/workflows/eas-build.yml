@@ -3,7 +3,17 @@ name: EAS Build (reader-mobile)
 on:
   push:
     tags:
-      - 'v*'
+      - 'mobile-v*'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Build profile (preview = APK, production = AAB)'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
 
 jobs:
   build-android:
@@ -26,6 +36,15 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build APK (preview)
+      - name: Determine build profile
+        id: profile
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.profile }}" >> $GITHUB_OUTPUT
+          else
+            echo "value=preview" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Android (${{ steps.profile.outputs.value }})
         working-directory: reader-mobile
-        run: eas build --platform android --profile preview --non-interactive
+        run: eas build --platform android --profile ${{ steps.profile.outputs.value }} --non-interactive

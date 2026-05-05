@@ -6,9 +6,86 @@ disable-model-invocation: true
 
 # Complete Release Workflow
 
-This skill handles the complete release process: git checks, build validation, version updates, tagging, and deployment.
+This skill handles the complete release process for both the desktop/web app and the mobile app.
 
-## Workflow Overview
+## Usage
+
+| Command | Action |
+|---------|--------|
+| `/release-build` | Desktop + web release (Tauri + Firebase) |
+| `/release-build mobile` | Mobile release (EAS Build Android APK) |
+
+---
+
+## `/release-build mobile` — Mobile Release
+
+### Mobile Step 1: Pre-flight Git Checks
+
+```bash
+cd /Users/gahee/pale-blue-dot && git status && git log --oneline -3
+```
+
+Check for clean working tree. If dirty, list changed files and ask user to commit first.
+
+### Mobile Step 2: Read Current Mobile Version
+
+```bash
+cd /Users/gahee/pale-blue-dot && cat reader-mobile/app.json | python3 -c "import json,sys; d=json.load(sys.stdin)['expo']; print('version:', d['version']); print('versionCode:', d['android']['versionCode'])"
+```
+
+Show current version and versionCode, then ask: "What version for this mobile release? (e.g., 1.1.0)"
+
+### Mobile Step 3: Update app.json
+
+After user provides version (e.g., `NEW_VERSION`):
+
+1. Read `reader-mobile/app.json` with the Read tool
+2. Update two fields with the Edit tool:
+   - `"version": "OLD"` → `"version": "NEW_VERSION"`
+   - `"versionCode": N` → `"versionCode": N+1` (always increment by 1)
+3. Confirm the changes:
+```bash
+cd /Users/gahee/pale-blue-dot && git diff reader-mobile/app.json
+```
+
+### Mobile Step 4: Commit, Tag, Push
+
+```bash
+cd /Users/gahee/pale-blue-dot && git add reader-mobile/app.json
+```
+
+```bash
+cd /Users/gahee/pale-blue-dot && git commit -m "chore(mobile): bump version to [NEW_VERSION] (versionCode [N+1])
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+```
+
+```bash
+cd /Users/gahee/pale-blue-dot && git tag mobile-v[NEW_VERSION]
+```
+
+```bash
+cd /Users/gahee/pale-blue-dot && git push && git push origin mobile-v[NEW_VERSION]
+```
+
+### Mobile Step 5: Confirm
+
+Show:
+```
+✅ mobile-v[NEW_VERSION] pushed!
+
+📱 EAS Build triggered:
+   https://github.com/SaraHan774/pale-blue-dot/actions
+
+📦 APK (완료 후):
+   https://expo.dev/accounts/vertias-lux-mea/projects/pale-blue-dot-reader/builds
+```
+
+---
+
+## `/release-build` — Desktop + Web Release
+
+### Workflow Overview
 
 1. **Pre-flight checks**: Verify git status and branch
 2. **Build validation**: Run `npm run build` and check for errors

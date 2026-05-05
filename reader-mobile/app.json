@@ -20,6 +20,7 @@
         "backgroundColor": "#1a1a1a"
       },
       "package": "com.palebluedot.reader",
+      "versionCode": 1,
       "permissions": [
         "android.permission.INTERNET"
       ],
