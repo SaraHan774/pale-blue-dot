@@ -64,6 +64,25 @@ cd /Users/gahee/pale-blue-dot && git diff reader-mobile/app.config.js
 
 **No 라고 하면 중단.**
 
+### Mobile Step 3-b: 릴리즈 노트 생성
+
+버전 업데이트 후, 커밋 범위에서 릴리즈 노트를 자동 생성한다.
+
+1. 이전 mobile 태그 확인:
+```bash
+cd /Users/gahee/pale-blue-dot && git tag --list 'mobile-v*' | sort -V | tail -1
+```
+
+2. 이전 태그부터 HEAD까지 커밋 수집:
+```bash
+cd /Users/gahee/pale-blue-dot && git log [PREV_TAG]..HEAD --oneline --no-merges
+```
+(이전 태그가 없으면 전체 히스토리: `git log --oneline --no-merges reader-mobile/`)
+
+3. 아래 **릴리즈 노트 작성 규칙**에 따라 마크다운 노트 작성 후 사용자에게 보여준다.
+
+4. 사용자 확인 후 계속 진행.
+
 ### Mobile Step 4: Commit, Tag, Push
 
 ```bash
@@ -189,6 +208,24 @@ cd /Users/gahee/pale-blue-dot && npm run build
 - Show build output summary (chunk sizes, warnings if any)
 - Continue to Step 3
 
+### Step 2-b: 릴리즈 노트 생성
+
+빌드 검증 통과 후, 커밋 범위에서 릴리즈 노트를 자동 생성한다.
+
+1. 이전 데스크톱 태그 확인:
+```bash
+cd /Users/gahee/pale-blue-dot && git tag --list 'v[0-9]*' | grep -v 'mobile' | sort -V | tail -1
+```
+
+2. 이전 태그부터 HEAD까지 커밋 수집:
+```bash
+cd /Users/gahee/pale-blue-dot && git log [PREV_TAG]..HEAD --oneline --no-merges
+```
+
+3. 아래 **릴리즈 노트 작성 규칙**에 따라 마크다운 노트 작성 후 사용자에게 보여준다.
+
+4. 사용자가 수정을 원하면 반영 후 계속. 아니면 바로 Step 3으로.
+
 ### Step 3: Version Update
 
 Ask the user: "What version number for this release? (e.g., 0.5.3)"
@@ -270,6 +307,85 @@ cd /Users/gahee/pale-blue-dot && git push && git push origin v[VERSION]
 4. 배포 후 확인:
    - Desktop: https://github.com/SaraHan774/pale-blue-dot/releases
    - Web:     https://mykanban-5beb2.web.app
+```
+
+---
+
+---
+
+## 릴리즈 노트 작성 규칙
+
+### 커밋 분류 기준
+
+수집된 커밋을 conventional commit prefix 기준으로 분류한다:
+
+| prefix | 섹션 | 표시 여부 |
+|--------|------|-----------|
+| `feat` / `feat(...)` | ✨ 새 기능 | 항상 표시 |
+| `fix` / `fix(...)` | 🐛 버그 수정 | 항상 표시 |
+| `refactor` | 🔧 개선 | 표시 |
+| `perf` | ⚡ 성능 | 표시 |
+| `ci` / `build` | 🏗 빌드/배포 | 표시 |
+| `chore` | — | **숨김** (버전 범프, Plans.md 마커 등 내부 작업) |
+| `docs` | 📝 문서 | 표시 |
+| `test` | 🧪 테스트 | 숨김 (사용자 무관) |
+
+**숨김 규칙 예외**: `chore` 라도 사용자에게 의미 있는 내용이면 표시한다.
+(예: `chore: EAS Build 파이프라인 추가` → 표시 / `chore: T3 cc:완료 마커 갱신` → 숨김)
+
+### 노트 포맷
+
+```markdown
+## 🚀 What's New in v[VERSION]
+
+### ✨ 새 기능
+- 기능 요약 (커밋 메시지를 사용자 언어로 풀어서 작성)
+
+### 🐛 버그 수정
+- 수정 내용 요약
+
+### 🔧 개선
+- 개선 내용 요약
+
+### 🏗 빌드/배포
+- 배포 관련 변경사항
+
+---
+**Full Changelog**: https://github.com/SaraHan774/pale-blue-dot/compare/[PREV_TAG]...v[VERSION]
+```
+
+### 작성 지침
+
+1. **커밋 메시지를 그대로 복사하지 말 것** — 사용자가 읽기 좋게 한국어로 풀어서 작성
+2. **scope 제거** — `feat(reader-mobile): ...` → `...` (괄호 부분 삭제)
+3. **중복 커밋 합치기** — 같은 기능의 `feat(T2):` + `feat: Phase 6 T2 머지` 같은 쌍은 하나로 합침
+4. **섹션이 비어있으면 생략** — 해당 릴리즈에 fix 가 없으면 `### 🐛 버그 수정` 섹션 통째로 제거
+5. **mobile 릴리즈**는 `reader-mobile/` 관련 커밋만 포함
+6. **desktop 릴리즈**는 `reader-mobile/` 관련 커밋 제외 (모바일 전용 변경은 별도 릴리즈)
+
+### 예시
+
+커밋 목록:
+```
+feat(T4): reader-mobile 메모 바텀 시트 구현
+feat: Phase 6 T4 reader-mobile 메모 바텀 시트 머지
+refactor(reader-mobile): HighlightSheet 통합 및 UX 개선
+chore: T4 cc:완료 마커 갱신
+chore: bump version to 0.9.3
+```
+
+생성 결과:
+```markdown
+## 🚀 What's New in mobile-v1.1.0
+
+### ✨ 새 기능
+- 하이라이트 탭 시 메모를 바로 확인하고 추가할 수 있는 메모 바텀 시트 추가
+
+### 🔧 개선
+- 하이라이트 색상 선택·메모·삭제를 하나의 바텀 시트로 통합 (2-depth → 1-depth)
+
+---
+**Full Changelog**: https://github.com/SaraHan774/pale-blue-dot/compare/mobile-v1.0.0...mobile-v1.1.0
 ```
 
 ---
