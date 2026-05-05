@@ -1,0 +1,31 @@
+name: EAS Build (reader-mobile)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: reader-mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: reader-mobile
+        run: npm ci
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build APK (preview)
+        working-directory: reader-mobile
+        run: eas build --platform android --profile preview --non-interactive
