@@ -32,7 +32,7 @@
 
 | Task | 내용 | Status |
 |------|------|--------|
-| T1 | secureConfigService 구현 — DoD: `reader-mobile/services/secureConfigService.ts` 생성, `getRepoUrl()` · `setRepoUrl()` · `getGithubToken()` · `setGithubToken()` · `clearGithubToken()` API 제공, 기본 repoUrl = `https://github.com/SaraHan774/pbd-private`, `expo-secure-store` 사용으로 앱 업데이트 후에도 값 유지, `npx tsc --noEmit` 통과 | pm:요청 |
+| T1 | secureConfigService 구현 — DoD: `reader-mobile/services/secureConfigService.ts` 생성, `getRepoUrl()` · `setRepoUrl()` · `getGithubToken()` · `setGithubToken()` · `clearGithubToken()` API 제공, 기본 repoUrl = `https://github.com/SaraHan774/pbd-private`, `expo-secure-store` 사용으로 앱 업데이트 후에도 값 유지, `npx tsc --noEmit` 통과 | cc:완료 |
 | T2 | Config 설정 화면 구현 — DoD: `reader-mobile/app/config.tsx` 라우트 생성, 설정 앱 스타일(섹션 그룹) 레이아웃, 레포 URL 입력 필드(기본값 프리필) + GitHub Token 입력 필드(마스킹 + 👁 토글, 저장된 토큰 존재 시 "이미 저장된 토큰이 있습니다 ✓" 표시) + 저장 버튼 + 하단 토스트 피드백("✅ 설정이 저장되었습니다"), 저장 시 `secureConfigService` 호출, `npx tsc --noEmit` 통과 | pm:요청 |
 | T3 | 홈 헤더 우상단 ⚙ 진입점 추가 — DoD: `app/index.tsx`(또는 홈 헤더) 우상단에 ⚙ 아이콘 버튼이 있어 `expo-router`로 `/config` 라우트로 이동, 기존 화면 회귀 없음, `npx tsc --noEmit` 통과 | pm:요청 |
 
