@@ -60,6 +60,31 @@ context: fork
 - [ ] 새/변경된 함수에 테스트가 있는가? 없으면 정당한가?
 - [ ] 영향 받는 service 의 호출자가 깨지지 않는가?
 
+### reader-mobile 변경 시 (diff 에 `reader-mobile/` 포함 시)
+
+[`.claude/rules/reader-mobile-runtime.md`](../rules/reader-mobile-runtime.md) 전체 체크리스트를 추가 적용한다.
+빠른 감지 명령:
+
+```bash
+# 직접 fetch 호출 (critical)
+grep -n "await fetch(" reader-mobile/services/githubService.ts
+
+# isMountedRef 없이 await 뒤 setState (critical)
+grep -rn "setSyncing\|setColumns\|setLoading\|Alert\.alert" reader-mobile/app/ | \
+  grep -v "isMountedRef"
+
+# SecureStore 키 불일치 (critical)
+grep -n "GITHUB_TOKEN_KEY" \
+  reader-mobile/services/secureConfigService.ts \
+  reader-mobile/services/tokenService.ts
+```
+
+- [ ] `fetchWithTimeout` 사용 (직접 `fetch()` 없음)
+- [ ] 모든 `await` 뒤 `isMountedRef.current` 가드
+- [ ] `useFocusEffect` 로 포커스 복귀 시 데이터 재로드
+- [ ] SecureStore 키가 `'github_access_token'` 으로 통일
+- [ ] 동기화 중 뒤로가기 인터셉트 + Alert 확인
+
 ### pale-blue-dot 안티패턴 (항상)
 
 - [ ] `pages.find(...)` 직접 호출 → `usePageById` 권장 (`major` 또는 `minor`)
