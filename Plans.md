@@ -25,22 +25,34 @@
 
 ## Active Phase
 
-### Phase 6: reader-mobile 하이라이트 지원
+### Phase 7: reader-mobile GitHub 연동 설정
 
 **시작**: 2026-05-05
 **대상**: `reader-mobile/` (React Native + Expo)
 
 | Task | 내용 | Status |
 |------|------|--------|
-| T1 | `<mark>` 태그 파싱 및 하이라이트 색상 렌더링 — DoD: MarkdownRenderer가 `data-highlight-color` 속성을 읽어 배경색이 적용된 텍스트로 렌더링됨, `npx tsc --noEmit` 통과, 통합 테스트 1개 | cc:완료 |
-| T2 | 텍스트 선택 시 하이라이트 생성 — touch 기반 버블 메뉴 — DoD: 롱프레스로 텍스트 선택 후 색상 버튼 탭 시 `<mark>` 태그가 content에 삽입되고 cacheService로 저장됨, `npx tsc --noEmit` 통과 | cc:완료 |
-| T3 | 기존 하이라이트 탭 시 색상 변경·삭제 팝오버 — DoD: 하이라이트 텍스트 탭으로 팝오버 오픈, 색상 변경·삭제 후 저장 확인, `npx tsc --noEmit` 통과 | cc:완료 |
-| T4 | 메모 바텀 시트 — DoD: 하이라이트 탭 시 linked memo 조회·작성 가능한 바텀 시트 노출, `Memo` 타입을 `types/index.ts`에 추가, `npx tsc --noEmit` 통과 | cc:완료 |
-| T5 | 전체 통합 및 에뮬레이터 회귀 점검 — DoD: Pixel 9 Pro 에뮬레이터에서 T1~T4 기능 동작 확인, `npx tsc --noEmit` 통과, 기존 페이지 뷰 회귀 없음 | cc:완료 |
+| T1 | secureConfigService 구현 — DoD: `reader-mobile/services/secureConfigService.ts` 생성, `getRepoUrl()` · `setRepoUrl()` · `getGithubToken()` · `setGithubToken()` · `clearGithubToken()` API 제공, 기본 repoUrl = `https://github.com/SaraHan774/pbd-private`, `expo-secure-store` 사용으로 앱 업데이트 후에도 값 유지, `npx tsc --noEmit` 통과 | pm:요청 |
+| T2 | Config 설정 화면 구현 — DoD: `reader-mobile/app/config.tsx` 라우트 생성, 설정 앱 스타일(섹션 그룹) 레이아웃, 레포 URL 입력 필드(기본값 프리필) + GitHub Token 입력 필드(마스킹 + 👁 토글, 저장된 토큰 존재 시 "이미 저장된 토큰이 있습니다 ✓" 표시) + 저장 버튼 + 하단 토스트 피드백("✅ 설정이 저장되었습니다"), 저장 시 `secureConfigService` 호출, `npx tsc --noEmit` 통과 | pm:요청 |
+| T3 | 홈 헤더 우상단 ⚙ 진입점 추가 — DoD: `app/index.tsx`(또는 홈 헤더) 우상단에 ⚙ 아이콘 버튼이 있어 `expo-router`로 `/config` 라우트로 이동, 기존 화면 회귀 없음, `npx tsc --noEmit` 통과 | pm:요청 |
 
 ---
 
 ## 보관 (Archived Phases)
+
+### Phase 6: reader-mobile 하이라이트 지원 (archived 2026-05-05)
+
+**시작**: 2026-05-05 / **종료**: 2026-05-05
+
+| Task | 내용 | 최종 Status |
+|------|------|------------|
+| T1 | `<mark>` 태그 파싱 및 하이라이트 색상 렌더링 | pm:확인 |
+| T2 | 텍스트 선택 시 하이라이트 생성 — touch 기반 버블 메뉴 | pm:확인 |
+| T3 | 기존 하이라이트 탭 시 색상 변경·삭제 팝오버 | pm:확인 |
+| T4 | 메모 바텀 시트 | pm:확인 |
+| T5 | 전체 통합 및 에뮬레이터 회귀 점검 | pm:확인 |
+
+---
 
 ### Phase 5: List View UI 개선 (archived 2026-05-05)
 
