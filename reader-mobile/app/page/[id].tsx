@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -759,6 +760,14 @@ export default function PageScreen() {
           if (y > 0) {
             webViewRef.current?.injectJavaScript(`window.scrollTo(0, ${y}); true;`);
           }
+        }}
+        onShouldStartLoadWithRequest={(request) => {
+          const { url } = request;
+          if (url.startsWith('http://') || url.startsWith('https://')) {
+            Linking.openURL(url).catch(console.error);
+            return false;
+          }
+          return true;
         }}
         scrollEnabled={true}
         showsVerticalScrollIndicator={true}
