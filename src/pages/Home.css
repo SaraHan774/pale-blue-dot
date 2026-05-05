@@ -583,6 +583,14 @@
   color: var(--text-primary);
   display: flex;
   align-items: center;
+  min-width: 0;
+}
+
+.list-cell-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .list-cell-date {

@@ -823,7 +823,7 @@ export function Home() {
                   {page.pinned && (
                     <span className="material-symbols-outlined list-pin-icon">keep</span>
                   )}
-                  {page.title}
+                  <span className="list-cell-title-text">{page.title}</span>
                 </span>
                 <span className="list-cell">
                   {page.kanbanColumn && (
