@@ -6,37 +6,36 @@ disable-model-invocation: true
 
 # Complete Release Workflow
 
-This skill handles the complete release process for both the desktop/web app and the mobile app.
+데스크톱/웹 앱과 모바일 앱의 릴리즈 전 과정을 처리한다.
 
-## Usage
+## 사용법
 
-| Command | Action |
-|---------|--------|
-| `/release-build` | Desktop + web release (Tauri + Firebase) |
-| `/release-build mobile` | Mobile release — preview APK (EAS Build) |
-| `/release-build mobile production` | Mobile release — production AAB (Play Store) |
+| 명령 | 동작 |
+|------|------|
+| `/release-build` | 데스크톱 + 웹 릴리즈 (Tauri + Firebase) |
+| `/release-build mobile` | 모바일 릴리즈 — preview APK (EAS Build) |
+| `/release-build mobile production` | 모바일 릴리즈 — production AAB (Play Store) |
 
 ---
 
-## `/release-build mobile [profile]` — Mobile Release
+## `/release-build mobile [profile]` — 모바일 릴리즈
 
-`profile` 은 `preview` (기본값) 또는 `production`. 생략 시 `preview`.
+`profile` 기본값은 `preview`. 명시하지 않으면 preview APK 빌드.
 
-### Mobile Step 1: Pre-flight Git Checks
+### Step 1: 사전 점검
 
 ```bash
 cd /Users/gahee/pale-blue-dot && git status && git log --oneline -3
 ```
 
-- ✅ main 브랜치인지 확인
-- ✅ working tree 가 clean 한지 확인. dirty 하면 변경 파일 목록 보여주고 사용자에게 먼저 커밋할지 물어보기
-- ✅ up to date 여부 (unpushed commits 경고는 OK)
+- main 브랜치인지 확인한다.
+- working tree 가 dirty 하면 변경 파일 목록을 보여주고 커밋 여부를 확인한다.
+- 커밋이 완료되기 전까지 진행하지 않는다.
 
-### Mobile Step 2: 현재 버전 확인
+### Step 2: 현재 버전 확인
 
 ```bash
 cd /Users/gahee/pale-blue-dot && node -e "
-const fs = require('fs');
 const cfg = require('./reader-mobile/app.config.js');
 const e = cfg.expo;
 console.log('version    :', e.version);
@@ -44,12 +43,25 @@ console.log('versionCode:', e.android.versionCode);
 "
 ```
 
-현재 version / versionCode 출력 후 사용자에게 질문:
-"새 버전을 입력하세요 (예: 1.1.0)"
+현재 version / versionCode 를 출력한 뒤 사용자에게 신규 버전을 확인한다.
 
-### Mobile Step 3: app.config.js 버전 업데이트
+### Step 2-b: 릴리즈 노트 생성
 
-사용자가 NEW_VERSION 을 제공하면:
+1. 이전 mobile 태그 확인:
+```bash
+cd /Users/gahee/pale-blue-dot && git tag --list 'mobile-v*' | sort -V | tail -1
+```
+
+2. 이전 태그부터 HEAD 까지 커밋 수집:
+```bash
+cd /Users/gahee/pale-blue-dot && git log [PREV_TAG]..HEAD --oneline --no-merges
+```
+이전 태그가 없으면: `git log --oneline --no-merges -- reader-mobile/`
+
+3. 아래 **릴리즈 노트 작성 규칙**에 따라 노트 초안 작성 후 사용자에게 제시한다.
+4. 수정 요청이 있으면 반영 후 확정한다.
+
+### Step 3: app.config.js 버전 업데이트
 
 1. Read tool 로 `reader-mobile/app.config.js` 읽기
 2. Edit tool 로 두 필드 수정:
@@ -59,31 +71,10 @@ console.log('versionCode:', e.android.versionCode);
 ```bash
 cd /Users/gahee/pale-blue-dot && git diff reader-mobile/app.config.js
 ```
+"version NEW_VERSION, versionCode N+1 로 업데이트됐습니다. 진행하시겠습니까?"
+거절 시 중단한다.
 
-사용자에게 확인: "version NEW_VERSION, versionCode N+1 로 업데이트됐습니다. 계속할까요?"
-
-**No 라고 하면 중단.**
-
-### Mobile Step 3-b: 릴리즈 노트 생성
-
-버전 업데이트 후, 커밋 범위에서 릴리즈 노트를 자동 생성한다.
-
-1. 이전 mobile 태그 확인:
-```bash
-cd /Users/gahee/pale-blue-dot && git tag --list 'mobile-v*' | sort -V | tail -1
-```
-
-2. 이전 태그부터 HEAD까지 커밋 수집:
-```bash
-cd /Users/gahee/pale-blue-dot && git log [PREV_TAG]..HEAD --oneline --no-merges
-```
-(이전 태그가 없으면 전체 히스토리: `git log --oneline --no-merges reader-mobile/`)
-
-3. 아래 **릴리즈 노트 작성 규칙**에 따라 마크다운 노트 작성 후 사용자에게 보여준다.
-
-4. 사용자 확인 후 계속 진행.
-
-### Mobile Step 4: Commit, Tag, Push
+### Step 4: Commit, Tag, Push
 
 ```bash
 cd /Users/gahee/pale-blue-dot && git add reader-mobile/app.config.js
@@ -103,36 +94,41 @@ cd /Users/gahee/pale-blue-dot && git tag mobile-v[NEW_VERSION]
 cd /Users/gahee/pale-blue-dot && git push && git push origin mobile-v[NEW_VERSION]
 ```
 
-### Mobile Step 5: 완료 메시지
+### Step 5: 완료 보고
 
 profile 이 `preview` 인 경우:
 ```
-✅ mobile-v[NEW_VERSION] released! (preview APK)
+mobile-v[NEW_VERSION] (preview APK) 배포가 시작됐습니다.
 
-빌드 환경: PBD Reader (Preview) — com.palebluedot.reader.preview
+빌드 환경  : PBD Reader (Preview) — com.palebluedot.reader.preview
 versionCode: [N+1]
 
-📱 GitHub Actions:
-   https://github.com/SaraHan774/pale-blue-dot/actions
+빌드 진행 상황:
+https://github.com/SaraHan774/pale-blue-dot/actions
 
-📦 APK 다운로드 (빌드 완료 후):
-   https://expo.dev/accounts/vertias-lux-mea/projects/pale-blue-dot-reader/builds
+APK 다운로드 (빌드 완료 후):
+https://expo.dev/accounts/vertias-lux-mea/projects/pale-blue-dot-reader/builds
 ```
 
 profile 이 `production` 인 경우:
 ```
-✅ mobile-v[NEW_VERSION] released! (production AAB)
+mobile-v[NEW_VERSION] (production AAB) 버전 태그가 생성됐습니다.
 
-빌드 환경: Pale Blue Dot Reader — com.palebluedot.reader
+빌드 환경  : Pale Blue Dot Reader — com.palebluedot.reader
 versionCode: [N+1]
 
-⚠️  production 빌드는 태그 트리거로 자동 실행되지 않습니다.
-    GitHub Actions → EAS Build → Run workflow → profile: production 으로 수동 실행하거나
-    아래 명령으로 로컬에서 실행하세요:
-    cd reader-mobile && eas build --platform android --profile production --non-interactive
+주의: production 빌드는 태그 트리거로 자동 실행되지 않습니다.
+아래 두 가지 방법 중 하나로 실행하십시오.
 
-📦 AAB 다운로드 (빌드 완료 후):
-   https://expo.dev/accounts/vertias-lux-mea/projects/pale-blue-dot-reader/builds
+방법 1 — GitHub Actions 수동 실행:
+https://github.com/SaraHan774/pale-blue-dot/actions
+→ EAS Build → Run workflow → profile: production
+
+방법 2 — 로컬 실행:
+cd reader-mobile && eas build --platform android --profile production --non-interactive
+
+AAB 다운로드 (빌드 완료 후):
+https://expo.dev/accounts/vertias-lux-mea/projects/pale-blue-dot-reader/builds
 ```
 
 ---
@@ -145,114 +141,81 @@ versionCode: [N+1]
 | preview | preview | PBD Reader (Preview) | ...reader.preview | APK |
 | production | production | Pale Blue Dot Reader | ...reader | AAB |
 
-- `preview` / `development` 는 기기에 동시 설치 가능 (패키지명 다름)
-- `constants/env.ts` 의 `IS_PRODUCTION`, `IS_PREVIEW`, `IS_DEVELOPMENT` 플래그로 앱 내 분기 가능
+- preview / development 는 패키지명이 달라 기기에 동시 설치 가능하다.
+- `constants/env.ts` 의 `IS_PRODUCTION`, `IS_PREVIEW`, `IS_DEVELOPMENT` 플래그로 앱 내 환경 분기가 가능하다.
 
 ---
 
-## `/release-build` — Desktop + Web Release
+## `/release-build` — 데스크톱 + 웹 릴리즈
 
-### Workflow Overview
-
-1. **Pre-flight checks**: Verify git status and branch
-2. **Build validation**: Run `npm run build` and check for errors
-3. **Version update**: Update version files
-4. **Git operations**: Commit, tag, and push
-5. **Deployment reminder**: Check GitHub Secrets for Firebase
-
-### Step 1: Pre-flight Git Checks
+### Step 1: 사전 점검
 
 ```bash
 cd /Users/gahee/pale-blue-dot && git status
 ```
 
-**Check for:**
-- ✅ On branch `main` (if not, warn and ask to switch)
-- ✅ Working tree clean OR show uncommitted changes
-- ✅ Up to date with origin (no unpushed commits warning is OK)
+- main 브랜치인지 확인한다.
+- working tree 가 dirty 하면 변경 파일 목록을 보여주고 커밋 여부를 확인한다.
+- 커밋이 완료되기 전까지 진행하지 않는다.
 
 ```bash
 cd /Users/gahee/pale-blue-dot && git log --oneline -3
 ```
 
-Show recent commits for context.
-
-**If working tree has uncommitted changes:**
-- List the changed files
-- Ask user if they want to commit them first or proceed anyway
-- If user wants to commit, pause and let them describe changes
-- **DO NOT proceed with release until user confirms**
-
-### Step 2: Build Validation
+### Step 2: 빌드 검증
 
 ```bash
 cd /Users/gahee/pale-blue-dot && npm run build
 ```
 
-**Wait for completion** and check the exit code.
+빌드 실패 시 (exit code != 0):
+- 즉시 중단한다. 이후 단계를 진행하지 않는다.
+- 에러 전체를 출력하고 파일·라인 정보와 함께 원인을 설명한다.
+- git 명령을 실행하지 않는다.
+- 수정 후 `/release-build` 재실행을 안내한다.
 
-**If build FAILS** (exit code ≠ 0):
-- **STOP immediately** - do NOT proceed with ANY further steps
-- Show the complete error output
-- Identify the specific error:
-  - TypeScript errors: `error TS####:` - show file:line and description
-  - Vite build errors: Module not found, import errors
-  - Type mismatches, missing properties
-- Point to the file and line number if available
-- Suggest fixes if the error is clear
-- **DO NOT run any git commands**
-- Tell user to fix errors and run `/release-build` again
-
-**If build SUCCEEDS** (exit code = 0):
-- Show: "✅ Build validation passed"
-- Show build output summary (chunk sizes, warnings if any)
-- Continue to Step 3
+빌드 성공 시:
+- "빌드 검증 완료." 를 출력한다.
+- 청크 크기 요약을 보여준다.
 
 ### Step 2-b: 릴리즈 노트 생성
-
-빌드 검증 통과 후, 커밋 범위에서 릴리즈 노트를 자동 생성한다.
 
 1. 이전 데스크톱 태그 확인:
 ```bash
 cd /Users/gahee/pale-blue-dot && git tag --list 'v[0-9]*' | grep -v 'mobile' | sort -V | tail -1
 ```
 
-2. 이전 태그부터 HEAD까지 커밋 수집:
+2. 이전 태그부터 HEAD 까지 커밋 수집:
 ```bash
 cd /Users/gahee/pale-blue-dot && git log [PREV_TAG]..HEAD --oneline --no-merges
 ```
 
-3. 아래 **릴리즈 노트 작성 규칙**에 따라 마크다운 노트 작성 후 사용자에게 보여준다.
+3. 아래 **릴리즈 노트 작성 규칙**에 따라 노트 초안 작성 후 사용자에게 제시한다.
+4. 수정 요청이 있으면 반영 후 확정한다.
 
-4. 사용자가 수정을 원하면 반영 후 계속. 아니면 바로 Step 3으로.
+### Step 3: 버전 업데이트
 
-### Step 3: Version Update
+"이번 릴리즈 버전을 입력하십시오. (예: 0.5.3)"
 
-Ask the user: "What version number for this release? (e.g., 0.5.3)"
-
-**After user provides version:**
-
-1. Read current versions:
+버전 확인:
 ```bash
 cd /Users/gahee/pale-blue-dot && cat package.json | grep '"version"' && cat src-tauri/Cargo.toml | grep '^version' && cat src-tauri/tauri.conf.json | grep '"version"'
 ```
 
-2. Update **all three** version files with new version using Edit tool:
-   - `package.json`: `"version": "X.Y.Z"` → `"version": "[VERSION]"`
-   - `src-tauri/Cargo.toml`: `version = "X.Y.Z"` → `version = "[VERSION]"`
-   - `src-tauri/tauri.conf.json`: `"version": "X.Y.Z"` → `"version": "[VERSION]"`
+Edit tool 로 세 파일 일괄 업데이트:
+- `package.json`: `"version": "X.Y.Z"` → `"version": "[VERSION]"`
+- `src-tauri/Cargo.toml`: `version = "X.Y.Z"` → `version = "[VERSION]"`
+- `src-tauri/tauri.conf.json`: `"version": "X.Y.Z"` → `"version": "[VERSION]"`
 
-3. Confirm the changes:
+변경 확인:
 ```bash
 cd /Users/gahee/pale-blue-dot && git diff package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
 ```
 
-Show the diff to user and ask: "Version updated to [VERSION]. Proceed with commit and tag?"
+"[VERSION] 으로 업데이트됐습니다. 커밋 및 태그를 생성하시겠습니까?"
+거절 시 중단한다.
 
-**If user says no:** Stop here and exit
-**If user says yes:** Continue to Step 4
-
-### Step 4: Git Commit and Tag
+### Step 4: Commit, Tag
 
 ```bash
 cd /Users/gahee/pale-blue-dot && git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
@@ -268,48 +231,43 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 cd /Users/gahee/pale-blue-dot && git tag v[VERSION] && git log --oneline -1
 ```
 
-### Step 5: Push to Trigger Release
+### Step 5: Push
 
-Ask user: "Ready to push? This will trigger GitHub Actions (Tauri build + Firebase deployment)."
+"push 하시겠습니까? GitHub Actions 가 트리거됩니다 (Tauri 빌드 + Firebase 배포)."
 
-**If YES:**
+승인 시:
 ```bash
 cd /Users/gahee/pale-blue-dot && git push && git push origin v[VERSION]
 ```
 
-**If NO:**
-- "로컬에 커밋·태그만 된 상태입니다. 나중에 push 하려면:"
+거절 시:
+- "로컬에 커밋과 태그만 생성된 상태입니다. 준비되면 아래 명령으로 배포하십시오."
 - `git push && git push origin v[VERSION]`
-- Exit
 
-### Step 6: Deployment Checklist
+### Step 6: 완료 보고
 
 ```
-✅ Release v[VERSION] triggered!
+v[VERSION] 배포가 시작됐습니다.
 
-📋 Deployment Checklist:
+빌드 진행 상황:
+https://github.com/SaraHan774/pale-blue-dot/actions
 
-1. GitHub Actions 모니터:
-   https://github.com/SaraHan774/pale-blue-dot/actions
+필요한 GitHub Secrets (미설정 시 Firebase 배포 실패):
+https://github.com/SaraHan774/pale-blue-dot/settings/secrets/actions
+  VITE_FIREBASE_API_KEY / AUTH_DOMAIN / PROJECT_ID
+  VITE_FIREBASE_STORAGE_BUCKET / MESSAGING_SENDER_ID / APP_ID / MEASUREMENT_ID
+  FIREBASE_SERVICE_ACCOUNT
 
-2. 필요한 GitHub Secrets:
-   https://github.com/SaraHan774/pale-blue-dot/settings/secrets/actions
-   - VITE_FIREBASE_API_KEY / AUTH_DOMAIN / PROJECT_ID
-   - VITE_FIREBASE_STORAGE_BUCKET / MESSAGING_SENDER_ID / APP_ID / MEASUREMENT_ID
-   - FIREBASE_SERVICE_ACCOUNT
+예상 실행 순서:
+  1. GitHub Release draft 생성
+  2. Tauri 앱 빌드 (macOS Intel + ARM)
+  3. Web 앱 빌드 및 Firebase 배포
+  4. GitHub Release 퍼블리시
 
-3. 예상 워크플로우:
-   ✓ GitHub Release draft 생성
-   ✓ Tauri 앱 빌드 (macOS Intel + ARM)
-   ✓ Web 앱 빌드 & Firebase 배포
-   ✓ GitHub Release 퍼블리시
-
-4. 배포 후 확인:
-   - Desktop: https://github.com/SaraHan774/pale-blue-dot/releases
-   - Web:     https://mykanban-5beb2.web.app
+배포 완료 후:
+  데스크톱 앱: https://github.com/SaraHan774/pale-blue-dot/releases
+  웹 앱:       https://mykanban-5beb2.web.app
 ```
-
----
 
 ---
 
@@ -317,51 +275,50 @@ cd /Users/gahee/pale-blue-dot && git push && git push origin v[VERSION]
 
 ### 커밋 분류 기준
 
-수집된 커밋을 conventional commit prefix 기준으로 분류한다:
+| prefix | 섹션 | 표시 |
+|--------|------|------|
+| `feat` | 새 기능 | 항상 |
+| `fix` | 버그 수정 | 항상 |
+| `refactor` | 개선 | 표시 |
+| `perf` | 성능 개선 | 표시 |
+| `ci` / `build` | 빌드/배포 | 표시 |
+| `docs` | 문서 | 표시 |
+| `chore` | — | 기본 숨김 |
+| `test` | — | 숨김 |
 
-| prefix | 섹션 | 표시 여부 |
-|--------|------|-----------|
-| `feat` / `feat(...)` | ✨ 새 기능 | 항상 표시 |
-| `fix` / `fix(...)` | 🐛 버그 수정 | 항상 표시 |
-| `refactor` | 🔧 개선 | 표시 |
-| `perf` | ⚡ 성능 | 표시 |
-| `ci` / `build` | 🏗 빌드/배포 | 표시 |
-| `chore` | — | **숨김** (버전 범프, Plans.md 마커 등 내부 작업) |
-| `docs` | 📝 문서 | 표시 |
-| `test` | 🧪 테스트 | 숨김 (사용자 무관) |
-
-**숨김 규칙 예외**: `chore` 라도 사용자에게 의미 있는 내용이면 표시한다.
-(예: `chore: EAS Build 파이프라인 추가` → 표시 / `chore: T3 cc:완료 마커 갱신` → 숨김)
+`chore` 예외: 사용자에게 의미 있는 내용은 표시한다.
+- 표시: `chore: EAS Build 파이프라인 추가`
+- 숨김: `chore: T3 cc:완료 마커 갱신`, `chore: bump version to ...`
 
 ### 노트 포맷
 
 ```markdown
-## 🚀 What's New in v[VERSION]
+## v[VERSION] — YYYY-MM-DD
 
-### ✨ 새 기능
-- 기능 요약 (커밋 메시지를 사용자 언어로 풀어서 작성)
+### 새 기능
+- 기능 요약
 
-### 🐛 버그 수정
+### 버그 수정
 - 수정 내용 요약
 
-### 🔧 개선
+### 개선
 - 개선 내용 요약
 
-### 🏗 빌드/배포
+### 빌드/배포
 - 배포 관련 변경사항
 
 ---
-**Full Changelog**: https://github.com/SaraHan774/pale-blue-dot/compare/[PREV_TAG]...v[VERSION]
+Full Changelog: https://github.com/SaraHan774/pale-blue-dot/compare/[PREV_TAG]...v[VERSION]
 ```
 
 ### 작성 지침
 
-1. **커밋 메시지를 그대로 복사하지 말 것** — 사용자가 읽기 좋게 한국어로 풀어서 작성
-2. **scope 제거** — `feat(reader-mobile): ...` → `...` (괄호 부분 삭제)
-3. **중복 커밋 합치기** — 같은 기능의 `feat(T2):` + `feat: Phase 6 T2 머지` 같은 쌍은 하나로 합침
-4. **섹션이 비어있으면 생략** — 해당 릴리즈에 fix 가 없으면 `### 🐛 버그 수정` 섹션 통째로 제거
-5. **mobile 릴리즈**는 `reader-mobile/` 관련 커밋만 포함
-6. **desktop 릴리즈**는 `reader-mobile/` 관련 커밋 제외 (모바일 전용 변경은 별도 릴리즈)
+1. 커밋 메시지를 그대로 복사하지 않는다. 사용자가 읽기 좋은 한국어로 풀어 쓴다.
+2. scope 괄호를 제거한다. `feat(reader-mobile): ...` → `...`
+3. 같은 기능에 대한 커밋 쌍(feat + 머지 커밋)은 하나로 합친다.
+4. 내용이 없는 섹션은 통째로 제거한다.
+5. mobile 릴리즈는 `reader-mobile/` 관련 커밋만 포함한다.
+6. desktop 릴리즈는 `reader-mobile/` 관련 커밋을 제외한다.
 
 ### 예시
 
@@ -376,30 +333,30 @@ chore: bump version to 0.9.3
 
 생성 결과:
 ```markdown
-## 🚀 What's New in mobile-v1.1.0
+## mobile-v1.1.0 — 2026-05-05
 
-### ✨ 새 기능
-- 하이라이트 탭 시 메모를 바로 확인하고 추가할 수 있는 메모 바텀 시트 추가
+### 새 기능
+- 하이라이트 탭 시 메모를 바로 확인하고 추가할 수 있는 메모 패널 추가
 
-### 🔧 개선
-- 하이라이트 색상 선택·메모·삭제를 하나의 바텀 시트로 통합 (2-depth → 1-depth)
+### 개선
+- 하이라이트 색상 선택, 메모, 삭제를 단일 패널에서 처리 (기존 2단계 → 1단계)
 
 ---
-**Full Changelog**: https://github.com/SaraHan774/pale-blue-dot/compare/mobile-v1.0.0...mobile-v1.1.0
+Full Changelog: https://github.com/SaraHan774/pale-blue-dot/compare/mobile-v1.0.0...mobile-v1.1.0
 ```
 
 ---
 
-## Key Rules
+## 핵심 규칙
 
-- **Always use absolute paths**: `/Users/gahee/pale-blue-dot`
-- **Stop on build errors**: Never proceed past failed builds
-- **Ask before pushing**: Confirm before any push
-- **Exit code matters**: Only exit code 0 means success
-- **Version format**: Semantic versioning (X.Y.Z)
-- **mobile versionCode**: 항상 +1, 절대 낮아지면 안 됨
+- 절대 경로를 사용한다: `/Users/gahee/pale-blue-dot`
+- 빌드 실패 시 즉시 중단하며 이후 단계를 진행하지 않는다.
+- push 전 반드시 사용자 확인을 받는다.
+- exit code 0 만 성공으로 간주한다.
+- 버전은 Semantic Versioning (X.Y.Z) 형식을 따른다.
+- mobile versionCode 는 항상 +1 이며 절대 감소시키지 않는다.
 
-## Emergency Rollback
+## 긴급 롤백
 
 ```bash
 # 태그 삭제
@@ -411,14 +368,16 @@ git revert HEAD
 git push
 ```
 
-## Success Criteria — Desktop
-- ✅ main 브랜치, working tree clean
-- ✅ `npm run build` exit code 0
-- ✅ package.json, Cargo.toml, tauri.conf.json 버전 업데이트
-- ✅ tag `v[VERSION]` 생성 및 push
+## 완료 기준 — 데스크톱
 
-## Success Criteria — Mobile
-- ✅ main 브랜치, working tree clean
-- ✅ `reader-mobile/app.config.js` version + versionCode 업데이트
-- ✅ tag `mobile-v[VERSION]` 생성 및 push
-- ✅ EAS Build 트리거 (preview) 또는 수동 실행 안내 (production)
+- main 브랜치, working tree clean
+- `npm run build` exit code 0
+- package.json, Cargo.toml, tauri.conf.json 버전 업데이트
+- tag `v[VERSION]` 생성 및 push
+
+## 완료 기준 — 모바일
+
+- main 브랜치, working tree clean
+- `reader-mobile/app.config.js` version + versionCode 업데이트
+- tag `mobile-v[VERSION]` 생성 및 push
+- EAS Build 트리거 완료 (preview) 또는 수동 실행 안내 (production)
